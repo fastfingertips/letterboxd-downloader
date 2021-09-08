@@ -1,4 +1,4 @@
 @echo off
 cls
-python lab/boxdcvv.py
+python boxdcvv.py
 pause
