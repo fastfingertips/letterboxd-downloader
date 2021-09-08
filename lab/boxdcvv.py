@@ -89,8 +89,9 @@ if True:
             # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
             print("Sayfa sayısı yok, bu sayfa tek sayfadır.")
 
-        # Csv dosyamızı açtık
-        with open(csv_name, 'w', newline='', encoding="utf-8") as file:
+        # Çalıştırıldığı konumda klasörümüzü oluşturduk ve .csv dosyamızı içerisinde açtık.
+
+        with open('exports/'+csv_name, 'w', newline='', encoding="utf-8") as file:
             writer = csv.writer(file)
             writer.writerow(["Sıra", "Filmİsmi", "YayınYılı"])
             # Filmleri çekiyoruz
