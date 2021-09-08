@@ -1,0 +1,2 @@
+- Sıralama yöntemi eklenecek.
+- Kişiyi görünnen ad ile arama eklenecek.

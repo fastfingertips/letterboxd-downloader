@@ -1,9 +1,44 @@
+import os
+import sys
 import csv
 import requests
 from pandas import DataFrame
 from typing import Collection
 from bs4 import BeautifulSoup
 from datetime import datetime
+
+
+def signature(x):
+    try:
+        if x == True:
+            print(f'\nUser: {user_name}\nList: {list_name}')
+        else:
+            print(
+                f'\nFilename: {csv_name}\nFilm sayısı: {dongu_no-1}\nTüm filmler {csv_name + " dosyasına"} aktarıldı.')
+    except:
+        print('İmza seçimi başarısız.')
+
+
+def rst():
+    os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
+
+
+def dir_check(l, e):
+    # l= logdir_name, e = exdir_name
+    # Log Dir
+    if os.path.exists(l):
+        logging(f'{l} klasörü halihazırda var.')
+    else:
+        os.makedirs(l)
+        logging(f'{l} klasörü oluşturuldu')
+        # Oluşturulmaz ise bir izin hatası olabilir
+    # Exports Dir
+    if os.path.exists(e):
+        logging(f'{e} klasörü halihazırda var.')
+    else:
+        os.makedirs(e)
+        logging(f'{e} klasörü oluşturuldu')
+        # Oluşturulmaz ise bir izin hatası olabilir
 
 
 def countrooms(r_article):
@@ -16,10 +51,10 @@ def countrooms(r_article):
         print('Sayım işlemi başarısız.')
 
 
-def logging(message):
+def logging(r_message):
     try:
-        f = open(f'logs/{csv_name}.txt', "a")
-        f.writelines(f'{message}\n')
+        f = open(f'{logdir_name}/{csv_name}.txt', "a")
+        f.writelines(f'{r_message}\n')
         f.close()
     except:
         print('Loglama işlemi başarısız.')
@@ -53,17 +88,6 @@ def readpage(r_url):
         print('Sayfa okunurken bir hata oluştu.')
 
 
-def signature(x):
-    try:
-        if x == True:
-            print(f'\nUser: {user_name}\nList: {list_name}')
-        else:
-            print(
-                f'\nFilename: {csv_name}\nFilm sayısı: {dongu_no-1}\nTüm filmler {csv_name + " dosyasına"} aktarıldı.')
-    except:
-        print('İmza seçimi başarısız.')
-
-
 def pullfilms(r_count, r_soup):
     try:
         # > Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
@@ -92,18 +116,22 @@ def pullfilms(r_count, r_soup):
 
 # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
 user_name = str(input("Username(Not display name): ")).lower()
-list_name = str(input("List_Name(Domain): ")).lower()
+list_name = str(input("Listname(Domain): ")).lower()
 # > Dosya çakışma sorunları için farklı isimler ürettik.
 zaman = datetime.now().strftime('%d%m%Y%H%M')
 csv_name = f"{user_name}-({zaman})"
-
-
+logdir_name = "logs"
+exdir_name = "exports"
+# Gerekli klasörlerin kontrolü
+dir_check(logdir_name, exdir_name)
 # > Domain'in parçalanması
 main_protocol = "https://"
 site_url = "letterboxd.com"
 domain = main_protocol + site_url
 mini_url = f'{domain}/{user_name}/list/{list_name}'
 url = f'{mini_url}/detail/page/'
+
+
 # > Domain'in doğru olup olmadığı kullanıcıya sorulur,
 # > doğruysa kullanıcı enter'a basar ve program verileri çeker.
 signature(1)
@@ -128,7 +156,7 @@ if ent == "":
         logging(f'{csv_name} Bilgi: Sayfa sayısı yok, bu sayfa tek sayfadır.')
 
     # Konumda klasör yoksa dosya oluşturmayacaktır.
-    with open(f'exports/{csv_name}.csv', 'w', newline='', encoding="utf-8") as file:
+    with open(f'{exdir_name}/{csv_name}.csv', 'w', newline='', encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(["Sıra", "Filmİsmi", "YayınYılı"])
         # Filmleri çekiyoruz
@@ -140,4 +168,9 @@ if ent == "":
         # Açtığımız dosyayı manuel kapattık
         file.close()
     logging(f'{csv_name} Success!')
+    os.system("cls")
     signature(0)
+    rst()
+else:
+    os.system("cls")
+    rst()

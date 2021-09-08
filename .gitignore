@@ -112,4 +112,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-lab/exports/
+
+# My Settings
+lab/exports
+lab/logs
+/exports
+/logs
