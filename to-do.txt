@@ -1,2 +1,3 @@
 - Sıralama yöntemi eklenecek.
 - Kişiyi görünnen ad ile arama eklenecek.
+- Ayriyeten letterbox'a aktarılabilecek şekilde bir csv belgesi çıkartılacak.
