@@ -13,21 +13,18 @@ if True:
     zaman = datetime.now().strftime('%d%m%Y%H%M')
     csv_name = f"{user_name}-({zaman}).csv"
 
-
 if True:
     # > Domain'in parçalanması
-    prefix = "https://"
-    main = "letterboxd.com"
-    url = main + "/" + user_name + "/list/" + list_name
-    domain_page = 1
-    suffix = "/detail/page/" + str(domain_page)
-
+    main_protocol = "https://"
+    site_url = "letterboxd.com"
+    domain = main_protocol + site_url
+    url = f'{domain}/{user_name}/list/{list_name}/detail/'
     # > Domain'in doğru olup olmadığı kullanıcıya sorulur,
     # > doğruysa kullanıcı enter'a basar ve program verileri çeker.
     ent = input("Is the domain correct? (Enter): "+url + "\n: ").lower()
     if ent == "":
         # > Parçalanan Domain toplanarak, istek atıldı.
-        page_url = requests.get(prefix + url + suffix)
+        page_url = requests.get(url)
         # > Sayfa kodları çekildi.
         soup = BeautifulSoup(
             page_url.content.decode('utf-8'), 'html.parser')
@@ -38,35 +35,45 @@ if True:
         # > Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al.
         try:
             # > Son'linin içindeki bağlantının metnini çektik. Bu bize kaç sayfalı bir listemiz olduğunuz verecek.
-            sayfa = soup.find(
+            lastPage_No = soup.find(
                 'div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text
-            print(str(sayfa) + " sayfası olan bir listedir.")
-            domain_page = sayfa
-            # > Sayfa sayısını öğrenmek için bir ön hazırlık.
-            last_page_url = requests.get(prefix + url + suffix)
-            last_page_films = 1
-            # > Son sayfadaki filmlerin sayısını öğrenip listedeki toplam film sayısını belirlemek.
-            film_sayisi = ((sayfa-1)*100)+last_page_films
+            print(f"{lastPage_No} sayfası olan bir listedir.")
+            last_page_url = f"page/{lastPage_No}"
+
+            # > Son sayfaya bağlanmak için bir ön hazırlık.
+            last_page_req = requests.get(url + last_page_url)
+            # > Sayfa kodları çekildi.
+            lastsoup = BeautifulSoup(
+                last_page_req.content.decode('utf-8'), 'html.parser')
+            lastarticles = lastsoup.find('ul', attrs={
+                'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
+            lastpage_fcount = 0
+            for lastrooms in lastarticles:
+                lastpage_fcount += 1
+            # < Film sayısı öğrenildi.
+            # > Toplam film sayısını belirlemek.
+            film_sayisi = ((int(lastPage_No)-1)*100)+lastpage_fcount
+            print((int(lastPage_No)-1)*100+lastpage_fcount)
+            print(f"Bu listedeki film sayısı: {film_sayisi}")
         except:
             # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
             print("Sayfa sayısı yok, bu sayfa tek sayfadır.")
 
-            # Csv dosyamızı açtık
+        # Csv dosyamızı açtık
         with open(csv_name, 'w', newline='', encoding="utf-8") as file:
             writer = csv.writer(file)
             writer.writerow(["Sıra", "Filmİsmi", "YayınYılı"])
             # Filmleri çekiyoruz
             dongu_no = 1
-            for room in articles:
+            for rooms in articles:
                 # Oda ismini çektik
-                film = room.find(
+                film = rooms.find(
                     'h2', attrs={'class': 'headline-2 prettify'})
                 film_adi = film.find('a').text
                 # Film yılı bazen boş olabiliyor. Önlem alıyoruz"
                 try:
                     film_yili = film.find('small').text
                 except:
-
                     film_yili = "Yok"
                 # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
                 print(f'{dongu_no}) {film_adi} ({film_yili})')
