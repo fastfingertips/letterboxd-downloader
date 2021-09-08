@@ -5,6 +5,14 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 
+
+def readpage(r_url):
+    page_url = requests.get(r_url)
+    # > Sayfa kodları çekildi.
+    soup = BeautifulSoup(page_url.content.decode('utf-8'), 'html.parser')
+    return soup
+
+
 if True:
     # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
     user_name = str(input("Username(Not display name): ")).lower()
@@ -24,10 +32,8 @@ if True:
     ent = input("Is the domain correct? (Enter): "+url + "\n: ").lower()
     if ent == "":
         # > Parçalanan Domain toplanarak, istek atıldı.
-        page_url = requests.get(url)
-        # > Sayfa kodları çekildi.
-        soup = BeautifulSoup(
-            page_url.content.decode('utf-8'), 'html.parser')
+
+        soup = readpage(url)
         # > Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
         articles = soup.find('ul', attrs={
             'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
@@ -41,10 +47,8 @@ if True:
             last_page_url = f"page/{lastPage_No}"
 
             # > Son sayfaya bağlanmak için bir ön hazırlık.
-            last_page_req = requests.get(url + last_page_url)
+            lastsoup = readpage(url + last_page_url)
             # > Sayfa kodları çekildi.
-            lastsoup = BeautifulSoup(
-                last_page_req.content.decode('utf-8'), 'html.parser')
             lastarticles = lastsoup.find('ul', attrs={
                 'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
             lastpage_fcount = 0
