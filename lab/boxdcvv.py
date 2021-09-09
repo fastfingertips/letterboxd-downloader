@@ -11,7 +11,12 @@ from datetime import datetime
 def signature(x):
     try:
         if x == True:
-            print(f'\nUser: {user_name}\nList: {list_name}')
+            if w_filter:
+                print(
+                    f'\nUser: {user_name}\nList: {list_name}\nFiltre uygulaması: Var\nFiltreler:\nDecade or Year: {w_decadeyear}\nGenre :{w_genre}\nSort By: {w_sortby}')
+            else:
+                print(
+                    f'\nUser: {user_name}\nList: {list_name}\nFiltre uygulaması: Yok\n')
         else:
             print(
                 f'\nFilename: {csv_name}\nFilm sayısı: {dongu_no-1}\nTüm filmler {csv_name + " dosyasına"} aktarıldı.')
@@ -117,6 +122,7 @@ def pullfilms(r_count, r_soup):
 # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
 user_name = str(input("Username(Not display name): ")).lower()
 list_name = str(input("Listname(Domain): ")).lower()
+
 # > Dosya çakışma sorunları için farklı isimler ürettik.
 zaman = datetime.now().strftime('%d%m%Y%H%M')
 csv_name = f"{user_name}-({zaman})"
@@ -131,6 +137,83 @@ domain = main_protocol + site_url
 mini_url = f'{domain}/{user_name}/list/{list_name}'
 url = f'{mini_url}/detail/page/'
 
+# Filter req
+while True:
+    filter_yn = input(f"Listeye filtre uygulanacak mı?: [Y/N]").lower()
+    if filter_yn == "y":
+        w_filter = True
+        logging('Listeye filtre uygulanacak.')
+        # filters
+        # Year
+        while True:
+            decadeyear_dory = input(
+                f"Want Decade or Year filter?: [D/Y/N]").lower()
+            if decadeyear_dory == "d":
+                i_decade = input(f"Decade:")
+                w_decadeyear = f"decade/{i_decade}s"
+                decadeyear_confirm = True
+            elif decadeyear_dory == "y":
+                i_year = input(f"Year: ")
+                w_decadeyear = f"year/{i_year}"
+                decadeyear_confirm = True
+            elif decadeyear_dory == "n":
+                w_decadeyear = "No"
+                print('Decade veya year filtresi uygulanmayacak.')
+                decadeyear_confirm = True
+            else:
+                print("Anlaışlmadı. Tekrar deneeyin.")
+                decadeyear_confirm = False
+            # decade ve year işlemleri tamamsa çıkalım
+            if decadeyear_confirm:
+                break
+        # Genre
+        while True:
+            genre_dory = input(f"Want genre filter?: [Y/N]").lower()
+            if genre_dory == "y":
+                i_genre = input(f"Genre: ")
+                w_genre = f"/genre/{i_genre}"
+                genre_confirm = True
+            elif genre_dory == "n":
+                w_genre = "Yok"
+                print('Genre filtresi uygulanmayacak.')
+                genre_confirm = True
+            else:
+                print("Anlaşılmadı. Tekrar deneyin.")
+                genre_confirm = False
+            if genre_confirm:
+                break
+        # Sory By
+        while True:
+            sortby_dory = input(f"Want Sort By filter?: [Y/N]").lower()
+            if sortby_dory == "y":
+                sortby_confirm = True
+                i_sortby = input(f"Sort By: ")
+                w_sortby = f"by/{i_sortby}"
+            elif sortby_dory == "n":
+                w_sortby = "Yok"
+                print('Sort By filtresi uygulanmayacak.')
+                sortby_confirm = True
+            else:
+                sortby_confirm = False
+                print("Anlaışlmadı. Tekrar deneyin.")
+            if sortby_confirm:
+                break
+        # Filtre elemanları bittikten sonra while için filtre onayı
+        filter_confirm = True
+    # Filtre istemezse
+    elif filter_yn == "n":
+        w_filter, w_decadeyear, w_genre, w_sortby = False, "Yok", "Yok", "Yok"
+        filter_confirm = True
+        print("Listenize filtre uygulamayacağız.")
+        logging('Listeye filtre uygulanmayacak.')
+    # Filtre isteyip istemediği anlaşılmayınca
+    else:
+        filter_confirm = False
+        print("Tam anlayamadık? Tekrar deneyin.")
+        logging('Kullanıcı soruya cevap veremedi.')
+    # While döngüsünden çıkmak için.
+    if filter_confirm:
+        break
 
 # > Domain'in doğru olup olmadığı kullanıcıya sorulur,
 # > doğruysa kullanıcı enter'a basar ve program verileri çeker.
@@ -140,7 +223,7 @@ ent = input(
     f"Link: {mini_url}\n> Press enter to confirm the entered information. (Enter)\n").lower()
 
 if ent == "":
-    # > Burada mini_url ile liste sayfa sayısını elde ediyoruz ve film toplamı sayısını hesaplıyoruz
+    # > Burada mini_url ile liste sayfa sayısını elde ediyoruz ve aşağısında film toplamı sayısını hesaplıyoruz
     soup = readpage(mini_url)
     try:
         # > Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al.
