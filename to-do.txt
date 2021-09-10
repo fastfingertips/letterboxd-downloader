@@ -1,3 +1,4 @@
-- Sıralama yöntemi eklenecek.
+- (Complate) Sıralama yöntemi eklenecek + Filtrelerin tümü eklendi.
+- Filtre türleri sergilenecek.
 - Kişiyi görünnen ad ile arama eklenecek.
 - Ayriyeten letterbox'a aktarılabilecek şekilde bir csv belgesi çıkartılacak.
