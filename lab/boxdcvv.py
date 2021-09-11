@@ -47,7 +47,8 @@ def filtre_sor():
             while True:
                 genre_dory = input(f"Want genre filter?: [Y/N]").lower()
                 if genre_dory == "y":
-                    genre_filter_adress, genre_filter_name = search_genre()
+                    # Buradaki 3 bizim 4.ula gitmemize yarayacak
+                    genre_filter_name, genre_filter_adress = search_filters(3)
                     # Gelen filtre adresini düzenliyoruz. Son kısmını alıyoruz
                     strip_genre = genre_filter_adress.replace(
                         f'/{user_name}/list/{list_name}/detail', "")
@@ -68,7 +69,9 @@ def filtre_sor():
             while True:
                 sortby_dory = input(f"Want Sort By filter?: [Y/N]").lower()
                 if sortby_dory == "y":
-                    sortby_filter_adress, sortby_filter_name = search_sortby()
+                    # Buradaki 1 bizim 2. ula gitmemize yarayacak.
+                    sortby_filter_name, sortby_filter_adress = search_filters(
+                        1)
                     # Gelen filtre adresini düzenliyoruz. Son kısmını alıyoruz
                     strip_sortby = sortby_filter_adress.replace(
                         f'/{user_name}/list/{list_name}/detail', "")
@@ -109,58 +112,33 @@ def filtre_sor():
     return all_filtres, w_filter, filtres_msg, filter_empty_items
 
 
-def search_genre():
+def search_filters(ul_num):
+    # genre 3, sortby 1
     # Sıralama adreslerini çekmek.
     # Filtre yöntemlerinden listenin sıralama yöntemleri olan ul etiketini yani 2.srıadaki ul'u seçtik.
-    page_filters = soup.find_all(
-        'ul', attrs={'class': 'smenu-menu'})[3].find_all("li")
-    genre_filter_number = 0
+    ul_filters = soup.find_all(
+        'ul', attrs={'class': 'smenu-menu'})[ul_num].find_all("li")
+    current_filter_number = 0
     # İSimler ve filtreler için boş küme oluşturduk.
-    genre_filtre_isimleri, genre_filtreler = [], []
-    for p_f in page_filters:
+    filter_names, filter_adresses = [], []
+    for current_li in ul_filters:
         try:
-            current_filter_name = p_f.find('a').text
+            current_filter_name = current_li.find('a').text
         except:
-            current_filter_name = p_f.text
+            current_filter_name = current_li.text
         finally:
-            genre_filtre_isimleri.append(current_filter_name)
+            filter_names.append(current_filter_name)
         try:
-            current_filter_adress = p_f.find('a')['href']
+            current_filter_adress = current_li.find('a')['href']
         except:
-            current_filter_adress = p_f.find('href')
+            current_filter_adress = current_li.find('href')
         finally:
-            genre_filtreler.append(current_filter_adress)
+            filter_adresses.append(current_filter_adress)
 
-        print(f'[{genre_filter_number}] {current_filter_name}')
-        genre_filter_number += 1
+        print(f'[{current_filter_number}] {current_filter_name}')
+        current_filter_number += 1
     filter_num = str(input("Filtre numaranız: "))
-    return genre_filtreler[int(filter_num)], genre_filtre_isimleri[int(filter_num)]
-
-
-def search_sortby():
-    # Sıralama adreslerini çekmek.
-    # Filtre yöntemlerinden listenin sıralama yöntemleri olan ul etiketini yani 2.srıadaki ul'u seçtik.
-    page_filters = soup.find_all(
-        'ul', attrs={'class': 'smenu-menu'})[1].find_all("li")
-    sortby_filter_number = 0
-    # İSimler ve filtreler için boş küme oluşturduk.
-    sortby_filtre_isimleri, sortby_filtreler = [], []
-    for p_f in page_filters:
-        try:
-            current_filter_name = p_f.find('a').text
-        except:
-            current_filter_name = p_f.text
-        try:
-            current_filter_adress = p_f.find('a')['href']
-        except:
-            current_filter_adress = p_f.find('href')
-
-        print(f'[{sortby_filter_number}] {current_filter_name}')
-        sortby_filtre_isimleri.append(current_filter_name)
-        sortby_filtreler.append(current_filter_adress)
-        sortby_filter_number += 1
-    filter_num = str(input("Filtre numaranız: "))
-    return sortby_filtreler[int(filter_num)], sortby_filtre_isimleri[int(filter_num)]
+    return filter_names[int(filter_num)], filter_adresses[int(filter_num)]
 
 
 def signature(x):
