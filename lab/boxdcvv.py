@@ -14,28 +14,48 @@ os.system('cls')
 def filtre_sor():
     # Filter req
     while True:
-        filter_yn = input(f"Listeye filtre uygulanacak mı?: [Y/N]").lower()
+        filter_yn = input(f"> Listeye filtre uygulanacak mı? [Y/N]: ").lower()
         if filter_yn == "y":
             w_filter = True
             logging('Listeye filtre uygulanacak.')
             filter_empty_items = 0
             while True:
                 decadeyear_dory = input(
-                    f"Want Decade or Year filter?: [D/Y/N]").lower()
+                    f"> Want Decade or Year filter? [D/Y/N]: ").lower()
                 if decadeyear_dory == "d":
-                    i_decadeyear = input(f"Decade:")
-                    msg_decadeyear = f'Decade: {i_decadeyear}\n'
-                    w_decadeyear = f"/decade/{i_decadeyear}s"
+                    # Çekmek yerine ürettik.
+                    decade_year = 1870
+                    decade_years = []
+                    decade_num = 0
+                    decade_nums = []
+                    for i in range(16):
+                        blank = ' ' if i < 10 else ''
+                        print(f'[{decade_num}] {blank}{decade_year}s')
+                        decade_years.append(int(decade_year))
+                        decade_year += 10
+                        decade_nums.append(int(decade_num))
+                        decade_num += 1
+                    i_decadeyear = int(input(f"> Decade [Num]: "))
+                    print(
+                        f'Selected: [{i_decadeyear}]: {decade_years[i_decadeyear]}s\n')
+                    msg_decadeyear = f'Decade:  [{i_decadeyear}]: {decade_years[i_decadeyear]}s\n'
+                    w_decadeyear = f"/decade/{decade_years[i_decadeyear]}s"
                     decadeyear_confirm = True
                 elif decadeyear_dory == "y":
-                    i_decadeyear = input(f"Year: ")
-                    msg_decadeyear = f'Year: {i_decadeyear}\n'
-                    w_decadeyear = f"/year/{i_decadeyear}"
-                    decadeyear_confirm = True
+                    while True:
+                        i_decadeyear = int(input(f"> Year [1870-2029]: "))
+                        msg_decadeyear = f'Year: {i_decadeyear}\n'
+                        w_decadeyear = f"/year/{i_decadeyear}"
+                        decadeyear_confirm = True
+                        print(
+                            f'Selected: {i_decadeyear}\n')
+                        # Linkler 1870 ve 2029'a kadar çalışıyor.
+                        if i_decadeyear > 1869 and i_decadeyear < 2030:
+                            break
                 elif decadeyear_dory == "n":
                     w_decadeyear = ''
                     msg_decadeyear = ''
-                    print('Decade veya year filtresi uygulanmayacak.')
+                    print('Decade veya year filtresi uygulanmayacak.\n')
                     filter_empty_items = 1
                     decadeyear_confirm = True
                 else:
@@ -45,20 +65,22 @@ def filtre_sor():
                 if decadeyear_confirm:
                     break
             while True:
-                genre_dory = input(f"Want genre filter?: [Y/N]").lower()
+                genre_dory = input(f"> Want genre filter? [Y/N]: ").lower()
                 if genre_dory == "y":
+
                     # Buradaki 3 bizim 4.ula gitmemize yarayacak
-                    genre_filter_name, genre_filter_adress = search_filters(3)
+                    genre_filter_name, genre_filter_adress, filter_num = search_filters(
+                        3)
                     # Gelen filtre adresini düzenliyoruz. Son kısmını alıyoruz
                     strip_genre = genre_filter_adress.replace(
                         f'/{user_name}/list/{list_name}/detail', "")
-                    msg_genre = f'Genre: {genre_filter_name}\n'
+                    msg_genre = f'Genre:   [{filter_num}]: {genre_filter_name}\n'
                     w_genre = strip_genre
                     genre_confirm = True
                 elif genre_dory == "n":
                     w_genre = ''
                     msg_genre = ''
-                    print('Genre filtresi uygulanmayacak.')
+                    print('Genre filtresi uygulanmayacak.\n')
                     filter_empty_items += 1
                     genre_confirm = True
                 else:
@@ -67,21 +89,21 @@ def filtre_sor():
                 if genre_confirm:
                     break
             while True:
-                sortby_dory = input(f"Want Sort By filter?: [Y/N]").lower()
+                sortby_dory = input(f"> Want Sort By filter? [Y/N]:").lower()
                 if sortby_dory == "y":
                     # Buradaki 1 bizim 2. ula gitmemize yarayacak.
-                    sortby_filter_name, sortby_filter_adress = search_filters(
+                    sortby_filter_name, sortby_filter_adress, filter_num = search_filters(
                         1)
                     # Gelen filtre adresini düzenliyoruz. Son kısmını alıyoruz
                     strip_sortby = sortby_filter_adress.replace(
                         f'/{user_name}/list/{list_name}/detail', "")
-                    msg_sortby = f'Sort By: {sortby_filter_name}\n'
+                    msg_sortby = f'Sort By: [{filter_num}]: {sortby_filter_name}\n'
                     w_sortby = strip_sortby
                     sortby_confirm = True
                 elif sortby_dory == "n":
                     w_sortby = ''
                     msg_sortby = ''
-                    print('Sort By filtresi uygulanmayacak.')
+                    print('Sort By filtresi uygulanmayacak.\n')
                     filter_empty_items += 1
                     sortby_confirm = True
                 else:
@@ -119,7 +141,8 @@ def search_filters(ul_num):
     ul_filters = soup.find_all(
         'ul', attrs={'class': 'smenu-menu'})[ul_num].find_all("li")
     current_filter_number = 0
-    # İSimler ve filtreler için boş küme oluşturduk.
+    # İSimler ve filtreler için boş küme oluşturduk
+
     filter_names, filter_adresses = [], []
     for current_li in ul_filters:
         try:
@@ -127,27 +150,31 @@ def search_filters(ul_num):
         except:
             current_filter_name = current_li.text
         finally:
-            filter_names.append(current_filter_name)
+            filter_names.append(str(current_filter_name))
         try:
             current_filter_adress = current_li.find('a')['href']
         except:
             current_filter_adress = current_li.find('href')
         finally:
-            filter_adresses.append(current_filter_adress)
+            filter_adresses.append(str(current_filter_adress))
 
-        print(f'[{current_filter_number}] {current_filter_name}')
+        blank = ' ' if current_filter_number < 10 else ''
+        print(f'[{current_filter_number}]: {blank}{current_filter_name}')
         current_filter_number += 1
-    filter_num = str(input("Filtre numaranız: "))
-    return filter_names[int(filter_num)], filter_adresses[int(filter_num)]
+    filter_num = int(input("> Filter [Num]: "))
+    print(f'Selected: [{filter_num}]: {filter_names[filter_num]}\n')
+    return filter_names[filter_num], filter_adresses[filter_num], filter_num
 
 
 def signature(x):
     # x: 0 ilk, 1 son
     try:
         if x == True:
+            # İlk imza gösteriminde öncesini temizle
+            os.system('cls')
             if w_filter and filter_empty_items < 3:
                 print(
-                    f'\nUser: {user_name}\nList: {list_name}\nFiltre uygulaması: Var\n---- Filtreler;\n{filtres_msg}')
+                    f'User: {user_name}\nList: {list_name}\nFiltre uygulaması: Var\n---- Filtreler;\n{filtres_msg}')
             else:
                 print(
                     f'\nUser: {user_name}\nList: {list_name}\nFiltre uygulaması: Yok\n')
@@ -155,9 +182,19 @@ def signature(x):
             print(
                 f'\nFilename: {csv_name}\nFilm sayısı: {dongu_no-1}\nTüm filmler {csv_name + " dosyasına"} aktarıldı.')
             # Seçili olan filtreyi yazdırdık.
-            search_selected_sortby = current_soup.select(
-                ".smenu-subselected")[0].text
-            print(f'Sorting was done by {search_selected_sortby}')
+            try:
+                search_selected_decadeyear = current_soup.select(
+                    ".smenu-subselected")[3].text
+                print(
+                    f'Filtered as {search_selected_decadeyear} movies only was done by')
+                search_selected_genre = current_soup.select(
+                    ".smenu-subselected")[2].text
+                print(f'Filtered as {search_selected_genre} only movies')
+                search_selected_sortby = current_soup.select(
+                    ".smenu-subselected")[0].text
+                print(f'Movies sorted by {search_selected_sortby}')
+            except:
+                logging("Film filtre bilgileri alınamadı..")
 
         log = 'İmza yazdırma işlemleri tamamlandı.'
     except:
@@ -270,8 +307,8 @@ def pullfilms(r_count, r_soup):
 
 
 # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
-user_name = str(input("Username(Not display name): ")).lower()
-list_name = str(input("Listname(Domain): ")).lower()
+user_name = str(input("> Username(Not display name): ")).lower()
+list_name = str(input("> Listname(Domain): ")).lower()
 # > Dosya çakışma sorunları için farklı isimler ürettik.
 csv_name = f"{user_name}-({zaman})"
 logdir_name = "logs"
