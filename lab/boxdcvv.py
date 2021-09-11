@@ -7,21 +7,143 @@ import csv
 import sys
 import os
 # Hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için.
+zaman = datetime.now().strftime('%d%m%Y%H%M')
 os.system('cls')
 
 
+def filtre_sor():
+    # Filter req
+    while True:
+        filter_yn = input(f"Listeye filtre uygulanacak mı?: [Y/N]").lower()
+        if filter_yn == "y":
+            w_filter = True
+            logging('Listeye filtre uygulanacak.')
+            filter_empty_items = 0
+            while True:
+                decadeyear_dory = input(
+                    f"Want Decade or Year filter?: [D/Y/N]").lower()
+                if decadeyear_dory == "d":
+                    i_decadeyear = input(f"Decade:")
+                    msg_decadeyear = f'Decade: {i_decadeyear}\n'
+                    w_decadeyear = f"/decade/{i_decadeyear}s"
+                    decadeyear_confirm = True
+                elif decadeyear_dory == "y":
+                    i_decadeyear = input(f"Year: ")
+                    msg_decadeyear = f'Year: {i_decadeyear}\n'
+                    w_decadeyear = f"/year/{i_decadeyear}"
+                    decadeyear_confirm = True
+                elif decadeyear_dory == "n":
+                    w_decadeyear = ''
+                    msg_decadeyear = ''
+                    print('Decade veya year filtresi uygulanmayacak.')
+                    filter_empty_items = 1
+                    decadeyear_confirm = True
+                else:
+                    print("Anlaşılmadı. Tekrar deneeyin.")
+                    decadeyear_confirm = False
+                # decade ve year işlemleri tamamsa çıkalım
+                if decadeyear_confirm:
+                    break
+            while True:
+                genre_dory = input(f"Want genre filter?: [Y/N]").lower()
+                if genre_dory == "y":
+                    i_genre = input(f"Genre: ")
+                    msg_genre = f'Genre: {i_genre}\n'
+                    w_genre = f"/genre/{i_genre}"
+                    genre_confirm = True
+                elif genre_dory == "n":
+                    w_genre = ''
+                    msg_genre = ''
+                    print('Genre filtresi uygulanmayacak.')
+                    filter_empty_items += 1
+                    genre_confirm = True
+                else:
+                    print("Anlaşılmadı. Tekrar deneyin.")
+                    genre_confirm = False
+                if genre_confirm:
+                    break
+            while True:
+                sortby_dory = input(f"Want Sort By filter?: [Y/N]").lower()
+                if sortby_dory == "y":
+                    sortby_filter_adress, sortby_filter_name = search_sortby()
+                    # Gelen filtre adresini düzenliyoruz. Son kısmını alıyoruz
+                    strip_decodeyear = sortby_filter_adress.replace(
+                        f'/{user_name}/list/{list_name}/detail', "")
+                    msg_sortby = f'Sort By: {sortby_filter_name}\n'
+                    w_sortby = strip_decodeyear
+                    sortby_confirm = True
+                elif sortby_dory == "n":
+                    w_sortby = ''
+                    msg_sortby = ''
+                    print('Sort By filtresi uygulanmayacak.')
+                    filter_empty_items += 1
+                    sortby_confirm = True
+                else:
+                    sortby_confirm = False
+                    print("Anlaşılmadı. Tekrar deneyin.")
+                if sortby_confirm:
+                    break
+            # Filtre elemanları bittikten sonra while için filtre onayı
+            filter_confirm = True
+        # Filtre istemezse
+        elif filter_yn == "n":
+            w_filter = False
+            w_decadeyear, w_genre, w_sortby = '', '', ''
+            msg_decadeyear, msg_genre, msg_sortby = '', '', ''
+            filter_empty_items = 3
+            filter_confirm = True
+            logging('Listeye filtre uygulanmayacak.')
+        # Filtre isteyip istemediği anlaşılmayınca
+        else:
+            filter_confirm = False
+            print("Tam anlayamadık? Tekrar deneyin.")
+            logging('Kullanıcı soruya cevap veremedi.')
+        # While döngüsünden çıkmak için.
+        if filter_confirm:
+            break
+    all_filtres = f'{w_decadeyear}{w_genre}{w_sortby}'
+    filtres_msg = f'{msg_decadeyear}{msg_genre}{msg_sortby}'
+    return all_filtres, w_filter, filtres_msg, filter_empty_items
+
+
+def search_sortby():
+    # Sıralama adreslerini çekmek.
+    # Filtre yöntemlerinden listenin sıralama yöntemleri olan ul etiketini yani 2.srıadaki ul'u seçtik.
+    page_filters = soup.find_all(
+        'ul', attrs={'class': 'smenu-menu'})[1].find_all("li")
+    sortby_filter_number = 0
+    # İSimler ve filtreler için boş küme oluşturduk.
+    sortby_filtre_isimleri, sortby_filtreler = [], []
+    for p_f in page_filters:
+        current_filter_name = p_f.find('a').text
+        # > veya: current_filter_adress = p_f.find('a').get('href')
+        current_filter_adress = p_f.find('a')['href']
+        print(f'[{sortby_filter_number}] {current_filter_name}')
+        sortby_filtre_isimleri.append(current_filter_name)
+        sortby_filtreler.append(current_filter_adress)
+        sortby_filter_number += 1
+    filter_num = str(input("Filtre numaranız: "))
+    return sortby_filtreler[int(filter_num)], sortby_filtre_isimleri[int(filter_num)]
+
+
 def signature(x):
+    # x: 0 ilk, 1 son
     try:
         if x == True:
             if w_filter and filter_empty_items < 3:
                 print(
-                    f'\nUser: {user_name}\nList: {list_name}\nFiltre uygulaması: Var\n---- Filtreler;\n{msg_decadeyear}{msg_genre}{msg_sortby}')
+                    f'\nUser: {user_name}\nList: {list_name}\nFiltre uygulaması: Var\n---- Filtreler;\n{filtres_msg}')
             else:
                 print(
                     f'\nUser: {user_name}\nList: {list_name}\nFiltre uygulaması: Yok\n')
         else:
             print(
                 f'\nFilename: {csv_name}\nFilm sayısı: {dongu_no-1}\nTüm filmler {csv_name + " dosyasına"} aktarıldı.')
+            # Seçili olan filtreyi yazdırdık.
+            search_selected_filter = current_soup.select(
+                ".smenu-subselected")[0].text
+            print(f'Sorting was done by {search_selected_filter}')
+
         log = 'İmza yazdırma işlemleri tamamlandı.'
     except:
         print('İmza seçimi başarısız.')
@@ -135,123 +257,31 @@ def pullfilms(r_count, r_soup):
 # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
 user_name = str(input("Username(Not display name): ")).lower()
 list_name = str(input("Listname(Domain): ")).lower()
-
 # > Dosya çakışma sorunları için farklı isimler ürettik.
-zaman = datetime.now().strftime('%d%m%Y%H%M')
 csv_name = f"{user_name}-({zaman})"
 logdir_name = "logs"
 exdir_name = "exports"
 # Gerekli klasörlerin kontrolü
 dir_check(logdir_name, exdir_name)
-# > Domain'in parçalanması
-main_protocol = "https://"
-site_url = "letterboxd.com"
-domain = main_protocol + site_url
-mini_url = f'{domain}/{user_name}/list/{list_name}'
-# Filter req
-while True:
-    filter_yn = input(f"Listeye filtre uygulanacak mı?: [Y/N]").lower()
-    if filter_yn == "y":
-        w_filter = True
-        logging('Listeye filtre uygulanacak.')
-        # filters
-        filter_empty_items = 0
-        # Year
-        while True:
-            decadeyear_dory = input(
-                f"Want Decade or Year filter?: [D/Y/N]").lower()
-            if decadeyear_dory == "d":
-                i_decadeyear = input(f"Decade:")
-                msg_decadeyear = f':Decader: {i_decadeyear}\n'
-                w_decadeyear = f"/decade/{i_decadeyear}s"
-                decadeyear_confirm = True
-            elif decadeyear_dory == "y":
-                i_decadeyear = input(f"Year: ")
-                msg_decadeyear = f'Year: {i_decadeyear}\n'
-                w_decadeyear = f"/year/{i_decadeyear}"
-                decadeyear_confirm = True
-            elif decadeyear_dory == "n":
-                w_decadeyear = ''
-                msg_decadeyear = ''
-                print('Decade veya year filtresi uygulanmayacak.')
-                filter_empty_items = 1
-                decadeyear_confirm = True
-            else:
-                print("Anlaışlmadı. Tekrar deneeyin.")
-                decadeyear_confirm = False
-            # decade ve year işlemleri tamamsa çıkalım
-            if decadeyear_confirm:
-                break
-        # Genre
-        while True:
-            genre_dory = input(f"Want genre filter?: [Y/N]").lower()
-            if genre_dory == "y":
-                i_genre = input(f"Genre: ")
-                msg_genre = f'Genre: {i_genre}\n'
-                w_genre = f"/genre/{i_genre}"
-                genre_confirm = True
-            elif genre_dory == "n":
-                w_genre = ''
-                msg_genre = ''
-                print('Genre filtresi uygulanmayacak.')
-                filter_empty_items += 1
-                genre_confirm = True
-            else:
-                print("Anlaşılmadı. Tekrar deneyin.")
-                genre_confirm = False
-            if genre_confirm:
-                break
-        # Sory By
-        while True:
-            sortby_dory = input(f"Want Sort By filter?: [Y/N]").lower()
-            if sortby_dory == "y":
-                i_sortby = input(f"Sort By: ")
-                msg_sortby = f'Sort By: {i_sortby}\n'
-                w_sortby = f"/by/{i_sortby}"
-                sortby_confirm = True
-            elif sortby_dory == "n":
-                w_sortby = ''
-                msg_sortby = ''
-                print('Sort By filtresi uygulanmayacak.')
-                filter_empty_items += 1
-                sortby_confirm = True
-            else:
-                sortby_confirm = False
-                print("Anlaışlmadı. Tekrar deneyin.")
-            if sortby_confirm:
-                break
-        # Filtre elemanları bittikten sonra while için filtre onayı
-        filter_confirm = True
-    # Filtre istemezse
-    elif filter_yn == "n":
-        w_filter, w_decadeyear, w_genre, w_sortby = False, "", "", ""
-        filter_confirm = True
-        logging('Listeye filtre uygulanmayacak.')
-    # Filtre isteyip istemediği anlaşılmayınca
-    else:
-        filter_confirm = False
-        print("Tam anlayamadık? Tekrar deneyin.")
-        logging('Kullanıcı soruya cevap veremedi.')
-    # While döngüsünden çıkmak için.
-    if filter_confirm:
-        break
-
-
-all_filtres = f'{w_decadeyear}{w_genre}{w_sortby}'
-logging(f'Uygulanan filtre: {all_filtres}')
-url = f'{mini_url}/detail{all_filtres}/page/'
-# Kontrol print(f'Kontrol: {all_filtres}\nKontrol: {url}')
-# > Domain'in doğru olup olmadığı kullanıcıya sorulur,
-# > doğruysa kullanıcı enter'a basar ve program verileri çeker.
+# > Saf domain'in parçalanarak birleştirilmesi
+url_protocol, site_url = "https://", "letterboxd.com"
+domain = url_protocol + site_url
+# Misafir girişi için url oluşturuluyor
+pure_url = f'{domain}/{user_name}/list/{list_name}/detail'
+soup = readpage(pure_url)
+# Filtrelerin domaine uygulanması
+all_filtres, w_filter, filtres_msg, filter_empty_items = filtre_sor()
+url = f'{pure_url}{all_filtres}page/'
+logging(f'Filtreler: {all_filtres}\nFiltre Url\'ye işlendi: {url}')
+# > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
 signature(1)
 logging(f'{csv_name} Bilgi: Karlışama imzası yazıldı')
 ent = input(
-    f"Link: {mini_url}\n> Press enter to confirm the entered information. (Enter)\n").lower()
+    f"Link: {pure_url}{all_filtres}\n> Press enter to confirm the entered information. (Enter)\n").lower()
 
 if ent == "":
-    # > Burada mini_url ile liste sayfa sayısını elde ediyoruz ve aşağısında film toplamı sayısını hesaplıyoruz
+    # > Burada pure_url ile liste sayfa sayısını elde ediyoruz ve aşağısında film toplamı sayısını hesaplıyoruz
     logging('Saf sayfaya erişim başlatılıyor.')
-    soup = readpage(mini_url)
     try:
         # > Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al.
         # > Son'linin içindeki bağlantının metnini çektik. Bu bize kaç sayfalı bir listemiz olduğunuz verecek.
@@ -276,6 +306,7 @@ if ent == "":
         writer.writerow(["Sıra", "Filmİsmi", "YayınYılı"])
         # Filmleri çekiyoruz
         dongu_no = 1
+        # x sıfırdan başlıyor
         for x in range(int(lastPage_No)):
             logging(f'{csv_name} Connecting to: {url}{str(x+1)}')
             current_soup = readpage(f'{url}{str(x+1)}')
@@ -290,3 +321,7 @@ else:
     print(cancel_log)
     logging(cancel_log)
     rst()
+
+
+# to:do
+# source.find_all(string=["Text","Text2"])
