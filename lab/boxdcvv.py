@@ -47,9 +47,12 @@ def filtre_sor():
             while True:
                 genre_dory = input(f"Want genre filter?: [Y/N]").lower()
                 if genre_dory == "y":
-                    i_genre = input(f"Genre: ")
-                    msg_genre = f'Genre: {i_genre}\n'
-                    w_genre = f"/genre/{i_genre}"
+                    genre_filter_adress, genre_filter_name = search_genre()
+                    # Gelen filtre adresini düzenliyoruz. Son kısmını alıyoruz
+                    strip_genre = genre_filter_adress.replace(
+                        f'/{user_name}/list/{list_name}/detail', "")
+                    msg_genre = f'Genre: {genre_filter_name}\n'
+                    w_genre = strip_genre
                     genre_confirm = True
                 elif genre_dory == "n":
                     w_genre = ''
@@ -67,10 +70,10 @@ def filtre_sor():
                 if sortby_dory == "y":
                     sortby_filter_adress, sortby_filter_name = search_sortby()
                     # Gelen filtre adresini düzenliyoruz. Son kısmını alıyoruz
-                    strip_decodeyear = sortby_filter_adress.replace(
+                    strip_sortby = sortby_filter_adress.replace(
                         f'/{user_name}/list/{list_name}/detail', "")
                     msg_sortby = f'Sort By: {sortby_filter_name}\n'
-                    w_sortby = strip_decodeyear
+                    w_sortby = strip_sortby
                     sortby_confirm = True
                 elif sortby_dory == "n":
                     w_sortby = ''
@@ -106,6 +109,34 @@ def filtre_sor():
     return all_filtres, w_filter, filtres_msg, filter_empty_items
 
 
+def search_genre():
+    # Sıralama adreslerini çekmek.
+    # Filtre yöntemlerinden listenin sıralama yöntemleri olan ul etiketini yani 2.srıadaki ul'u seçtik.
+    page_filters = soup.find_all(
+        'ul', attrs={'class': 'smenu-menu'})[3].find_all("li")
+    genre_filter_number = 0
+    # İSimler ve filtreler için boş küme oluşturduk.
+    genre_filtre_isimleri, genre_filtreler = [], []
+    for p_f in page_filters:
+        try:
+            current_filter_name = p_f.find('a').text
+        except:
+            current_filter_name = p_f.text
+        finally:
+            genre_filtre_isimleri.append(current_filter_name)
+        try:
+            current_filter_adress = p_f.find('a')['href']
+        except:
+            current_filter_adress = p_f.find('href')
+        finally:
+            genre_filtreler.append(current_filter_adress)
+
+        print(f'[{genre_filter_number}] {current_filter_name}')
+        genre_filter_number += 1
+    filter_num = str(input("Filtre numaranız: "))
+    return genre_filtreler[int(filter_num)], genre_filtre_isimleri[int(filter_num)]
+
+
 def search_sortby():
     # Sıralama adreslerini çekmek.
     # Filtre yöntemlerinden listenin sıralama yöntemleri olan ul etiketini yani 2.srıadaki ul'u seçtik.
@@ -115,9 +146,15 @@ def search_sortby():
     # İSimler ve filtreler için boş küme oluşturduk.
     sortby_filtre_isimleri, sortby_filtreler = [], []
     for p_f in page_filters:
-        current_filter_name = p_f.find('a').text
-        # > veya: current_filter_adress = p_f.find('a').get('href')
-        current_filter_adress = p_f.find('a')['href']
+        try:
+            current_filter_name = p_f.find('a').text
+        except:
+            current_filter_name = p_f.text
+        try:
+            current_filter_adress = p_f.find('a')['href']
+        except:
+            current_filter_adress = p_f.find('href')
+
         print(f'[{sortby_filter_number}] {current_filter_name}')
         sortby_filtre_isimleri.append(current_filter_name)
         sortby_filtreler.append(current_filter_adress)
@@ -140,9 +177,9 @@ def signature(x):
             print(
                 f'\nFilename: {csv_name}\nFilm sayısı: {dongu_no-1}\nTüm filmler {csv_name + " dosyasına"} aktarıldı.')
             # Seçili olan filtreyi yazdırdık.
-            search_selected_filter = current_soup.select(
+            search_selected_sortby = current_soup.select(
                 ".smenu-subselected")[0].text
-            print(f'Sorting was done by {search_selected_filter}')
+            print(f'Sorting was done by {search_selected_sortby}')
 
         log = 'İmza yazdırma işlemleri tamamlandı.'
     except:
