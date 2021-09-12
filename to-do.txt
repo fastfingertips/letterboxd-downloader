@@ -1,4 +1,5 @@
-- (Complate) Sıralama yöntemi eklenecek + Filtrelerin tümü eklendi.
-- Filtre türleri sergilenecek.
+- (Complated) Sıralama yöntemi eklenecek + Filtrelerin tümü eklendi.
+- (Complated) Filtre türleri sergilenecek.
+- Kullanıcıda girilen liste adresi yoksa yeniden sorulacak ona göre işlemler devam ettirilecek.
 - Kişiyi görünnen ad ile arama eklenecek.
 - Ayriyeten letterbox'a aktarılabilecek şekilde bir csv belgesi çıkartılacak.
