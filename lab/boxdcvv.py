@@ -367,6 +367,21 @@ def check_user():
         return user_available
 
 
+def check_user_list():
+    try:
+        c_listname = visit_list.find(
+            'meta', property="og:title").attrs['content']
+        print(f'Found it: {c_listname}')
+        logging(f'{list_name} listesi bulundu: {c_listname}')
+        c_list_available = True
+    except:
+        print('Liste bulunamadı. Tekrar deneyin.')
+        logging(f'{list_name} listesi bulunamadı.')
+        c_list_available = False
+    finally:
+        return c_list_available
+
+
 # > Saf domain'in parçalanarak birleştirilmesi
 url_protocol, site_url = "https://", "letterboxd.com/"
 domain = url_protocol + site_url
@@ -393,7 +408,17 @@ approved_session = f'{logdir_name}/{csv_name}.txt'
 os.rename(open_log, approved_session)
 open_log = approved_session
 open_csv = f'{exdir_name}/{csv_name}.csv'
-list_name = str(input("> Listname(Domain): ")).lower()
+
+
+while True:
+    # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
+    list_name = str(input("> Listname(Domain): ")).lower()
+    # Kullanıcının böyle bir listesi mevcutmu bakıyoruz
+    visit_list = readpage(f'{domain}{user_name}/list/{list_name}')
+    userlist_available = check_user_list()
+    if userlist_available:
+        break
+
 # Misafir girişi için url oluşturuluyor
 pure_url = f'{domain}{user_name}/list/{list_name}/detail/'
 soup = readpage(pure_url)
