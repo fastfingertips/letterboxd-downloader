@@ -8,10 +8,23 @@ import requests
 import csv
 import sys
 import os
+from termcolor import colored, cprint
 # Hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için.
 os.system('cls')
 run_time = datetime.now().strftime('%d%m%Y%H%M%S')
-print(f'Session hash: #{run_time}')
+print(f'[{colored("#", color="yellow")}] Session hash: {run_time}')
+
+"""
+print(colored("grey", color="grey"))
+print(colored("red", color="red"))
+print(colored("green", color="green"))
+print(colored("yellow", color="yellow"))
+print(colored("blue", color="blue"))
+print(colored("magenta", color="magenta"))
+print(colored("cyan", color="cyan"))
+print(colored("white", color="white"))
+"""
+user_input_green = f'[{colored(">", color="green")}]'
 
 
 def test_pause():
@@ -21,14 +34,15 @@ def test_pause():
 def filtre_sor():
     # Filter req
     while True:
-        filter_yn = input(f"> Listeye filtre uygulanacak mı? [Y/N]: ").lower()
+        filter_yn = input(
+            f'{user_input_green} Listeye filtre uygulanacak mı? [{colored("Y", color="green")}/{colored("N", color="red")}]: ').lower()
         if filter_yn == "y":
             w_filter = True
             logging('Listeye filtre uygulanacak.')
             filter_empty_items = 0
             while True:
                 decadeyear_dory = input(
-                    f"\n> Want Decade or Year filter? [D/Y/N]: ").lower()
+                    f'\n{user_input_green} Want Decade or Year filter? [{colored("D", color="green")}/{colored("Y", color="green")}/{colored("N", color="red")}]: ').lower()
                 if decadeyear_dory == "d":
                     # Çekmek yerine ürettik.
                     decade_year = 1870  # min decade year
@@ -39,43 +53,56 @@ def filtre_sor():
                     for i in range(max_multiply):
                         # blank = ' ' if i in range(10) else ''
                         blank = ' ' if i < 10 else ''
-                        print(f'[{decade_num}] {blank}{decade_year}s')
+                        print(
+                            f'[{colored(decade_num, color="blue")}] {blank}{decade_year}s')
                         decade_years.append(int(decade_year))
                         decade_year += 10
                         decade_nums.append(int(decade_num))
                         decade_num += 1
-                    i_decadeyear = int(input(f"> Decade [Num]: "))
-                    print(
-                        f'Selected: [{i_decadeyear}]: {decade_years[i_decadeyear]}s\n')
-                    msg_decadeyear = f'  \u25E6 Decade:  [{i_decadeyear}]: {decade_years[i_decadeyear]}s\n'
-                    w_decadeyear = f"/decade/{decade_years[i_decadeyear]}s"
-                    decadeyear_confirm = True
+                    while True:
+                        i_decadeyear = int(input(
+                            f'{user_input_green} Decade [{colored("Num", color="blue")}]: '))
+                        if i_decadeyear >= min(decade_nums) and i_decadeyear <= max(decade_nums):
+                            print(
+                                f'    {colored("Selected:", color="green")} [{colored(i_decadeyear, color="blue")}]: {decade_years[i_decadeyear]}s\n')
+                            msg_decadeyear = f'  \u25E6 Decade:  [{i_decadeyear}]: {decade_years[i_decadeyear]}s\n'
+                            w_decadeyear = f"/decade/{decade_years[i_decadeyear]}s"
+                            decadeyear_confirm = True
+                            break
+                        else:
+                            print(
+                                f'    {colored("Belirtilen onyıllardan satır numarasını girmelisiniz.", color="red")}')
                 elif decadeyear_dory == "y":
                     while True:
-                        i_decadeyear = int(input(f"> Year [1870-2029]: "))
+                        i_decadeyear = int(
+                            input(f'{user_input_green} Year [{colored("1870", color="blue")}-{colored("2029", color="blue")}]: '))
                         msg_decadeyear = f'   Year: {i_decadeyear}\n'
                         w_decadeyear = f"/year/{i_decadeyear}"
                         decadeyear_confirm = True
                         # Linkler 1870 ve 2029'a kadar çalışıyor.
                         if i_decadeyear >= 1870 and i_decadeyear <= 2029:
-                            print(f'Selected: {i_decadeyear}\n')
+                            print(
+                                f'    {colored("Selected:", color="green")} {i_decadeyear}\n')
                             break
                         else:
-                            print('Belirtilen aralıkta seçim yapınız.')
+                            print(
+                                f'    {colored("Belirtilen aralıkta seçim yapınız.", color="red")}')
                 elif decadeyear_dory == "n":
                     w_decadeyear = ''
                     msg_decadeyear = ''
-                    print('Decade veya year filtresi uygulanmayacak.\n')
+                    print('    Zaman aralığı filtresi uygulanmayacak.\n')
                     filter_empty_items = 1
                     decadeyear_confirm = True
                 else:
-                    print("Anlaşılmadı. Tekrar deneeyin.")
+                    print(
+                        f'    {colored("Anlaşılmadı, tekrar deneyin.", color="red")}')
                     decadeyear_confirm = False
                 # decade ve year işlemleri tamamsa çıkalım
                 if decadeyear_confirm:
                     break
             while True:
-                genre_dory = input(f"> Want genre filter? [Y/N]: ").lower()
+                genre_dory = input(
+                    f'{user_input_green} Want genre filter? [Y/N]: ').lower()
                 if genre_dory == "y":
 
                     # Buradaki 3 bizim 4.ula gitmemize yarayacak
@@ -83,42 +110,43 @@ def filtre_sor():
                         3)
                     # Gelen filtre adresini düzenliyoruz. Son kısmını alıyoruz
                     strip_genre = genre_filter_adress.replace(
-                        f'/{user_name}/list/{list_name}/detail', "")
+                        f'/{user_name}/list/{list_name}detail', "")
                     msg_genre = f'  \u25E6 Genre:   [{filter_num}]: {genre_filter_name}\n'
                     w_genre = strip_genre
                     genre_confirm = True
                 elif genre_dory == "n":
                     w_genre = ''
                     msg_genre = ''
-                    print('Genre filtresi uygulanmayacak.\n')
+                    print('    Genre filtresi uygulanmayacak.\n')
                     filter_empty_items += 1
                     genre_confirm = True
                 else:
-                    print("Anlaşılmadı. Tekrar deneyin.")
+                    print("Anlaşılmadı. Tekrar deneyin.", end='')
                     genre_confirm = False
                 if genre_confirm:
                     break
             while True:
-                sortby_dory = input(f"> Want Sort By filter? [Y/N]:").lower()
+                sortby_dory = input(
+                    f'{user_input_green} Want Sort By filter? [Y/N]:').lower()
                 if sortby_dory == "y":
                     # Buradaki 1 bizim 2. ula gitmemize yarayacak.
                     sortby_filter_name, sortby_filter_adress, filter_num = search_filters(
                         1)
                     # Gelen filtre adresini düzenliyoruz. Son kısmını alıyoruz
                     strip_sortby = sortby_filter_adress.replace(
-                        f'/{user_name}/list/{list_name}/detail', "")
+                        f'/{user_name}/list/{list_name}detail', "")
                     msg_sortby = f'  \u25E6 Sort By: [{filter_num}]: {sortby_filter_name}\n'
                     w_sortby = strip_sortby
                     sortby_confirm = True
                 elif sortby_dory == "n":
                     w_sortby = ''
                     msg_sortby = ''
-                    print('Sort By filtresi uygulanmayacak.\n')
+                    print('  Sort By filtresi uygulanmayacak.\n')
                     filter_empty_items += 1
                     sortby_confirm = True
                 else:
                     sortby_confirm = False
-                    print("Anlaşılmadı. Tekrar deneyin.")
+                    print("  Anlaşılmadı. Tekrar deneyin.")
                 if sortby_confirm:
                     break
             # Filtre elemanları bittikten sonra while için filtre onayı
@@ -130,7 +158,7 @@ def filtre_sor():
             msg_decadeyear, msg_genre, msg_sortby = '', '', ''
             filter_empty_items = 3
             filter_confirm = True
-            logging('Listeye filtre uygulanmayacak.')
+            logging('    Listeye filtre uygulanmayacak.')
         # Filtre isteyip istemediği anlaşılmayınca
         else:
             filter_confirm = False
@@ -171,7 +199,7 @@ def search_filters(ul_num):
         blank = ' ' if current_filter_number < 10 else ''
         print(f'[{current_filter_number}]: {blank}{current_filter_name}')
         current_filter_number += 1
-    filter_num = int(input("> Filter [Num]: "))
+    filter_num = int(input(f'{user_input_green} Filter [Num]: '))
     print(f'Selected: [{filter_num}]: {filter_names[filter_num]}\n')
     return filter_names[filter_num], filter_adresses[filter_num], filter_num
 
@@ -357,11 +385,11 @@ def pullfilms(r_count, r_soup):
 def check_user():
     try:
         user_displayname = visit_profile.select(".title-1")[0].text
-        print(f'Found it: {user_displayname}')
+        print(f'    {colored("Found it: ", color="green")}{user_displayname}')
         logging(f'{user_name} kullanıcısı bulundu: {user_displayname}')
         user_available = True
     except:
-        print('Kullanıcı bulunamadı. Tekrar deneyin.')
+        print(colored('    Kullanıcı bulunamadı. Tekrar deneyin.', color="red"))
         logging(f'{user_name} kullanıcısı bulunamadı.')
         user_available = False
     finally:
@@ -374,33 +402,38 @@ def check_user_list():
         try:
             meta_test = visit_list.find(
                 'meta', property="og:type").attrs['content']
-
+            # Meta etiketindeki bilgi sorgulanır. Sayfanın liste olup olmadığı anlaşışılır
+            if meta_test == "letterboxd:list":
+                logging(
+                    f'Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {meta_test}')
+                # Liste ismini alıyoruz.
+                c_listname = visit_list.find(
+                    'meta', property="og:title").attrs['content']
+                print(f'    {colored("Found it: ", color="green")}{c_listname}')
+                # Liste yönlendirimesi var mı bakıyoruz
+                c_url = visit_list.find(
+                    'meta', property="og:url").attrs['content']
+                if c_url == visit_list_url:
+                    logging('Liste adresi yönlendime içermiyor.')
+                    c_url = visit_list_url
+                else:
+                    print(
+                        f'[{colored("!", color="yellow")}] Girdiğiniz liste linki eskimiştir, muhtemelen liste ismi yakın bir zamanda değişildi.')
+                    print(
+                        f'    {colored(visit_list_url, color="yellow")} adresini değiştirdik.')
+                    print(
+                        f'    {colored(c_url, color="green")} adresinden devam ediyoruz.')
+                logging(f'{list_name} listesi bulundu: {c_listname}')
+                c_list_available = True
         except:
-            print('Burada bir liste bulunamadı.')
-        logging(
-            f'Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {meta_test}')
+            print("    Meta etiketinden veri alınamadı")
+            c_url = ""
+            c_list_available = False
 
-        # Listenin varolduğu öğrenildikten sonra sayfadaki meta etiketinde url sorgulanır
-        #  böylece kullanıcının girdiği liste adresi eski ve site bizi yönlendirmişmi öğrneceğiz.
-
-        if meta_test == "letterboxd:list":
-            c_url = visit_list.find('meta', property="og:url").attrs['content']
-            if c_url == visit_list_url:
-                logging('Liste adresi yönlendime içermiyor.')
-            else:
-                print(
-                    f'Girdiğiniz liste linki eskimiştir, muhtemelen liste ismi yakın bir zamanda değişildi.\nİşlemlerimize {c_url} adresinden devam ediyoruz.')
-            c_listname = visit_list.find(
-                'meta', property="og:title").attrs['content']
-            print(f'Found it: {c_listname}')
-            logging(f'{list_name} listesi bulundu: {c_listname}')
-            c_list_available = True
     except:
-        print('Liste bulunamadı. Tekrar deneyin.')
-        logging(f'{list_name} listesi bulunamadı.')
         c_list_available = False
     finally:
-        return c_list_available
+        return c_list_available, c_url
 
 
 # > Saf domain'in parçalanarak birleştirilmesi
@@ -415,7 +448,8 @@ dir_check(logdir_name, False)
 
 while True:
     # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
-    user_name = str(input("> Username(Not display name): ")).lower()
+    user_name = str(
+        input(f'{user_input_green} Username(Not display name): ')).lower()
     # Kullanıcı mevcutmu bakıyoruz
     visit_profile = readpage(f'{domain}{user_name}')
     user_available = check_user()
@@ -433,26 +467,33 @@ open_csv = f'{exdir_name}/{csv_name}.csv'
 
 while True:
     # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
-    list_name = str(input("> Listname(Domain): ")).lower()
+    list_name = str(
+        input(f'{user_input_green} Listname(Domain): ')).lower()
     # Kullanıcının böyle bir listesi mevcutmu bakıyoruz
     visit_list_url = f'{domain}{user_name}/list/{list_name}/'
     visit_list = readpage(visit_list_url)
-    userlist_available = check_user_list()
+    userlist_available, approved_list_url = check_user_list()
+    # Listenin asıl ismi
+    # Approverd boş geldiğinde boşluk değerini değiştirmez
+    list_name = approved_list_url.replace(f'{domain}{user_name}/list/', "")
     if userlist_available:
         break
 
 # Misafir girişi için url oluşturuluyor
-pure_url = f'{domain}{user_name}/list/{list_name}/detail/'
+# approved_list_url https://letterboxd.com/username/list/listname/
+pure_url = f'{approved_list_url}detail/'
 soup = readpage(pure_url)
+
 # Filtrelerin çekilmesi ve domaine uygulanması
 all_filtres, w_filter, filtres_msg, filter_empty_items = filtre_sor()
 url = f'{pure_url}{all_filtres}page/'
+print(f'url: {url}')
 logging(f'Filtreler: {all_filtres}\nFiltre Url\'ye işlendi: {url}')
 # Karşılama mesajı, kullanıcının girdiği bilgleri ve girilen bilgilere dayanarak listenin bilgilerini yazdırır.
 signature(1)
 # > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
 ent = input(
-    f"\u00B7 Link: {pure_url}{all_filtres}\n\n> Press enter to confirm the entered information. (Enter)\n").lower()
+    f"\u00B7 Link: {pure_url}{all_filtres}\n\n> Press enter to confirm the entered information. (Enter)\n{user_input_green}").lower()
 if ent == "":
     # Gerekli klasörlerin kontrolü
     dir_check(False, exdir_name)
