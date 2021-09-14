@@ -198,8 +198,9 @@ def signature(x):
                 search_listBy = soup.select("[itemprop=name]")[0].text
                 print(f'\u00B7 List by {search_listBy} (@{user_name})')
                 # > Liste başlığının ismini çektik
-                search_listTitle = soup.select("[itemprop=title]")[0].text
-                print(f'\u00B7 List title "{search_listTitle}" ')
+                search_listTitle = soup.select("[itemprop=title]")[
+                    0].text.strip()
+                print(f'\u00B7 List title: {search_listTitle}')
                 # > Liste oluşturulma tarihi
                 search_listPtime = soup.select(".published time")[0].text
                 # > arrow: https://arrow.readthedocs.io/en/latest/
@@ -369,11 +370,17 @@ def check_user():
 
 def check_user_list():
     try:
-        c_listname = visit_list.find(
-            'meta', property="og:title").attrs['content']
-        print(f'Found it: {c_listname}')
-        logging(f'{list_name} listesi bulundu: {c_listname}')
-        c_list_available = True
+        # bu meta etiketinden veri almayı deniyor eğer yoksa liste değil.
+        meta_test = visit_list.find(
+            'meta', property="og:type").attrs['content']
+        logging(
+            f'Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {meta_test}')
+        if meta_test == "letterboxd:list":
+            c_listname = visit_list.find(
+                'meta', property="og:title").attrs['content']
+            print(f'Found it: {c_listname}')
+            logging(f'{list_name} listesi bulundu: {c_listname}')
+            c_list_available = True
     except:
         print('Liste bulunamadı. Tekrar deneyin.')
         logging(f'{list_name} listesi bulunamadı.')
