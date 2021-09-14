@@ -371,11 +371,25 @@ def check_user():
 def check_user_list():
     try:
         # bu meta etiketinden veri almayı deniyor eğer yoksa liste değil.
-        meta_test = visit_list.find(
-            'meta', property="og:type").attrs['content']
+        try:
+            meta_test = visit_list.find(
+                'meta', property="og:type").attrs['content']
+
+        except:
+            print('Burada bir liste bulunamadı.')
         logging(
             f'Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {meta_test}')
+
+        # Listenin varolduğu öğrenildikten sonra sayfadaki meta etiketinde url sorgulanır
+        #  böylece kullanıcının girdiği liste adresi eski ve site bizi yönlendirmişmi öğrneceğiz.
+
         if meta_test == "letterboxd:list":
+            c_url = visit_list.find('meta', property="og:url").attrs['content']
+            if c_url == visit_list_url:
+                logging('Liste adresi yönlendime içermiyor.')
+            else:
+                print(
+                    f'Girdiğiniz liste linki eskimiştir, muhtemelen liste ismi yakın bir zamanda değişildi.\nİşlemlerimize {c_url} adresinden devam ediyoruz.')
             c_listname = visit_list.find(
                 'meta', property="og:title").attrs['content']
             print(f'Found it: {c_listname}')
@@ -421,7 +435,8 @@ while True:
     # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
     list_name = str(input("> Listname(Domain): ")).lower()
     # Kullanıcının böyle bir listesi mevcutmu bakıyoruz
-    visit_list = readpage(f'{domain}{user_name}/list/{list_name}')
+    visit_list_url = f'{domain}{user_name}/list/{list_name}/'
+    visit_list = readpage(visit_list_url)
     userlist_available = check_user_list()
     if userlist_available:
         break
