@@ -183,24 +183,40 @@ def search_filters(ul_num):
 
     filter_names, filter_adresses = [], []
     for current_li in ul_filters:
+        # Seçimin başlığı var mı
         try:
-            current_filter_name = current_li.find('a').text
+            filter_sub = current_li.find('span').text
+            print(f'{filter_sub}')
+            current_filter_number -= 1
+        # Seçimin Başlığı yoksa
         except:
-            current_filter_name = current_li.text
-        finally:
-            filter_names.append(str(current_filter_name))
-        try:
-            current_filter_adress = current_li.find('a')['href']
-        except:
-            current_filter_adress = current_li.find('href')
-        finally:
-            filter_adresses.append(str(current_filter_adress))
-
-        blank = ' ' if current_filter_number < 10 else ''
-        print(f'[{current_filter_number}]: {blank}{current_filter_name}')
+            # Dene
+            try:
+                # İlk 10 Liste elemanı için boşluk ayarlar ve hızalarız
+                blank = ' ' if current_filter_number < 10 else ''
+                print(f'[{current_filter_number}]: {blank}', end=' ')
+                # Liste ismini almayı deneriz
+                try:
+                    current_filter_name = current_li.find('a').text
+                except:
+                    current_filter_name = current_li.text
+                finally:
+                    filter_names.append(str(current_filter_name))
+                    print(f'{current_filter_name}')
+                # Liste elemanının adresini almayı deneriz.
+                try:
+                    current_filter_adress = current_li.find('a')['href']
+                except:
+                    current_filter_adress = current_li.find('href')
+                finally:
+                    filter_adresses.append(str(current_filter_adress))
+            except:
+                pass
         current_filter_number += 1
+    # Kullanıcı bir eleman seçer
     filter_num = int(input(f'{user_input_green} Filter [Num]: '))
     print(f'Selected: [{filter_num}]: {filter_names[filter_num]}\n')
+    os.system('pause')
     return filter_names[filter_num], filter_adresses[filter_num], filter_num
 
 
