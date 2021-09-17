@@ -442,7 +442,7 @@ def check_user_list():
                 logging(f'{list_name} listesi bulundu: {c_listname}')
                 c_list_available = True
         except:
-            print("    Meta etiketinden veri alınamadı")
+            print("    Bu kullanıcının böyle bir listesi yok.")
             c_url = ""
             c_list_available = False
 
@@ -510,7 +510,9 @@ signature(1)
 # > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
 ent = input(
     f"\u00B7 Link: {pure_url}{all_filtres}\n\n> Press enter to confirm the entered information. (Enter)\n{user_input_green}").lower()
+
 if ent == "":
+    print("-------------- Liste Onaylandı --------------")
     # Gerekli klasörlerin kontrolü
     dir_check(False, exdir_name)
 
