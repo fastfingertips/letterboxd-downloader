@@ -1,0 +1,35 @@
+Metadata-Version: 1.0
+Name: termcolor2
+Version: 0.0.3
+Summary: simple termcolor wrapper
+Home-page: https://github.com/v2e4lisp/termcolor2
+Author: Yan Wenjun
+Author-email: mylastnameisyan@gmail.com
+License: MIT
+Description: A simple wrapper for termcolor
+        ==============================
+        
+        install
+        =======
+        
+        .. code:: bash
+        
+            pip install termcolor2
+        
+        useage
+        ======
+        
+        .. code:: python
+        
+            from termcolor2 import c
+        
+            # termcolor2
+            print c("hello").red.on_white.blink.underline.dark
+        
+            # ---  this is equal to the following ---
+        
+            # termcolor
+            print colored("hello", "red", "on_white", ["blink", "underline", "dark"])
+        
+        
+Platform: UNKNOWN
