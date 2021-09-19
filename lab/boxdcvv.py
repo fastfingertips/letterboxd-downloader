@@ -25,6 +25,8 @@ print(colored("cyan", color="cyan"))
 print(colored("white", color="white"))
 """
 user_input_green = f'[{colored(">", color="green")}]'
+middle_point = '[' + colored(u"\u00B7", color="cyan") + ']'
+error_suf = f'[{colored("!", color="red")}]'
 
 
 def test_pause():
@@ -71,22 +73,22 @@ def filtre_sor():
                             break
                         else:
                             print(
-                                f'    {colored("Belirtilen onyıllardan satır numarasını girmelisiniz.", color="red")}')
+                                f'{colored("    Belirtilen onyıllardan satır numarasını girmelisiniz.", color="red")}')
                 elif decadeyear_dory == "y":
                     while True:
                         i_decadeyear = int(
                             input(f'{user_input_green} Year [{colored("1870", color="blue")}-{colored("2029", color="blue")}]: '))
-                        msg_decadeyear = f'   Year: {i_decadeyear}\n'
+                        msg_decadeyear = f'Year: {i_decadeyear}\n'
                         w_decadeyear = f"/year/{i_decadeyear}"
                         decadeyear_confirm = True
                         # Linkler 1870 ve 2029'a kadar çalışıyor.
                         if i_decadeyear >= 1870 and i_decadeyear <= 2029:
                             print(
-                                f'    {colored("Selected:", color="green")} {i_decadeyear}\n')
+                                f'{colored("    Selected:", color="green")} {i_decadeyear}\n')
                             break
                         else:
                             print(
-                                f'    {colored("Belirtilen aralıkta seçim yapınız.", color="red")}')
+                                f'{colored("    Belirtilen aralıkta seçim yapınız.", color="red")}')
                 elif decadeyear_dory == "n":
                     w_decadeyear = ''
                     msg_decadeyear = ''
@@ -95,7 +97,7 @@ def filtre_sor():
                     decadeyear_confirm = True
                 else:
                     print(
-                        f'    {colored("Anlaşılmadı, tekrar deneyin.", color="red")}')
+                        f'{colored("    Anlaşılmadı, tekrar deneyin.", color="red")}')
                     decadeyear_confirm = False
                 # decade ve year işlemleri tamamsa çıkalım
                 if decadeyear_confirm:
@@ -216,7 +218,6 @@ def search_filters(ul_num):
     # Kullanıcı bir eleman seçer
     filter_num = int(input(f'{user_input_green} Filter [Num]: '))
     print(f'Selected: [{filter_num}]: {filter_names[filter_num]}\n')
-    os.system('pause')
     return filter_names[filter_num], filter_adresses[filter_num], filter_num
 
 
@@ -227,29 +228,29 @@ def signature(x):
 
             # İlk imza gösteriminde öncesini temizle
             os.system('cls')
-            print('Your Inputs;', end='')
+            print(colored('Your Inputs;', color="yellow"))
             if w_filter and filter_empty_items < 3:
                 print(
-                    f'\u00B7 User: {user_name}\n\u00B7 List: {list_name}\n\u00B7 Filtre uygulaması: Var\n{filtres_msg}')
+                    f'{middle_point} User: {user_name}\n{middle_point} List: {list_name}\n{middle_point} Filtre uygulaması: Var\n{filtres_msg}')
             else:
                 print(
-                    f'\n\u00B7 User: {user_name}\n\u00B7 List: {list_name}\n\u00B7 Filtre uygulaması: Yok\n')
+                    f'{middle_point} User: {user_name}\n{middle_point} List: {list_name}\n{middle_point} Filtre uygulaması: Yok\n')
 
             # Liste sayfasından bilgiler çekmek.
             try:
-                print('List info;')
+                print(colored('List info;', color="yellow"))
                 # > Liste sahibin ismini çektik
                 search_listBy = soup.select("[itemprop=name]")[0].text
-                print(f'\u00B7 List by {search_listBy} (@{user_name})')
+                print(f'{middle_point} List by {search_listBy} (@{user_name})')
                 # > Liste başlığının ismini çektik
                 search_listTitle = soup.select("[itemprop=title]")[
                     0].text.strip()
-                print(f'\u00B7 List title: {search_listTitle}')
+                print(f'{middle_point} List title: {search_listTitle}')
                 # > Liste oluşturulma tarihi
                 search_listPtime = soup.select(".published time")[0].text
                 # > arrow: https://arrow.readthedocs.io/en/latest/
                 listPtime = arrow.get(search_listPtime)
-                print(f'\u00B7 Published: {listPtime.humanize()}')
+                print(f'{middle_point} Published: {listPtime.humanize()}')
                 # < or: print(f'Published: {listPtime.humanize(granularity=["year","month", "day", "hour", "minute"])}')
                 # > utcnow: https://newbedev.com/python-utc-datetime-object-s-iso-format-doesn-t-include-z-zulu-or-zero-offset
                 # now_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -262,25 +263,26 @@ def signature(x):
                 except:
                     msg_Utime = 'No editing'
                 finally:
-                    print(f'\u00B7 Updated: {msg_Utime}')
+                    print(f'{middle_point} Updated: {msg_Utime}')
             except:
                 logging(
                     'Film sahibi görünür adı ve liste adı istenirken hata oluştu.')
         else:
             print(
-                f'\nFilename: {csv_name}\nFilm sayısı: {dongu_no-1}\nTüm filmler {csv_name + " dosyasına"} aktarıldı.')
+                f'\n{middle_point} Filename: {csv_name}\n{middle_point} Film sayısı: {dongu_no-1}\n{middle_point} Tüm filmler {csv_name + " dosyasına"} aktarıldı.')
             # Seçili olan filtreyi yazdırdık.
             try:
                 search_selected_decadeyear = current_soup.select(
                     ".smenu-subselected")[3].text
                 print(
-                    f'Filtered as {search_selected_decadeyear} movies only was done by')
+                    f'{middle_point} Filtered as {search_selected_decadeyear} movies only was done by')
                 search_selected_genre = current_soup.select(
                     ".smenu-subselected")[2].text
-                print(f'Filtered as {search_selected_genre} only movies')
+                print(
+                    f'{middle_point} Filtered as {search_selected_genre} only movies')
                 search_selected_sortby = current_soup.select(
                     ".smenu-subselected")[0].text
-                print(f'Movies sorted by {search_selected_sortby}')
+                print(f'{middle_point} Movies sorted by {search_selected_sortby}')
             except:
                 logging("Film filtre bilgileri alınamadı..")
 
@@ -378,6 +380,8 @@ def pullfilms(r_count, r_soup):
         articles = r_soup.find('ul', attrs={
             'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
         dongu_no = r_count
+        # > Filmleri ekrana ve dosyaya yazdırma işlemleri
+        print("\nListedeki filmler:")
         for rooms in articles:
             # Oda ismini çektik
             film = rooms.find(
@@ -389,15 +393,16 @@ def pullfilms(r_count, r_soup):
             except:
                 film_yili = "Yok"
             # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
-            print(f'{dongu_no}) {film_adi} ({film_yili})')
+            print(f'{dongu_no})  {film_adi} ({film_yili})')
             writer.writerow(
-                [str(dongu_no), str(film_adi), str(film_yili)])
+                [str(film_adi), str(film_yili)])
             dongu_no += 1
         return dongu_no
     except:
         print('Film bilgilerini elde ederken bir hatayla karşılaşıldı.')
 
 
+# Kullanıcının var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
 def check_user():
     try:
         user_displayname = visit_profile.select(".title-1")[0].text
@@ -412,9 +417,10 @@ def check_user():
         return user_available
 
 
+# Kullanıcının girilen şekilde ir listesinin var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
 def check_user_list():
     try:
-        # bu meta etiketinden veri almayı deniyor eğer yoksa liste değil.
+        # > bu meta etiketinden veri almayı deniyor eğer yoksa liste değil.
         try:
             meta_test = visit_list.find(
                 'meta', property="og:type").attrs['content']
@@ -508,11 +514,11 @@ logging(f'Filtreler: {all_filtres}\nFiltre Url\'ye işlendi: {url}')
 # Karşılama mesajı, kullanıcının girdiği bilgleri ve girilen bilgilere dayanarak listenin bilgilerini yazdırır.
 signature(1)
 # > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
+print(f'{middle_point} Link: {pure_url}{all_filtres}')
 ent = input(
-    f"\u00B7 Link: {pure_url}{all_filtres}\n\n> Press enter to confirm the entered information. (Enter)\n{user_input_green}").lower()
-
+    f'\n{user_input_green} Press enter to confirm the entered information. (Enter)')
 if ent == "":
-    print("-------------- Liste Onaylandı --------------")
+    print(colored("    Liste bilgilerini onayladınız.", color="green"))
     # Gerekli klasörlerin kontrolü
     dir_check(False, exdir_name)
 
@@ -539,7 +545,7 @@ if ent == "":
     # Konumda klasör yoksa dosya oluşturmayacaktır.
     with open(f'{open_csv}', 'w', newline='', encoding="utf-8") as file:
         writer = csv.writer(file)
-        writer.writerow(["Sıra", "Filmİsmi", "YayınYılı"])
+        writer.writerow(["Title", "Year"])
         # Filmleri çekiyoruz
         dongu_no = 1
         # x sıfırdan başlıyor
