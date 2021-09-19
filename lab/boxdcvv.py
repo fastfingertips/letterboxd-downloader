@@ -1,19 +1,26 @@
+import sys
+import csv
+import requests
 import arrow
 from datetime import datetime, timedelta, date, timezone
 from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
 from typing import Collection
 from pandas import DataFrame
-import requests
-import csv
-import sys
-import os
-from termcolor import colored, cprint
-# Hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için.
-os.system('cls')
-run_time = datetime.now().strftime('%d%m%Y%H%M%S')
-print(f'[{colored("#", color="yellow")}] Session hash: {run_time}')
+import os  # https://stackoverflow.com/a/48010814
+# Term Color NET/lOCAL
+try:
+    from termcolor import colored, cprint
+except:
+    from labs.termcolor110.termcolor import colored, cprint
 
+
+# > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
+os.system('color & cls')
+# Hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için.
+run_time = datetime.now().strftime('%d%m%Y%H%M%S')
+print(f'[{colored("#", color="yellow")}] Session hash: ', end="")
+cprint(run_time, 'yellow', attrs=['blink'])
 """
 print(colored("grey", color="grey"))
 print(colored("red", color="red"))
