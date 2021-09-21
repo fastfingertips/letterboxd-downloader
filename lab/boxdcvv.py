@@ -51,7 +51,7 @@ def filtre_sor():
             f'{user_input_green} Listeye filtre uygulanacak mı? [{colored("Y", color="green")}/{colored("N", color="red")}]: ').lower()
         if filter_yn == "y":
             w_filter = True
-            logging('Listeye filtre uygulanacak.')
+            logging(f'{info_suf}Listeye filtre uygulanacak.')
             filter_empty_items = 0
             while True:
                 decadeyear_dory = input(
@@ -171,12 +171,12 @@ def filtre_sor():
             msg_decadeyear, msg_genre, msg_sortby = '', '', ''
             filter_empty_items = 3
             filter_confirm = True
-            logging('{info_suf}Listeye filtre uygulanmayacak.')
+            logging(f'{info_suf}Listeye filtre uygulanmayacak.')
         # Filtre isteyip istemediği anlaşılmayınca
         else:
             filter_confirm = False
             print("Tam anlayamadık? Tekrar deneyin.")
-            logging('Kullanıcı soruya cevap veremedi.')
+            logging(f'{imfo_suf}Kullanıcı soruya cevap veremedi.')
         # While döngüsünden çıkmak için.
         if filter_confirm:
             break
@@ -258,11 +258,8 @@ def signature(x):
                     0].text.strip()
                 print(f'{middle_point} List title: {search_listTitle}')
                 # Film sayısını yazdırdık.
-                try:
-                    print(
-                        f'{middle_point} Number of movies: {f_filmsayisi(f_LisLastPageNo())}')
-                except Exception as e:
-                    print(e)
+                print(
+                    f'{middle_point} Number of movies: {f_filmsayisi(f_ListLastPageNo())}')
                 # > Liste oluşturulma tarihi
                 search_listPtime = soup.select(".published time")[0].text
                 # > arrow: https://arrow.readthedocs.io/en/latest/
@@ -285,8 +282,10 @@ def signature(x):
                 logging(
                     f'{info_err_suf}Film sahibi görünür adı ve liste adı istenirken hata oluştu.')
         else:
-            print(
-                f'\n{middle_point} Filename: {csv_name}\n{middle_point} Film sayısı: {dongu_no-1}\n{middle_point} Tüm filmler {csv_name + " dosyasına"} aktarıldı.')
+            print(f'\n{middle_point} Filename: {csv_name}\n{middle_point} Film sayısı: {dongu_no-1}\n{middle_point} Tüm filmler ', end="")
+            cprint(csv_name, 'yellow', attrs=[
+                   'blink'], end=" dosyasına aktarıldı.\n")
+
             # Seçili olan filtreyi yazdırdık.
             try:
                 search_selected_decadeyear = current_soup.select(
@@ -303,12 +302,12 @@ def signature(x):
             except:
                 logging(f'{info_err_suf}Film filtre bilgileri alınamadı..')
 
-        log = 'İmza yazdırma işlemleri tamamlandı.'
+        log = f'{info_suf}İmza yazdırma işlemleri tamamlandı.'
     except:
         print('İmza seçimi başarısız.')
-        log = 'İmza yüklenemedi. Program yine de devam etmeyi deneyecek.'
+        log = f'{info_err_suf}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.'
     finally:
-        logging(info_err_suf + log)
+        logging(log)
 
 
 def dir_check(l, e):
@@ -343,13 +342,17 @@ def countrooms(r_article):
         print('Sayım işlemi başarısız.')
 
 
-def logging(r_message):
+def logging(r_message, r_loglocation=None):
     try:
         f = open(open_log, "a")
         f.writelines(f'{r_message}\n')
         f.close()
-    except:
-        print('Loglama işlemi başarısız.')
+    except Exception as e:
+        if r_loglocation is not None:
+            print(
+                f'Loglama işlemi {r_loglocation} konumunda {e} nedeniyle başarısız.')
+        else:
+            print(f'Loglama işlemi {e} nedeniyle başarısız.')
 
 
 def readpage(r_url):
@@ -397,11 +400,13 @@ def check_user():
     try:
         user_displayname = visit_profile.select(".title-1")[0].text
         print(f'    {colored("Found it: ", color="green")}{user_displayname}')
-        logging(f'{info_suf}{user_name} kullanıcısı bulundu: {user_displayname}')
+        logging(
+            f'{info_suf}{user_name} kullanıcısı bulundu: {str(user_displayname)}', check_user.__name__)
         user_available = True
     except:
         print(colored('    Kullanıcı bulunamadı. Tekrar deneyin.', color="red"))
-        logging(f'{info_suf}{user_name} kullanıcısı bulunamadı.')
+        logging(f'{info_suf}{user_name} kullanıcısı bulunamadı.',
+                check_user.__name__)
         user_available = False
     finally:
         return user_available
@@ -448,7 +453,7 @@ def check_user_list():
         return c_list_available, c_url
 
 
-def f_LisLastPageNo():  # Listenin son sayfasını öğren
+def f_ListLastPageNo():  # Listenin son sayfasını öğren
     try:
         # > Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al.
         # > Son'linin içindeki bağlantının metnini çektik. Bu bize kaç sayfalı bir listemiz olduğunuz verecek.
@@ -547,7 +552,6 @@ while True:
 # approved_list_url https://letterboxd.com/username/list/listname/
 pure_url = f'{approved_list_url}detail/'
 soup = readpage(pure_url)
-
 # Filtrelerin çekilmesi ve domaine uygulanması
 all_filtres, w_filter, filtres_msg, filter_empty_items = filtre_sor()
 # Filtreler varsa URL'e işleniyor
@@ -562,9 +566,9 @@ ent = input(
 if ent == "":
     print(colored("    Liste bilgilerini onayladınız.", color="green"))
     logging(f'{info_suf}Saf sayfaya erişim başlatılıyor.')
-    # > Burada pure_url ile liste sayfa sayısını elde ediyoruz
-    lastPage_No = f_LisLastPageNo()
-
+    # > Soupta artık filtreli adresin bilgiler var.
+    soup = readpage(pure_url+all_filtres)
+    lastPage_No = f_ListLastPageNo()
     # Export klasörünün kontrolü
     dir_check(False, exdir_name)
     # Konumda klasör yoksa dosya oluşturmayacaktır.
