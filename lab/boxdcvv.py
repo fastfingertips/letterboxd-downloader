@@ -2,6 +2,7 @@ import sys
 import csv
 import requests
 import arrow
+import json
 from datetime import datetime, timedelta, date, timezone
 from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
@@ -15,29 +16,33 @@ except:
     from labs.termcolor110.termcolor import colored, cprint
 
 
-# > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
-os.system('color & cls')
-# Hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için.
-run_time = datetime.now().strftime('%d%m%Y%H%M%S')
-print(f'[{colored("#", color="yellow")}] Session hash: ', end="")
-cprint(run_time, 'yellow', attrs=['blink'])
-"""
-print(colored("grey", color="grey"))
-print(colored("red", color="red"))
-print(colored("green", color="green"))
-print(colored("yellow", color="yellow"))
-print(colored("blue", color="blue"))
-print(colored("magenta", color="magenta"))
-print(colored("cyan", color="cyan"))
-print(colored("white", color="white"))
-"""
-# Mesajlar, Log Mesaj atamaları
-user_input_green = f'[{colored(">", color="green")}]'
-middle_point = '[' + colored(u"\u00B7", color="cyan") + ']'
-error_suf = f'[{colored("!", color="red")}]'
-info_suf = "Bilgi: "
-info_err_suf = "Hata: "
-cancel_log = "Bilgileri doğrulamadığınız için oturum iptal edildi."
+def settings_set():
+    if os.path.exists('settings.json'):
+        while True:
+            try:
+                with open("settings.json") as jsonFile:
+                    jsonObject = json.load(jsonFile)
+                    log_dir_name = jsonObject['log_dir']
+                    export_dir_name = jsonObject['export_dir']
+                    break
+            except Exception as except_msg:
+                print(f'Ayarlarınız {except_msg} nedeniyle alınamadı.')
+    else:
+        while True:
+            try:
+                print('Ayar dosyası bulunamadı. Lütfen gerekli bilgileri girin.')
+                log_dir_name = input('Log directory Name: ')
+                export_dir_name = input('Export directory Name: ')
+                settings_dict = {
+                    'log_dir': log_dir_name,
+                    'export_dir': export_dir_name,
+                }
+                with open('settings.json', 'w') as json_file:
+                    json.dump(settings_dict, json_file)
+                break
+            except Exception as except_msg:
+                print(f'Ayarlarınız {except_msg} nedeniyle kaydedilemedi.')
+    return log_dir_name, export_dir_name
 
 
 def test_pause():
@@ -48,14 +53,14 @@ def filtre_sor():
     # Filter req
     while True:
         filter_yn = input(
-            f'{user_input_green} Listeye filtre uygulanacak mı? [{colored("Y", color="green")}/{colored("N", color="red")}]: ').lower()
+            f'{uInput_cmd_suf} Listeye filtre uygulanacak mı? [{colored("Y", color="green")}/{colored("N", color="red")}]: ').lower()
         if filter_yn == "y":
             w_filter = True
-            logging(f'{info_suf}Listeye filtre uygulanacak.')
+            logging(f'{info_log_suf}Listeye filtre uygulanacak.')
             filter_empty_items = 0
             while True:
                 decadeyear_dory = input(
-                    f'\n{user_input_green} Want Decade or Year filter? [{colored("D", color="green")}/{colored("Y", color="green")}/{colored("N", color="red")}]: ').lower()
+                    f'\n{uInput_cmd_suf} Want Decade or Year filter? [{colored("D", color="green")}/{colored("Y", color="green")}/{colored("N", color="red")}]: ').lower()
                 if decadeyear_dory == "d":
                     # Çekmek yerine ürettik.
                     decade_year = 1870  # min decade year
@@ -67,17 +72,17 @@ def filtre_sor():
                         # blank = ' ' if i in range(10) else ''
                         blank = ' ' if i < 10 else ''
                         print(
-                            f'[{colored(decade_num, color="blue")}] {blank}{decade_year}s')
+                            f'[{colored(decade_num, color="cyan")}] {blank}{decade_year}s')
                         decade_years.append(int(decade_year))
                         decade_year += 10
                         decade_nums.append(int(decade_num))
                         decade_num += 1
                     while True:
                         i_decadeyear = int(input(
-                            f'{user_input_green} Decade [{colored("Num", color="blue")}]: '))
+                            f'{uInput_cmd_suf} Decade [{colored("Num", color="cyan")}]: '))
                         if i_decadeyear >= min(decade_nums) and i_decadeyear <= max(decade_nums):
                             print(
-                                f'    {colored("Selected:", color="green")} [{colored(i_decadeyear, color="blue")}]: {decade_years[i_decadeyear]}s\n')
+                                f'    {colored("Selected:", color="green")} [{colored(i_decadeyear, color="cyan")}]: {decade_years[i_decadeyear]}s\n')
                             msg_decadeyear = f'  \u25E6 Decade:  [{i_decadeyear}]: {decade_years[i_decadeyear]}s\n'
                             w_decadeyear = f"/decade/{decade_years[i_decadeyear]}s"
                             decadeyear_confirm = True
@@ -88,7 +93,7 @@ def filtre_sor():
                 elif decadeyear_dory == "y":
                     while True:
                         i_decadeyear = int(
-                            input(f'{user_input_green} Year [{colored("1870", color="blue")}-{colored("2029", color="blue")}]: '))
+                            input(f'{uInput_cmd_suf} Year [{colored("1870", color="cyan")}-{colored("2029", color="blue")}]: '))
                         msg_decadeyear = f'Year: {i_decadeyear}\n'
                         w_decadeyear = f"/year/{i_decadeyear}"
                         decadeyear_confirm = True
@@ -115,7 +120,7 @@ def filtre_sor():
                     break
             while True:
                 genre_dory = input(
-                    f'{user_input_green} Want genre filter? [Y/N]: ').lower()
+                    f'{uInput_cmd_suf} Want genre filter? [Y/N]: ').lower()
                 if genre_dory == "y":
 
                     # Buradaki 3 bizim 4.ula gitmemize yarayacak
@@ -140,7 +145,7 @@ def filtre_sor():
                     break
             while True:
                 sortby_dory = input(
-                    f'{user_input_green} Want Sort By filter? [Y/N]:').lower()
+                    f'{uInput_cmd_suf} Want Sort By filter? [Y/N]:').lower()
                 if sortby_dory == "y":
                     # Buradaki 1 bizim 2. ula gitmemize yarayacak.
                     sortby_filter_name, sortby_filter_adress, filter_num = search_filters(
@@ -171,12 +176,12 @@ def filtre_sor():
             msg_decadeyear, msg_genre, msg_sortby = '', '', ''
             filter_empty_items = 3
             filter_confirm = True
-            logging(f'{info_suf}Listeye filtre uygulanmayacak.')
+            logging(f'{info_log_suf}Listeye filtre uygulanmayacak.')
         # Filtre isteyip istemediği anlaşılmayınca
         else:
             filter_confirm = False
             print("Tam anlayamadık? Tekrar deneyin.")
-            logging(f'{imfo_suf}Kullanıcı soruya cevap veremedi.')
+            logging(f'{info_log_suf}Kullanıcı soruya cevap veremedi.')
         # While döngüsünden çıkmak için.
         if filter_confirm:
             break
@@ -227,7 +232,7 @@ def search_filters(ul_num):
                 pass
         current_filter_number += 1
     # Kullanıcı bir eleman seçer
-    filter_num = int(input(f'{user_input_green} Filter [Num]: '))
+    filter_num = int(input(f'{uInput_cmd_suf} Filter [Num]: '))
     print(f'Selected: [{filter_num}]: {filter_names[filter_num]}\n')
     return filter_names[filter_num], filter_adresses[filter_num], filter_num
 
@@ -242,29 +247,29 @@ def signature(x):
             print(colored('Your Inputs;', color="yellow"))
             if w_filter and filter_empty_items < 3:
                 print(
-                    f'{middle_point} User: {user_name}\n{middle_point} List: {list_name}\n{middle_point} Filtre uygulaması: Var\n{filtres_msg}')
+                    f'{mPoint_cmd_suf} User: {user_name}\n{mPoint_cmd_suf} List: {list_name}\n{mPoint_cmd_suf} Filtre uygulaması: Var\n{filtres_msg}')
             else:
                 print(
-                    f'{middle_point} User: {user_name}\n{middle_point} List: {list_name}\n{middle_point} Filtre uygulaması: Yok\n')
+                    f'{mPoint_cmd_suf} User: {user_name}\n{mPoint_cmd_suf} List: {list_name}\n{mPoint_cmd_suf} Filtre uygulaması: Yok\n')
 
             # Liste sayfasından bilgiler çekmek.
             try:
                 print(colored('List info;', color="yellow"))
                 # > Liste sahibin ismini çektik
                 search_listBy = soup.select("[itemprop=name]")[0].text
-                print(f'{middle_point} List by {search_listBy} (@{user_name})')
+                print(f'{mPoint_cmd_suf} List by {search_listBy} (@{user_name})')
                 # > Liste başlığının ismini çektik
                 search_listTitle = soup.select("[itemprop=title]")[
                     0].text.strip()
-                print(f'{middle_point} List title: {search_listTitle}')
+                print(f'{mPoint_cmd_suf} List title: {search_listTitle}')
                 # Film sayısını yazdırdık.
                 print(
-                    f'{middle_point} Number of movies: {f_filmsayisi(f_ListLastPageNo())}')
+                    f'{mPoint_cmd_suf} Number of movies: {f_filmsayisi(f_ListLastPageNo())}')
                 # > Liste oluşturulma tarihi
                 search_listPtime = soup.select(".published time")[0].text
                 # > arrow: https://arrow.readthedocs.io/en/latest/
                 listPtime = arrow.get(search_listPtime)
-                print(f'{middle_point} Published: {listPtime.humanize()}')
+                print(f'{mPoint_cmd_suf} Published: {listPtime.humanize()}')
                 # < or: print(f'Published: {listPtime.humanize(granularity=["year","month", "day", "hour", "minute"])}')
                 # > utcnow: https://newbedev.com/python-utc-datetime-object-s-iso-format-doesn-t-include-z-zulu-or-zero-offset
                 # now_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -277,13 +282,13 @@ def signature(x):
                 except:
                     msg_Utime = 'No editing'
                 finally:
-                    print(f'{middle_point} Updated: {msg_Utime}')
+                    print(f'{mPoint_cmd_suf} Updated: {msg_Utime}')
             except:
                 logging(
-                    f'{info_err_suf}Film sahibi görünür adı ve liste adı istenirken hata oluştu.')
+                    f'{err_log_suf}Film sahibi görünür adı ve liste adı istenirken hata oluştu.')
         else:
-            print(f'\n{middle_point} Filename: {csv_name}\n{middle_point} Film sayısı: {dongu_no-1}\n{middle_point} Tüm filmler ', end="")
-            cprint(csv_name, 'yellow', attrs=[
+            print(f'\n{mPoint_cmd_suf} Filename: {csv_name}\n{mPoint_cmd_suf} Film sayısı: {dongu_no-1}\n{mPoint_cmd_suf} Tüm filmler ', end="")
+            cprint(open_csv, 'yellow', attrs=[
                    'blink'], end=" dosyasına aktarıldı.\n")
 
             # Seçili olan filtreyi yazdırdık.
@@ -291,21 +296,21 @@ def signature(x):
                 search_selected_decadeyear = current_soup.select(
                     ".smenu-subselected")[3].text
                 print(
-                    f'{middle_point} Filtered as {search_selected_decadeyear} movies only was done by')
+                    f'{mPoint_cmd_suf} Filtered as {search_selected_decadeyear} movies only was done by')
                 search_selected_genre = current_soup.select(
                     ".smenu-subselected")[2].text
                 print(
-                    f'{middle_point} Filtered as {search_selected_genre} only movies')
+                    f'{mPoint_cmd_suf} Filtered as {search_selected_genre} only movies')
                 search_selected_sortby = current_soup.select(
                     ".smenu-subselected")[0].text
-                print(f'{middle_point} Movies sorted by {search_selected_sortby}')
+                print(f'{mPoint_cmd_suf} Movies sorted by {search_selected_sortby}')
             except:
-                logging(f'{info_err_suf}Film filtre bilgileri alınamadı..')
+                logging(f'{err_log_suf}Film filtre bilgileri alınamadı..')
 
-        log = f'{info_suf}İmza yazdırma işlemleri tamamlandı.'
+        log = f'{info_log_suf}İmza yazdırma işlemleri tamamlandı.'
     except:
         print('İmza seçimi başarısız.')
-        log = f'{info_err_suf}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.'
+        log = f'{err_log_suf}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.'
     finally:
         logging(log)
 
@@ -317,18 +322,18 @@ def dir_check(l, e):
     if l:
         # Log Dir
         if os.path.exists(l):
-            logging(f'{info_suf}{l} klasörü halihazırda var.')
+            logging(f'{info_log_suf}{l} klasörü halihazırda var.')
         else:
             os.makedirs(l)
-            logging(f'{info_suf}{l} klasörü oluşturuldu')
+            logging(f'{info_log_suf}{l} klasörü oluşturuldu')
             # Oluşturulmaz ise bir izin hatası olabilir
     if e:
         # Exports Dir
         if os.path.exists(e):
-            logging(f'{info_suf}{e} klasörü halihazırda var.')
+            logging(f'{info_log_suf}{e} klasörü halihazırda var.')
         else:
             os.makedirs(e)
-            logging(f'{info_suf}{e} klasörü oluşturuldu')
+            logging(f'{info_log_suf}{e} klasörü oluşturuldu')
             # Oluşturulmaz ise bir izin hatası olabilir
 
 
@@ -342,6 +347,7 @@ def countrooms(r_article):
         print('Sayım işlemi başarısız.')
 
 
+# None: Kullanıcı log lokasyonunu belirtmese de olur
 def logging(r_message, r_loglocation=None):
     try:
         f = open(open_log, "a")
@@ -360,11 +366,11 @@ def readpage(r_url):
         page_url = requests.get(r_url)
         # > Sayfa kodları çekildi.
         soup = BeautifulSoup(page_url.content.decode('utf-8'), 'html.parser')
-        logging(f'{info_suf}Trying connect to [{r_url}]')
+        logging(f'{info_log_suf}Trying connect to [{r_url}]')
         return soup
     except:
         print('Connection to address failed.')
-        logging(f'{info_err_suf}Connection to address failed [{r_url}]')
+        logging(f'{err_log_suf}Connection to address failed [{r_url}]')
 
 
 # Filmleri çekiyoruz yazıyoruz
@@ -401,11 +407,11 @@ def check_user():
         user_displayname = visit_profile.select(".title-1")[0].text
         print(f'    {colored("Found it: ", color="green")}{user_displayname}')
         logging(
-            f'{info_suf}{user_name} kullanıcısı bulundu: {str(user_displayname)}', check_user.__name__)
+            f'{info_log_suf}{user_name} kullanıcısı bulundu: {str(user_displayname)}', check_user.__name__)
         user_available = True
     except:
         print(colored('    Kullanıcı bulunamadı. Tekrar deneyin.', color="red"))
-        logging(f'{info_suf}{user_name} kullanıcısı bulunamadı.',
+        logging(f'{info_log_suf}{user_name} kullanıcısı bulunamadı.',
                 check_user.__name__)
         user_available = False
     finally:
@@ -422,7 +428,7 @@ def check_user_list():
             # Meta etiketindeki bilgi sorgulanır. Sayfanın liste olup olmadığı anlaşışılır
             if meta_test == "letterboxd:list":
                 logging(
-                    f'{info_suf}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {meta_test}')
+                    f'{info_log_suf}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {meta_test}')
                 # Liste ismini alıyoruz.
                 c_listname = visit_list.find(
                     'meta', property="og:title").attrs['content']
@@ -431,7 +437,7 @@ def check_user_list():
                 c_url = visit_list.find(
                     'meta', property="og:url").attrs['content']
                 if c_url == visit_list_url:
-                    logging(f'{info_suf}Liste adresi yönlendime içermiyor.')
+                    logging(f'{info_log_suf}Liste adresi yönlendime içermiyor.')
                     c_url = visit_list_url
                 else:
                     print(
@@ -440,7 +446,8 @@ def check_user_list():
                         f'    {colored(visit_list_url, color="yellow")} adresini değiştirdik.')
                     print(
                         f'    {colored(c_url, color="green")} adresinden devam ediyoruz.')
-                logging(f'{info_suf}{list_name} listesi bulundu: {c_listname}')
+                logging(
+                    f'{info_log_suf}{list_name} listesi bulundu: {c_listname}')
                 c_list_available = True
         except:
             print("    Bu kullanıcının böyle bir listesi yok.")
@@ -457,20 +464,20 @@ def f_ListLastPageNo():  # Listenin son sayfasını öğren
     try:
         # > Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al.
         # > Son'linin içindeki bağlantının metnini çektik. Bu bize kaç sayfalı bir listemiz olduğunuz verecek.
-        logging(f'{info_suf}Listedeki sayfa sayısı denetleniyor..')
+        logging(f'{info_log_suf}Listedeki sayfa sayısı denetleniyor..')
         lastPage_No = soup.find(
             'div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text
         logging(
-            f'{info_suf}Liste birden çok sayfaya ({lastPage_No}) sahiptir.')
+            f'{info_log_suf}Liste birden çok sayfaya ({lastPage_No}) sahiptir.')
         f_filmsayisi(lastPage_No)
     except:
         # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
         lastPage_No = 1
         f_filmsayisi(lastPage_No)
-        logging(f'{info_suf}Birden fazla sayfa yok, bu liste tek sayfadır.')
+        logging(f'{info_log_suf}Birden fazla sayfa yok, bu liste tek sayfadır.')
     finally:
         logging(
-            f'{info_suf}Saf sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPage_No} olduğu öğrenildi.')
+            f'{info_log_suf}Saf sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPage_No} olduğu öğrenildi.')
         return lastPage_No
 
 
@@ -486,11 +493,11 @@ def f_filmsayisi(r_lastPage_No):  # Film sayısını öğreniyoruz
         # > Toplam film sayısını belirlemek.
         film_sayisi = ((int(r_lastPage_No)-1)*100)+lastpage_fcount
         logging(
-            f"{info_suf}Listedeki film sayısı {film_sayisi} olarak bulunmuştur.")
+            f"{info_log_suf}Listedeki film sayısı {film_sayisi} olarak bulunmuştur.")
         return film_sayisi
     except:
         print(f'Film sayısını elde ederken hata.')
-        logging(f'{info_err_suf}Film sayısı elde edilirkren hata oluştu.s')
+        logging(f'{err_log_suf}Film sayısı elde edilirkren hata oluştu.s')
 
 
 def rst():  # Porgramı yeniden başlat
@@ -501,23 +508,40 @@ def rst():  # Porgramı yeniden başlat
     except:
         log = 'Programın yeniden başlatılmaya çalışılması başarısız.'
         print(log)
-        logging(info_err_suf + log)
+        logging(err_log_suf + log)
 
 
-# > Saf domain'in parçalanarak birleştirilmesi
-url_protocol, site_url = "https://", "letterboxd.com/"
-domain = url_protocol + site_url
-# Gerekli dizin ve dosya isimlendirmesi.
-exdir_name, logdir_name, = "exports", "logs"
-# Burada loh dosyasına oturum onaylanana kadar geçici bir isimlendirme atanır.
-open_log = f'{logdir_name}/{run_time}.txt'
-# Log klasörünün kontrolü
-dir_check(logdir_name, False)
+# > Hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için.
+# > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
+os.system('color & cls')
+if 1:
+    # > Saf domain'in parçalanarak birleştirilmesi
+    url_protocol, site_url = "https://", "letterboxd.com/"
+    domain = url_protocol + site_url
+    # Mesajlar, Log Mesaj atamaları
+    uInput_cmd_suf = f'[{colored(">", color="green")}]'
+    mPoint_cmd_suf = '[' + colored(u"\u00B7", color="cyan") + ']'
+    err_cmd_suf = f'[{colored("!", color="red")}]'
+    info_log_suf = "Bilgi: "
+    err_log_suf = "Hata: "
+    cancel_log = "Bilgileri doğrulamadığınız için oturum iptal edildi."
+# > Run time check - Generate session hash
+run_time = datetime.now().strftime('%d%m%Y%H%M%S')
+print(f'[{colored("#", color="yellow")}] Session hash: ', end="")
+cprint(run_time, 'yellow', attrs=['blink'])
+log_dir_name, export_dir_name = settings_set()
+# > Log dosyasının konumunu içeren bir değişken
+open_log = f'{log_dir_name}/{run_time}.txt'
+# > Log klasörünün kontrolü
+dir_check(log_dir_name, False)
+print(f'[{colored("#", color="yellow")}] Log location created: ', end="")
+cprint(open_log, 'yellow', attrs=['blink'])
+
 
 while True:
     # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
     user_name = str(
-        input(f'{user_input_green} Username(Not display name): ')).lower()
+        input(f'{uInput_cmd_suf} Username(Not display name): ')).lower()
     # Kullanıcı mevcutmu bakıyoruz
     visit_profile = readpage(f'{domain}{user_name}')
     user_available = check_user()
@@ -528,16 +552,21 @@ while True:
 csv_name = f"{user_name}-({run_time})"
 # Artık log ismi karışmaması için log dosyasının ismini değiştik.
 # Os rename ile dizin belirterek dosya taşınabilir
-approved_session = f'{logdir_name}/{csv_name}.txt'
-os.rename(open_log, approved_session)
-open_log = approved_session
-open_csv = f'{exdir_name}/{csv_name}.csv'
+try:
+    approved_session = f'{log_dir_name}/{csv_name}.txt'
+    os.rename(open_log, approved_session)
+    open_log = approved_session
+    print(f'[{colored("#", color="yellow")}] Username added to log file: ', end="")
+    cprint(open_log, 'yellow', attrs=['blink'])
+except Exception as except_msg:
+    print(f"Log dosyasının ismi {except_msg} nedeniyle değiştirilemedi.")
+open_csv = f'{export_dir_name}/{csv_name}.csv'
 
 
 while True:
     # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
     list_name = str(
-        input(f'{user_input_green} Listname(Domain): ')).lower()
+        input(f'{uInput_cmd_suf} Listname(Domain): ')).lower()
     # Kullanıcının böyle bir listesi mevcutmu bakıyoruz
     visit_list_url = f'{domain}{user_name}/list/{list_name}/'
     visit_list = readpage(visit_list_url)
@@ -560,17 +589,17 @@ print(f'url: {url}')
 # Karşılama mesajı, kullanıcının girdiği bilgleri ve girilen bilgilere dayanarak listenin bilgilerini yazdırır.
 signature(1)
 # > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
-print(f'{middle_point} Link: {pure_url}{all_filtres}')
+print(f'{mPoint_cmd_suf} Link: {pure_url}{all_filtres}')
 ent = input(
-    f'\n{user_input_green} Press enter to confirm the entered information. (Enter)')
+    f'\n{uInput_cmd_suf} Press enter to confirm the entered information. (Enter)')
 if ent == "":
     print(colored("    Liste bilgilerini onayladınız.", color="green"))
-    logging(f'{info_suf}Saf sayfaya erişim başlatılıyor.')
+    logging(f'{info_log_suf}Saf sayfaya erişim başlatılıyor.')
     # > Soupta artık filtreli adresin bilgiler var.
     soup = readpage(pure_url+all_filtres)
     lastPage_No = f_ListLastPageNo()
     # Export klasörünün kontrolü
-    dir_check(False, exdir_name)
+    dir_check(False, export_dir_name)
     # Konumda klasör yoksa dosya oluşturmayacaktır.
     with open(f'{open_csv}', 'w', newline='', encoding="utf-8") as file:
         writer = csv.writer(file)
@@ -585,12 +614,12 @@ if ent == "":
             dongu_no = pullfilms(dongu_no, current_soup)
         # Açtığımız dosyayı manuel kapattık
         file.close()
-    logging(f'{info_suf}Success!')
+    logging(f'{info_log_suf}Success!')
     signature(0)
     rst()
 else:
     print(cancel_log)
-    logging(info_suf + cancel_log)
+    logging(info_log_suf + cancel_log)
     rst()
 
 
