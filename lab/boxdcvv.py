@@ -31,9 +31,13 @@ print(colored("magenta", color="magenta"))
 print(colored("cyan", color="cyan"))
 print(colored("white", color="white"))
 """
+# Mesajlar, Log Mesaj atamaları
 user_input_green = f'[{colored(">", color="green")}]'
 middle_point = '[' + colored(u"\u00B7", color="cyan") + ']'
 error_suf = f'[{colored("!", color="red")}]'
+info_suf = "Bilgi: "
+info_err_suf = "Hata: "
+cancel_log = "Bilgileri doğrulamadığınız için oturum iptal edildi."
 
 
 def test_pause():
@@ -167,7 +171,7 @@ def filtre_sor():
             msg_decadeyear, msg_genre, msg_sortby = '', '', ''
             filter_empty_items = 3
             filter_confirm = True
-            logging('    Listeye filtre uygulanmayacak.')
+            logging('{info_suf}Listeye filtre uygulanmayacak.')
         # Filtre isteyip istemediği anlaşılmayınca
         else:
             filter_confirm = False
@@ -253,6 +257,12 @@ def signature(x):
                 search_listTitle = soup.select("[itemprop=title]")[
                     0].text.strip()
                 print(f'{middle_point} List title: {search_listTitle}')
+                # Film sayısını yazdırdık.
+                try:
+                    print(
+                        f'{middle_point} Number of movies: {f_filmsayisi(f_LisLastPageNo())}')
+                except Exception as e:
+                    print(e)
                 # > Liste oluşturulma tarihi
                 search_listPtime = soup.select(".published time")[0].text
                 # > arrow: https://arrow.readthedocs.io/en/latest/
@@ -273,7 +283,7 @@ def signature(x):
                     print(f'{middle_point} Updated: {msg_Utime}')
             except:
                 logging(
-                    'Film sahibi görünür adı ve liste adı istenirken hata oluştu.')
+                    f'{info_err_suf}Film sahibi görünür adı ve liste adı istenirken hata oluştu.')
         else:
             print(
                 f'\n{middle_point} Filename: {csv_name}\n{middle_point} Film sayısı: {dongu_no-1}\n{middle_point} Tüm filmler {csv_name + " dosyasına"} aktarıldı.')
@@ -291,25 +301,14 @@ def signature(x):
                     ".smenu-subselected")[0].text
                 print(f'{middle_point} Movies sorted by {search_selected_sortby}')
             except:
-                logging("Film filtre bilgileri alınamadı..")
+                logging(f'{info_err_suf}Film filtre bilgileri alınamadı..')
 
         log = 'İmza yazdırma işlemleri tamamlandı.'
     except:
         print('İmza seçimi başarısız.')
         log = 'İmza yüklenemedi. Program yine de devam etmeyi deneyecek.'
     finally:
-        logging(log)
-
-
-def rst():
-    try:
-        os.system('echo Press and any key to reboot & pause >nul')
-        os.system('echo Confirm reboot press any key again & pause >nul')
-        os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
-    except:
-        log = 'Programın yeniden başlatılmaya çalışılması başarısız.'
-        print(log)
-        logging(log)
+        logging(info_err_suf + log)
 
 
 def dir_check(l, e):
@@ -319,18 +318,18 @@ def dir_check(l, e):
     if l:
         # Log Dir
         if os.path.exists(l):
-            logging(f'{l} klasörü halihazırda var.')
+            logging(f'{info_suf}{l} klasörü halihazırda var.')
         else:
             os.makedirs(l)
-            logging(f'{l} klasörü oluşturuldu')
+            logging(f'{info_suf}{l} klasörü oluşturuldu')
             # Oluşturulmaz ise bir izin hatası olabilir
     if e:
         # Exports Dir
         if os.path.exists(e):
-            logging(f'{e} klasörü halihazırda var.')
+            logging(f'{info_suf}{e} klasörü halihazırda var.')
         else:
             os.makedirs(e)
-            logging(f'{e} klasörü oluşturuldu')
+            logging(f'{info_suf}{e} klasörü oluşturuldu')
             # Oluşturulmaz ise bir izin hatası olabilir
 
 
@@ -353,34 +352,19 @@ def logging(r_message):
         print('Loglama işlemi başarısız.')
 
 
-def f_filmsayisi(r_lastPage_No):
-    try:
-        # > Son sayfaya bağlanmak için bir ön hazırlık.
-        lastsoup = readpage(f'{url}{r_lastPage_No}')
-        # > Sayfa kodları çekildi.
-        lastarticles = lastsoup.find('ul', attrs={
-            'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
-        lastpage_fcount = countrooms(lastarticles)
-        # < Film sayısı öğrenildi.
-        # > Toplam film sayısını belirlemek.
-        film_sayisi = ((int(r_lastPage_No)-1)*100)+lastpage_fcount
-        logging(f"Bilgi: Film sayısı {film_sayisi} olarak bulunmuştur.")
-        return film_sayisi
-    except:
-        print('Film sayısını elde ederken hata.')
-
-
 def readpage(r_url):
     try:
         page_url = requests.get(r_url)
         # > Sayfa kodları çekildi.
         soup = BeautifulSoup(page_url.content.decode('utf-8'), 'html.parser')
-        logging(f'Trying connect to: {r_url}')
+        logging(f'{info_suf}Trying connect to [{r_url}]')
         return soup
     except:
         print('Connection to address failed.')
+        logging(f'{info_err_suf}Connection to address failed [{r_url}]')
 
 
+# Filmleri çekiyoruz yazıyoruz
 def pullfilms(r_count, r_soup):
     try:
         # > Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
@@ -388,7 +372,6 @@ def pullfilms(r_count, r_soup):
             'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
         dongu_no = r_count
         # > Filmleri ekrana ve dosyaya yazdırma işlemleri
-        print("\nListedeki filmler:")
         for rooms in articles:
             # Oda ismini çektik
             film = rooms.find(
@@ -414,11 +397,11 @@ def check_user():
     try:
         user_displayname = visit_profile.select(".title-1")[0].text
         print(f'    {colored("Found it: ", color="green")}{user_displayname}')
-        logging(f'{user_name} kullanıcısı bulundu: {user_displayname}')
+        logging(f'{info_suf}{user_name} kullanıcısı bulundu: {user_displayname}')
         user_available = True
     except:
         print(colored('    Kullanıcı bulunamadı. Tekrar deneyin.', color="red"))
-        logging(f'{user_name} kullanıcısı bulunamadı.')
+        logging(f'{info_suf}{user_name} kullanıcısı bulunamadı.')
         user_available = False
     finally:
         return user_available
@@ -434,7 +417,7 @@ def check_user_list():
             # Meta etiketindeki bilgi sorgulanır. Sayfanın liste olup olmadığı anlaşışılır
             if meta_test == "letterboxd:list":
                 logging(
-                    f'Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {meta_test}')
+                    f'{info_suf}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {meta_test}')
                 # Liste ismini alıyoruz.
                 c_listname = visit_list.find(
                     'meta', property="og:title").attrs['content']
@@ -443,7 +426,7 @@ def check_user_list():
                 c_url = visit_list.find(
                     'meta', property="og:url").attrs['content']
                 if c_url == visit_list_url:
-                    logging('Liste adresi yönlendime içermiyor.')
+                    logging(f'{info_suf}Liste adresi yönlendime içermiyor.')
                     c_url = visit_list_url
                 else:
                     print(
@@ -452,7 +435,7 @@ def check_user_list():
                         f'    {colored(visit_list_url, color="yellow")} adresini değiştirdik.')
                     print(
                         f'    {colored(c_url, color="green")} adresinden devam ediyoruz.')
-                logging(f'{list_name} listesi bulundu: {c_listname}')
+                logging(f'{info_suf}{list_name} listesi bulundu: {c_listname}')
                 c_list_available = True
         except:
             print("    Bu kullanıcının böyle bir listesi yok.")
@@ -463,6 +446,57 @@ def check_user_list():
         c_list_available = False
     finally:
         return c_list_available, c_url
+
+
+def f_LisLastPageNo():  # Listenin son sayfasını öğren
+    try:
+        # > Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al.
+        # > Son'linin içindeki bağlantının metnini çektik. Bu bize kaç sayfalı bir listemiz olduğunuz verecek.
+        logging(f'{info_suf}Listedeki sayfa sayısı denetleniyor..')
+        lastPage_No = soup.find(
+            'div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text
+        logging(
+            f'{info_suf}Liste birden çok sayfaya ({lastPage_No}) sahiptir.')
+        f_filmsayisi(lastPage_No)
+    except:
+        # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
+        lastPage_No = 1
+        f_filmsayisi(lastPage_No)
+        logging(f'{info_suf}Birden fazla sayfa yok, bu liste tek sayfadır.')
+    finally:
+        logging(
+            f'{info_suf}Saf sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPage_No} olduğu öğrenildi.')
+        return lastPage_No
+
+
+def f_filmsayisi(r_lastPage_No):  # Film sayısını öğreniyoruz
+    try:
+        # > Son sayfaya bağlanmak için bir ön hazırlık.
+        lastsoup = readpage(f'{url}{r_lastPage_No}')
+        # > Sayfa kodları çekildi.
+        lastarticles = lastsoup.find('ul', attrs={
+            'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
+        lastpage_fcount = countrooms(lastarticles)
+        # < Film sayısı öğrenildi.
+        # > Toplam film sayısını belirlemek.
+        film_sayisi = ((int(r_lastPage_No)-1)*100)+lastpage_fcount
+        logging(
+            f"{info_suf}Listedeki film sayısı {film_sayisi} olarak bulunmuştur.")
+        return film_sayisi
+    except:
+        print(f'Film sayısını elde ederken hata.')
+        logging(f'{info_err_suf}Film sayısı elde edilirkren hata oluştu.s')
+
+
+def rst():  # Porgramı yeniden başlat
+    try:
+        os.system('echo Press and any key to reboot & pause >nul')
+        os.system('echo Confirm reboot press any key again & pause >nul')
+        os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
+    except:
+        log = 'Programın yeniden başlatılmaya çalışılması başarısız.'
+        print(log)
+        logging(info_err_suf + log)
 
 
 # > Saf domain'in parçalanarak birleştirilmesi
@@ -484,6 +518,7 @@ while True:
     user_available = check_user()
     if user_available:
         break
+
 # > Dosya çakışma sorunları için farklı isimler ürettik.
 csv_name = f"{user_name}-({run_time})"
 # Artık log ismi karışmaması için log dosyasının ismini değiştik.
@@ -515,9 +550,9 @@ soup = readpage(pure_url)
 
 # Filtrelerin çekilmesi ve domaine uygulanması
 all_filtres, w_filter, filtres_msg, filter_empty_items = filtre_sor()
+# Filtreler varsa URL'e işleniyor
 url = f'{pure_url}{all_filtres}page/'
 print(f'url: {url}')
-logging(f'Filtreler: {all_filtres}\nFiltre Url\'ye işlendi: {url}')
 # Karşılama mesajı, kullanıcının girdiği bilgleri ve girilen bilgilere dayanarak listenin bilgilerini yazdırır.
 signature(1)
 # > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
@@ -526,29 +561,12 @@ ent = input(
     f'\n{user_input_green} Press enter to confirm the entered information. (Enter)')
 if ent == "":
     print(colored("    Liste bilgilerini onayladınız.", color="green"))
-    # Gerekli klasörlerin kontrolü
+    logging(f'{info_suf}Saf sayfaya erişim başlatılıyor.')
+    # > Burada pure_url ile liste sayfa sayısını elde ediyoruz
+    lastPage_No = f_LisLastPageNo()
+
+    # Export klasörünün kontrolü
     dir_check(False, exdir_name)
-
-    # > Burada pure_url ile liste sayfa sayısını elde ediyoruz ve aşağısında film toplamı sayısını hesaplıyoruz
-    logging('Saf sayfaya erişim başlatılıyor.')
-    try:
-        # > Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al.
-        # > Son'linin içindeki bağlantının metnini çektik. Bu bize kaç sayfalı bir listemiz olduğunuz verecek.
-        logging('Bilgi: Listedeki sayfa sayısı denetleniyor..')
-        lastPage_No = soup.find(
-            'div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text
-        logging(
-            f'Bilgi: Liste birden çok sayfaya {lastPage_No} sayfaya sahiptir.')
-        f_filmsayisi(lastPage_No)
-    except:
-        # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
-        lastPage_No = 1
-        f_filmsayisi(lastPage_No)
-        logging('Bilgi: Birden fazla sayfa yok, bu liste tek sayfadır.')
-    finally:
-        logging(
-            f'Saf sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPage_No} olduğu öğrenildi.')
-
     # Konumda klasör yoksa dosya oluşturmayacaktır.
     with open(f'{open_csv}', 'w', newline='', encoding="utf-8") as file:
         writer = csv.writer(file)
@@ -556,19 +574,19 @@ if ent == "":
         # Filmleri çekiyoruz
         dongu_no = 1
         # x sıfırdan başlıyor
+        print("\nListedeki filmler:")
         for x in range(int(lastPage_No)):
             logging(f'Connecting to: {url}{str(x+1)}')
             current_soup = readpage(f'{url}{str(x+1)}')
             dongu_no = pullfilms(dongu_no, current_soup)
         # Açtığımız dosyayı manuel kapattık
         file.close()
-    logging(f'Success!')
+    logging(f'{info_suf}Success!')
     signature(0)
     rst()
 else:
-    cancel_log = "Bilgileri doğrulamadığınız için oturum iptal edildi."
     print(cancel_log)
-    logging(cancel_log)
+    logging(info_suf + cancel_log)
     rst()
 
 
