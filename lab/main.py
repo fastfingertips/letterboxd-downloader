@@ -62,7 +62,7 @@ def doReadPage(tempUrl): #: Url'si belirtilen saufanın okunup, dom alınması.
         txtLog(f'{preLogInfo}Trying connect to [{tempUrl}]')
         return urlDom
     except:
-        print('Connection to address failed.')
+        print(f'{preBlankCount}Connection to address failed.')
         txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]')
 def doReset():  # Porgramı yeniden başlat
     try:
@@ -214,7 +214,7 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                 txtLog(f'{preLogInfo}{listUrl} listesi bulundu: {currentListName}')
                 currentListAvaliable = True
         except: #: liste imzası olmadığı belirlenir.
-            print(f'{preBlankCount}Bu kullanıcının böyle bir listesi yok.')
+            print(f'{preBlankCount}List not found.')
             currentUrl = ''
             currentListAvaliable = False
     except:
