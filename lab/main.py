@@ -233,7 +233,6 @@ def getUlFilters(tempUlNum): #: Sıralama yöntemlerini çekmek. Genre: 3, Sortb
     currentFilterNumber = 0
     filterNames, filterAdresses = [], [] #: İsimler ve filtreler için boş küme oluşturduk.
     for currentFilter in filtersDom:
-        
         try: #: Seçimin başlığı var mı?
             filter_sub = currentFilter.find('span').text
             print(f'{filter_sub}')
