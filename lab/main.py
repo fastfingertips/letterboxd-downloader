@@ -388,10 +388,9 @@ def cmdPre(s,c): #: Mesaj ön ekleri için kalıp.
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
 os.system('color & cls')
 
-# > Saf domain'in parçalanarak birleştirilmesi
+## Saf domain'in parçalanarak birleştirilmesi
 siteProtocol, siteUrl = "https://", "letterboxd.com/"
 siteDomain = siteProtocol + siteUrl
-
 ## Mesajlar, Log Mesaj atamaları
 # Cmd
 preCmdInput = cmdPre(">","green")
@@ -464,7 +463,6 @@ if ent == "":
     txtLog(f'{preLogInfo}Saf sayfaya erişim başlatılıyor.')
     soup = doReadPage(editedListVisitUrl+allFiltres) #: Verinin çekileceği dom'a filtre ekleniyor.
     lastPageNo = getListLastPageNo()
-    print(type(lastPageNo))
     dirCheck(False, exportDirName) #: Export klasörünün kontrolü.
     with open(f'{open_csv}', 'w', newline='', encoding="utf-8") as file: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
         writer = csv.writer(file)
