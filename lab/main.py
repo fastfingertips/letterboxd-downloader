@@ -28,6 +28,9 @@ def dirCheck(l, e): # l= LOG FILE, e = EXPORT FILE
         else:
             os.makedirs(e)
             txtLog(f'{preLogInfo}{e} klasörü oluşturuldu') #: Oluşturulamaz ise bir izin hatası olabilir.
+    
+    print(f'[{colored("#", color="yellow")}] Log location created: {colored(logFilePath, "yellow", attrs=["blink"])}')
+
 def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
     try:
         # > Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
@@ -50,6 +53,7 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
         return loopCount
     except:
         print('Film bilgilerini elde ederken bir hatayla karşılaşıldı.')
+
 def doReadPage(tempUrl): #: Url'si belirtilen saufanın okunup, dom alınması.
     try:
         urlResponseCode = requests.get(tempUrl)
@@ -86,6 +90,7 @@ def getListLastPageNo():  # Listenin son sayfasını öğren
     finally:
         txtLog(f'{preLogInfo}Sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPageNo} olduğu öğrenildi.')
         return lastPageNo
+
 def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
     try:
         # > Son sayfaya bağlanmak için bir ön hazırlık.
@@ -99,43 +104,9 @@ def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
         txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.")
         return movieCount
     except:
-        print(f'Film sayısını elde ederken hata.')
-        txtLog(f'{preLogErr}Film sayısı elde edilirkren hata oluştu.s')
-def getUlFilters(tempUlNum): #: Sıralama yöntemlerini çekmek. Genre: 3, Sortby: 1
-    # Filtre yöntemlerinden listenin sıralama yöntemleri olan ul etiketini yani 2.sıradaki ul'u seçtik.
-    filtersDom = soup.find_all('ul', attrs={'class': 'smenu-menu'})[tempUlNum].find_all("li") # şu anki dom içinde belirtilen ul içindeki filtreler.
-    currentFilterNumber = 0
-    filterNames, filterAdresses = [], [] #: İsimler ve filtreler için boş küme oluşturduk.
-    for currentFilter in filtersDom:
-        try: #: Seçimin başlığı var mı?
-            filter_sub = currentFilter.find('span').text
-            print(f'{filter_sub}')
-            currentFilterNumber -= 1
-        except: #: Seçimin başlığı yoksa
-            try:
-                filterBlanks = ' ' if currentFilterNumber < 10 else '' #: İlk 10 Liste elemanı için boşluk ayarlar,
-                print(f'[{colored(currentFilterNumber, color="cyan")}]: {filterBlanks}', end=' ') #: ve hizalarız.
-                try: #: Liste ismini almayı deneriz.
-                    currentFilterName = currentFilter.find('a').text
-                except:
-                    currentFilterName = currentFilter.text
-                finally:
-                    filterNames.append(str(currentFilterName))
-                    print(currentFilterName)
-                    print("test")
-                try: #: Liste elemanının adresini almayı deneriz.
-                    currentFilterAdress = currentFilter.find('a')['href']
-                except:
-                    currentFilterAdress = currentFilter.find('href')
-                finally:
-                    filterAdresses.append(str(currentFilterAdress))
-            except:
-                pass
-        currentFilterNumber += 1
-    # Kullanıcı bir eleman seçer
-    filterNum = int(input(f'{preCmdInput} Filter [{colored("Num", "cyan")}]: '))
-    print(f'{preBlankCount}{colored("Selected:", color="green")} [{colored(filterNum, color="cyan")}]: {filterNames[filterNum]}\n')
-    return filterNames[filterNum], filterAdresses[filterNum], filterNum
+        print(f'Error getting movie count.')
+        txtLog(f'{preLogErr}Film sayısı elde edilirkren hata oluştu.')
+
 def settingsFileSet(): #: Ayar dosyası kurulumu.
     if os.path.exists('settings.json'):
         while True:
@@ -163,6 +134,7 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
             except Exception as msgExcept:
                 print(f'Ayarlarınız {msgExcept} nedeniyle kaydedilemedi.')
     return logDirName, exportDirName
+
 def signature(x): #: x: 0 ilk, 1 son
     try:
         if x == True:
@@ -207,6 +179,7 @@ def signature(x): #: x: 0 ilk, 1 son
         log = f'{preLogErr}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.'
     finally:
         txtLog(log)
+
 def txtLog(r_message, r_loglocation=None): #: None: Kullanıcı log lokasyonunu belirtmese de olur.
     try:
         f = open(logFilePath, "a")
@@ -217,6 +190,7 @@ def txtLog(r_message, r_loglocation=None): #: None: Kullanıcı log lokasyonunu 
             print(f'Loglama işlemi {r_loglocation} konumunda {e} nedeniyle başarısız.')
         else:
             print(f'Loglama işlemi {e} nedeniyle başarısız.')
+
 def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
     try:
         # > bu meta etiketinden veri almayı deniyor eğer yoksa liste değil.
@@ -247,8 +221,10 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
         currentListAvaliable = False
     finally:
         return currentListAvaliable, currentUrl
+
 def test_pause(): #: Geliştirici duraklatmaları için kalıp.
     os.system('echo Test için durduruluyor. & pause >nul')
+
 def cmdPre(s,c): #: Mesaj ön ekleri için kalıp.
     return f'[{colored(s, color=c)}]'
 
@@ -256,9 +232,10 @@ def cmdPre(s,c): #: Mesaj ön ekleri için kalıp.
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
 os.system('color & cls')
 
-## Saf domain'in parçalanarak birleştirilmesi
-siteProtocol, siteUrl = "https://", "letterboxd.com/"
-siteDomain = siteProtocol + siteUrl
+
+# siteProtocol, siteUrl = "https://", "letterboxd.com/"     # Saf domain'in parçalanarak birleştirilmesi
+# siteDomain = siteProtocol + siteUrl                       # Saf domain'in parçalanarak birleştirilmesi
+
 ## Mesajlar, Log Mesaj atamaları
 # Cmd
 preCmdInput = cmdPre(">","green")
@@ -269,65 +246,54 @@ preBlankCount = 4*' '
 preLogInfo = "Bilgi: "
 preLogErr = "Hata: "
 # Messages
-msgCancel = "Bilgileri doğrulamadığınız için oturum iptal edildi."
-# Run time check - Generate session hash
-cmdRunTime = datetime.now().strftime('%d%m%Y%H%M%S')
-print(f'[{colored("#", color="yellow")}] Session hash: ', end="") # Oturum için farklı bir isim üretildi.
-cprint(cmdRunTime, 'yellow', attrs=['blink'])
-logDirName, exportDirName = settingsFileSet()
-# Log file path
-logFilePath = f'{logDirName}/{cmdRunTime}.txt'
-dirCheck(logDirName, False) # Log file check
-print(f'[{colored("#", color="yellow")}] Log location created: ', end="")
-cprint(logFilePath, 'yellow', attrs=['blink'])
+msgCancel = "The session was canceled because you did not verify the information."
 
+cmdRunTime = datetime.now().strftime('%d%m%Y%H%M%S') #: Run time check - Generate session hash
+print(f'[{colored("#", color="yellow")}] Session hash: {colored(cmdRunTime, "yellow", attrs=["blink"])}') #: Oturum için farklı bir isim üretildi.
+logDirName, exportDirName = settingsFileSet()
+logFilePath = f'{logDirName}/{cmdRunTime}.txt' #: logging, dircheck
+dirCheck(logDirName, False) # Log file check
 open_csv = f'{exportDirName}/{cmdRunTime}.csv' 
 
 while True:
-    # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
-    listUrl = str(input(f'{preCmdInput} List Url: ')).lower()
-    # Kullanıcının böyle bir listesi mevcutmu bakıyoruz
+    listUrl = str(input(f'{preCmdInput} List Url: ')).lower() #: List url alındı ve str küçültüldü.
     visitUserListUrl = listUrl
     visitList = doReadPage(visitUserListUrl)
-    userListAvailable, approvedListUrl = userListCheck()
-    # Listenin asıl ismi
+    userListAvailable, approvedListUrl = userListCheck() #: Liste mevcutluğu kontrol ediliyor.
     if userListAvailable:
+        editedListVisitUrl = f'{approvedListUrl}detail/' # Guest generate url. approvedListUrl https://letterboxd.com/username/list/listname/
+        soup = doReadPage(editedListVisitUrl)
+        url = f'{editedListVisitUrl}page/'
+        print(f'Url: {url}')
+        # Karşılama mesajı, kullanıcının girdiği bilgleri ve girilen bilgilere dayanarak listenin bilgilerini yazdırır.
+        signature(1)
+        # > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
+        print(f'{preCmdMiddleDot} Link: {editedListVisitUrl}')
+        ent = input(f'\n{preCmdInput} Press enter to confirm the entered information. (Enter)')
+        if ent == "":
+            print(f'{preBlankCount}{colored("List confirmed.", color="green")}')
+            txtLog(f'{preLogInfo}Saf sayfaya erişim başlatılıyor.')
+            soup = doReadPage(editedListVisitUrl) #: Verinin çekileceği dom'a filtre ekleniyor.
+            lastPageNo = getListLastPageNo()
+            dirCheck(False, exportDirName) #: Export klasörünün kontrolü.
+            with open(f'{open_csv}', 'w', newline='', encoding="utf-8") as file: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
+                writer = csv.writer(file)
+                writer.writerow(["Title", "Year"])
+                # Filmleri çekiyoruz
+                loopCount = 1
+                # x sıfırdan başlıyor
+                print("\nListedeki filmler:")
+                for x in range(int(lastPageNo)):
+                    txtLog(f'Connecting to: {url}{str(x+1)}')
+                    currentDom = doReadPage(f'{url}{str(x+1)}')
+                    loopCount = doPullFilms(loopCount, currentDom)
+                # Açtığımız dosyayı manuel kapattık
+                file.close()
+            txtLog(f'{preLogInfo}Success!')
+            signature(0)
+            doReset()
+        else:
+            print(msgCancel)
+            txtLog(preLogInfo + msgCancel)
+            doReset()
         break
-
-editedListVisitUrl = f'{approvedListUrl}detail/' # Guest generate url. approvedListUrl https://letterboxd.com/username/list/listname/
-soup = doReadPage(editedListVisitUrl)
-# Filtrelerin çekilmesi ve domaine uygulanması
-# Filtreler varsa URL'e işleniyor
-url = f'{editedListVisitUrl}page/'
-print(f'url: {url}')
-# Karşılama mesajı, kullanıcının girdiği bilgleri ve girilen bilgilere dayanarak listenin bilgilerini yazdırır.
-signature(1)
-# > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
-print(f'{preCmdMiddleDot} Link: {editedListVisitUrl}')
-ent = input(f'\n{preCmdInput} Press enter to confirm the entered information. (Enter)')
-if ent == "":
-    print(f'{preBlankCount}{colored("Liste bilgilerini onayladınız.", color="green")}')
-    txtLog(f'{preLogInfo}Saf sayfaya erişim başlatılıyor.')
-    soup = doReadPage(editedListVisitUrl) #: Verinin çekileceği dom'a filtre ekleniyor.
-    lastPageNo = getListLastPageNo()
-    dirCheck(False, exportDirName) #: Export klasörünün kontrolü.
-    with open(f'{open_csv}', 'w', newline='', encoding="utf-8") as file: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
-        writer = csv.writer(file)
-        writer.writerow(["Title", "Year"])
-        # Filmleri çekiyoruz
-        loopCount = 1
-        # x sıfırdan başlıyor
-        print("\nListedeki filmler:")
-        for x in range(int(lastPageNo)):
-            txtLog(f'Connecting to: {url}{str(x+1)}')
-            currentDom = doReadPage(f'{url}{str(x+1)}')
-            loopCount = doPullFilms(loopCount, currentDom)
-        # Açtığımız dosyayı manuel kapattık
-        file.close()
-    txtLog(f'{preLogInfo}Success!')
-    signature(0)
-    doReset()
-else:
-    print(msgCancel)
-    txtLog(preLogInfo + msgCancel)
-    doReset()
