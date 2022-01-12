@@ -14,18 +14,6 @@ try: #: Term Color NET/lOCAL
 except:
     from libs.termcolor110.termcolor import colored, cprint
 
-def checkUser(): #: Kullanıcının var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
-    try:
-        userDisplayName = profileVisit.select(".title-1")[0].text
-        print(f'{preBlankCount}{colored("Found it: ", color="green")}{userDisplayName}')
-        txtLog(f'{preLogInfo}{userName} kullanıcısı bulundu: {str(userDisplayName)}', checkUser.__name__)
-        userAvailable = True
-    except:
-        print(f'{preBlankCount}{colored("Kullanıcı bulunamadı. Tekrar deneyin.", color="red")}')
-        txtLog(f'{preLogInfo}{userName} kullanıcısı bulunamadı.', checkUser.__name__)
-        userAvailable = False
-    finally:
-        return userAvailable
 def dirCheck(l, e): # l= LOG FILE, e = EXPORT FILE
     # Buradaki ifler tekli kontrol yapabş-ilmemize yarar. Örneğin e'yi false yollarım ve sadece l'yi çekebilirim.
     if l: #: Log directory
@@ -81,121 +69,7 @@ def doReset():  # Porgramı yeniden başlat
         log = 'Programın yeniden başlatılmaya çalışılması başarısız.'
         print(log)
         txtLog(preLogErr + log)
-def filterPreferences(): #: Filtre seçenekleri.
-    # Filter req
-    while True:
-        filter_yn = input(
-            f'{preCmdInput} Listeye filtre uygulanacak mı? [{colored("Y", color="green")}/{colored("N", color="red")}]: ').lower()
-        if filter_yn == "y":
-            w_filter = True
-            txtLog(f'{preLogInfo}Listeye filtre uygulanacak.')
-            bypassedFilters = 0
-            while True:
-                decadeyear_dory = input(f'\n{preCmdInput} Want {colored("D", color="green")}ecade or {colored("Y", color="green")}ear filter? [{colored("D", color="green")}/{colored("Y", color="green")}/{colored("N", color="red")}]: ').lower()
-                if decadeyear_dory == "d":
-                    # Çekmek yerine ürettik.
-                    decade_year = 1870 #: min decade year
-                    max_multiply = 16 #: 16*10 + 1870
-                    decade_years = []
-                    decade_nums = []
-                    decade_num = 0
-                    for i in range(max_multiply):
-                        filterBlanks = ' ' if i < 10 else '' #: filterBlanks = ' ' if i in range(10) else ''
-                        print(f'[{colored(decade_num, color="cyan")}] {filterBlanks}{decade_year}s')
-                        decade_years.append(int(decade_year))
-                        decade_year += 10
-                        decade_nums.append(int(decade_num))
-                        decade_num += 1
-                    while True:
-                        i_decadeyear = int(input(f'{preCmdInput} Decade [{colored("Num", color="cyan")}]: '))
-                        if i_decadeyear >= min(decade_nums) and i_decadeyear <= max(decade_nums):
-                            print(f'{preBlankCount}{colored("Selected:", color="green")} [{colored(i_decadeyear, color="cyan")}]: {decade_years[i_decadeyear]}s\n')
-                            msgDecadeYear = f'  \u25E6 Decade:  [{i_decadeyear}]: {decade_years[i_decadeyear]}s\n'
-                            w_decadeyear = f"/decade/{decade_years[i_decadeyear]}s"
-                            decadeyear_confirm = True
-                            break
-                        else:
-                            print(f'{preBlankCount}{colored("Belirtilen onyıllardan satır numarasını girmelisiniz.", color="red")}')
-                elif decadeyear_dory == "y":
-                    while True:
-                        i_decadeyear = int(input(f'{preCmdInput} Year [{colored("1870", color="cyan")}-{colored("2029", color="blue")}]: '))
-                        msgDecadeYear = f'Year: {i_decadeyear}\n'
-                        w_decadeyear = f"/year/{i_decadeyear}"
-                        decadeyear_confirm = True
-                        # Linkler 1870 ve 2029'a kadar çalışıyor.
-                        if i_decadeyear >= 1870 and i_decadeyear <= 2029:
-                            print(f'{preBlankCount}{colored("Selected:", color="green")} {i_decadeyear}\n')
-                            break
-                        else:
-                            print(f'{preBlankCount}{colored("Belirtilen aralıkta seçim yapınız.", color="red")}')
-                elif decadeyear_dory == "n":
-                    w_decadeyear = ''
-                    msgDecadeYear = ''
-                    print(f'{preBlankCount}Zaman aralığı filtresi uygulanmayacak.\n')
-                    bypassedFilters = 1
-                    decadeyear_confirm = True
-                else:
-                    print(f'{preBlankCount}{colored("Anlaşılmadı, tekrar deneyin.", color="red")}')
-                    decadeyear_confirm = False
-                # decade ve year işlemleri tamamsa çıkalım
-                if decadeyear_confirm:
-                    break
-            while True:
-                genre_dory = input(f'{preCmdInput} Want genre filter? [{colored("Y", color="green")}/{colored("N", color="red")}]:').lower()
-                if genre_dory == "y":
-                    genre_filter_name, genre_filter_adress, filterNum = getUlFilters(3) #: Buradaki 3 bizim 4. Ul'a gitmemize yarayacak.
-                    strip_genre = genre_filter_adress.replace(f'/{userName}/list/{list_name}detail', "") # Gelen filtre adresini düzenliyoruz. Son kısmını alıyoruz
-                    msgGenre = f'  \u25E6 Genre:   [{filterNum}]: {genre_filter_name}\n'
-                    w_genre = strip_genre
-                    genre_confirm = True
-                elif genre_dory == "n":
-                    w_genre = ''
-                    msgGenre = ''
-                    print(f'{preBlankCount}Genre filtresi uygulanmayacak.\n')
-                    bypassedFilters += 1
-                    genre_confirm = True
-                else:
-                    print("Anlaşılmadı. Tekrar deneyin.", end='')
-                    genre_confirm = False
-                if genre_confirm:
-                    break
-            while True:
-                sortby_dory = input(f'{preCmdInput} Want Sort By filter? [{colored("Y", color="green")}/{colored("N", color="red")}]: ').lower()
-                if sortby_dory == "y":
-                    sortby_filter_name, sortby_filter_adress, filterNum = getUlFilters(1) #: Buradaki 1 bizim 2. Ul'a gitmemize yarayacak.
-                    # Gelen filtre adresini düzenliyoruz. Son kısmını alıyoruz
-                    strip_sortby = sortby_filter_adress.replace(f'/{userName}/list/{list_name}detail', "")
-                    msgSortby = f'  \u25E6 Sort By: [{filterNum}]: {sortby_filter_name}\n'
-                    w_sortby = strip_sortby
-                    sortby_confirm = True
-                elif sortby_dory == "n":
-                    w_sortby = ''
-                    msgSortby = ''
-                    print('  Sort By filtresi uygulanmayacak.\n')
-                    bypassedFilters += 1
-                    sortby_confirm = True
-                else:
-                    sortby_confirm = False
-                    print("  Anlaşılmadı. Tekrar deneyin.")
-                if sortby_confirm:
-                    break
-            filterConfirm = True #: Filtre elemanları bittikten sonra while için filtre onayı
-        elif filter_yn == "n": #: Filtre istemezse
-            w_filter = False
-            w_decadeyear, w_genre, w_sortby = '', '', ''
-            msgDecadeYear, msgGenre, msgSortby = '', '', ''
-            bypassedFilters = 3
-            filterConfirm = True
-            txtLog(f'{preLogInfo}Listeye filtre uygulanmayacak.')
-        else: #: Filtre isteyip istemediği anlaşılmayınca
-            filterConfirm = False
-            print("Tam anlayamadık? Tekrar deneyin.")
-            txtLog(f'{preLogInfo}Kullanıcı soruya cevap veremedi.')
-        if filterConfirm: #: While döngüsünden çıkmak için.
-            break
-    allFiltres = f'{w_decadeyear}{w_genre}{w_sortby}'
-    filtresMsg = f'{msgDecadeYear}{msgGenre}{msgSortby}'
-    return allFiltres, w_filter, filtresMsg, bypassedFilters
+
 def getListLastPageNo():  # Listenin son sayfasını öğren
     try:
         # > Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al.
@@ -293,15 +167,10 @@ def signature(x): #: x: 0 ilk, 1 son
     try:
         if x == True:
             os.system('cls') #: İlk imza gösteriminde öncesini temizle.
-            print(colored('Your Inputs;', color="yellow"))
-            if w_filter and bypassedFilters < 3:
-                print(f'{preCmdMiddleDot} User: {userName}\n{preCmdMiddleDot} List: {list_name}\n{preCmdMiddleDot} Filtre uygulaması: Var\n{filtresMsg}')
-            else:
-                print(f'{preCmdMiddleDot} User: {userName}\n{preCmdMiddleDot} List: {list_name}\n{preCmdMiddleDot} Filtre uygulaması: Yok\n')
             try: #: Liste sayfasından bilgiler çekmek.
                 print(colored('List info;', color="yellow"))
                 listBy = soup.select("[itemprop=name]")[0].text #: Liste sahibin ismini çektik
-                print(f'{preCmdMiddleDot} List by {listBy} (@{userName})')
+                print(f'{preCmdMiddleDot} List by {listBy}')
                 listTitle = soup.select("[itemprop=title]")[0].text.strip() #: Liste başlığının ismini çektik
                 print(f'{preCmdMiddleDot} List title: {listTitle}')
                 print(f'{preCmdMiddleDot} Number of movies: {getMovieCount(getListLastPageNo())}') # Film sayısını yazdırdık
@@ -321,7 +190,7 @@ def signature(x): #: x: 0 ilk, 1 son
             except:
                 txtLog(f'{preLogErr}Film sahibi görünür adı ve liste adı istenirken hata oluştu.')
         else:
-            print(f'\n{preCmdMiddleDot} Filename: {csvFileName}\n{preCmdMiddleDot} Film sayısı: {loopCount-1}\n{preCmdMiddleDot} Tüm filmler ', end="")
+            print(f'\n{preCmdMiddleDot} Filename: {open_csv}\n{preCmdMiddleDot} Film sayısı: {loopCount-1}\n{preCmdMiddleDot} Tüm filmler ', end="")
             cprint(open_csv, 'yellow', attrs=['blink'], end=" dosyasına aktarıldı.\n")
             try: #: Seçili olan filtreyi yazdırdık.
                 search_selected_decadeyear = currentDom.select(".smenu-subselected")[3].text
@@ -368,7 +237,7 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                     print(f'[{colored("!", color="yellow")}] Girdiğiniz liste linki eskimiştir, muhtemelen liste ismi yakın bir zamanda değişildi.')
                     print(f'{preBlankCount}{colored(visitUserListUrl, color="yellow")} adresini değiştirdik.')
                     print(f'{preBlankCount}{colored(currentUrl, color="green")} adresinden devam ediyoruz.')
-                txtLog(f'{preLogInfo}{list_name} listesi bulundu: {currentListName}')
+                txtLog(f'{preLogInfo}{listUrl} listesi bulundu: {currentListName}')
                 currentListAvaliable = True
         except:
             print(f'{preBlankCount}Bu kullanıcının böyle bir listesi yok.')
@@ -412,55 +281,34 @@ dirCheck(logDirName, False) # Log file check
 print(f'[{colored("#", color="yellow")}] Log location created: ', end="")
 cprint(logFilePath, 'yellow', attrs=['blink'])
 
-while True:
-    # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
-    userName = str(input(f'{preCmdInput} Username(Not display name): ')).lower()
-    # Kullanıcı mevcutmu bakıyoruz
-    profileVisit = doReadPage(f'{siteDomain}{userName}')
-    userAvailable = checkUser()
-    if userAvailable:
-        break
-
-csvFileName = f"{userName}-({cmdRunTime})" #: Dosya çakışma sorunları için farklı isimler ürettik.
-try: #: İşlem yapılan kişinin ismine göre log dosyasının isminin değiştirilmesi.
-    approved_session = f'{logDirName}/{csvFileName}.txt'
-    os.rename(logFilePath, approved_session) #: Os rename ile dizin belirterek dosya taşınabilir
-    logFilePath = approved_session
-    print(f'[{colored("#", color="yellow")}] Username added to log file: ', end="")
-    cprint(logFilePath, 'yellow', attrs=['blink'])
-except Exception as msgExcept:
-    print(f"Log dosyasının ismi {msgExcept} nedeniyle değiştirilemedi.")
-open_csv = f'{exportDirName}/{csvFileName}.csv'
+open_csv = f'{exportDirName}/{cmdRunTime}.csv' 
 
 while True:
     # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
-    list_name = str(input(f'{preCmdInput} Listname(Domain): ')).lower()
+    listUrl = str(input(f'{preCmdInput} List Url: ')).lower()
     # Kullanıcının böyle bir listesi mevcutmu bakıyoruz
-    visitUserListUrl = f'{siteDomain}{userName}/list/{list_name}/'
+    visitUserListUrl = listUrl
     visitList = doReadPage(visitUserListUrl)
     userListAvailable, approvedListUrl = userListCheck()
     # Listenin asıl ismi
-    # Approverd boş geldiğinde boşluk değerini değiştirmez
-    list_name = approvedListUrl.replace(f'{siteDomain}{userName}/list/', "")
     if userListAvailable:
         break
 
 editedListVisitUrl = f'{approvedListUrl}detail/' # Guest generate url. approvedListUrl https://letterboxd.com/username/list/listname/
 soup = doReadPage(editedListVisitUrl)
 # Filtrelerin çekilmesi ve domaine uygulanması
-allFiltres, w_filter, filtresMsg, bypassedFilters = filterPreferences()
 # Filtreler varsa URL'e işleniyor
-url = f'{editedListVisitUrl}{allFiltres}page/'
+url = f'{editedListVisitUrl}page/'
 print(f'url: {url}')
 # Karşılama mesajı, kullanıcının girdiği bilgleri ve girilen bilgilere dayanarak listenin bilgilerini yazdırır.
 signature(1)
 # > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
-print(f'{preCmdMiddleDot} Link: {editedListVisitUrl}{allFiltres}')
+print(f'{preCmdMiddleDot} Link: {editedListVisitUrl}')
 ent = input(f'\n{preCmdInput} Press enter to confirm the entered information. (Enter)')
 if ent == "":
     print(f'{preBlankCount}{colored("Liste bilgilerini onayladınız.", color="green")}')
     txtLog(f'{preLogInfo}Saf sayfaya erişim başlatılıyor.')
-    soup = doReadPage(editedListVisitUrl+allFiltres) #: Verinin çekileceği dom'a filtre ekleniyor.
+    soup = doReadPage(editedListVisitUrl) #: Verinin çekileceği dom'a filtre ekleniyor.
     lastPageNo = getListLastPageNo()
     dirCheck(False, exportDirName) #: Export klasörünün kontrolü.
     with open(f'{open_csv}', 'w', newline='', encoding="utf-8") as file: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
