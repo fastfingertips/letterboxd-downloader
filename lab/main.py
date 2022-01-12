@@ -46,6 +46,7 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
                 movieYear = movie.find('small').text
             except:
                 movieYear = "Yok"
+            if loopCount > 10 xxxx
             # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
             print(f'{loopCount})  {movieName} ({movieYear})')
             writer.writerow([str(movieName), str(movieYear)])
@@ -141,24 +142,27 @@ def signature(x): #: x: 0 ilk, 1 son
             #! os.system('cls') #: İlk imza gösteriminde öncesini temizle.
             try: #: Liste sayfasından bilgiler çekmek.
                 print(colored('\nList info;', color="yellow"))
-                listBy = soup.select("[itemprop=name]")[0].text #: Liste sahibin ismini çektik
+                ## Liste bilgileri alınır.
+                listBy = soup.select("[itemprop=name]")[0].text                 #: Liste sahibin ismini çekiliyor.
+                listTitle = soup.select("[itemprop=title]")[0].text.strip()     #: Liste başlığının ismini çekiliyor.
+                listPublicationTime = soup.select(".published time")[0].text    #: Liste oluşturulma tarihi çekiliyor.
+                listPT = arrow.get(listPublicationTime)                      #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/
+                listMovieCount =  getMovieCount(getListLastPageNo())            #: Listedeki film sayısı hesaplanıyor.
+                ## Liste bilgileri yazdırılır.
                 print(f'{preCmdMiddleDot} List by {listBy}')
-                listTitle = soup.select("[itemprop=title]")[0].text.strip() #: Liste başlığının ismini çektik
                 print(f'{preCmdMiddleDot} List title: {listTitle}')
-                print(f'{preCmdMiddleDot} Number of movies: {getMovieCount(getListLastPageNo())}') # Film sayısını yazdırdık
-                listPublicationTime = soup.select(".published time")[0].text #: Liste oluşturulma tarihi
-                listPtime = arrow.get(listPublicationTime)#: arrow: https://arrow.readthedocs.io/en/latest/
-                print(f'{preCmdMiddleDot} Published: {listPtime.humanize()}') #: or print(f'Published: {listPtime.humanize(granularity=["year","month", "day", "hour", "minute"])}')
-                #!< now_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S") #: utcnow: https://newbedev.com/python-utc-datetime-object-s-iso-format-doesn-t-include-z-zulu-or-zero-offset
+                print(f'{preCmdMiddleDot} Number of movies: {listMovieCount}')
+                print(f'{preCmdMiddleDot} Published: {listPT.humanize()}')   #: or print(f'Published: {listPtime.humanize(granularity=["year","month", "day", "hour", "minute"])}')
+                #!< now_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")  #: utcnow: https://newbedev.com/python-utc-datetime-object-s-iso-format-doesn-t-include-z-zulu-or-zero-offset
                 # s = arrow.get(now_time) | time_x = s-f | print(f'Time since publication: {time_x}')
                 try: #: Search list update time
-                    search_listUtime = soup.select(".updated time")[0].text
-                    listUtime = arrow.get(search_listUtime)
-                    msg_Utime = listUtime.humanize()
+                    listUpdateTime = soup.select(".updated time")[0].text       #: Liste düzenlenme vakti çekiliyor.
+                    listUT = arrow.get(listUpdateTime)                       #: Çekilen liste düzenlenme vakti düzenleniyor.
+                    msgListUpdateTime = listUT.humanize()                            #: 
                 except:
-                    msg_Utime = 'No editing'
+                    msgListUpdateTime = 'No editing'
                 finally:
-                    print(f'{preCmdMiddleDot} Updated: {msg_Utime}')
+                    print(f'{preCmdMiddleDot} Updated: {msgListUpdateTime}')
             except:
                 txtLog(f'{preLogErr}Film sahibi görünür adı ve liste adı istenirken hata oluştu.')
         else:
@@ -230,6 +234,7 @@ def cmdPre(m,c): #: Mesaj ön ekleri için kalıp.
 
 def cmdBlink(m,c):
     return colored(m,c,attrs=["blink"])
+    
 # > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
 cmdRunTime = datetime.now().strftime('%d%m%Y%H%M%S') #: Run time check - Generate session hash
