@@ -14,7 +14,7 @@ try: #: Term Color NET/lOCAL
 except:
     from libs.termcolor110.termcolor import colored, cprint
 
-def dirCheck(dirs): # l= LOG FILE, e = EXPORT FILE
+def dirCheck(dirs): # List
     # Buradaki ifler tekli kontrol yapabş-ilmemize yarar. Örneğin e'yi false yollarım ve sadece l'yi çekebilirim.
     for dir in dirs:
         if dir: #: Log directory
@@ -24,7 +24,6 @@ def dirCheck(dirs): # l= LOG FILE, e = EXPORT FILE
                 os.makedirs(dir)
                 txtLog(f'{preLogInfo}{dir} folder created.') #: Oluşturulamaz ise bir izin hatası olabilir.
     print(f'{preCmdInfo} Log location created: {cmdBlink(logFilePath, "yellow")}')
-
 
 def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
     try:
@@ -49,16 +48,16 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
     except:
         print('An error was encountered while obtaining movie information.')
 
-def doReadPage(tempUrl): #: Url'si belirtilen saufanın okunup, dom alınması.
+def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
     try:
-        urlResponseCode = requests.get(tempUrl)
-        # > Sayfa kodları çekildi.
-        urlDom = BeautifulSoup(urlResponseCode.content.decode('utf-8'), 'html.parser')
-        txtLog(f'{preLogInfo}Trying connect to [{tempUrl}]')
-        return urlDom
-    except:
+        txtLog(f'{preLogInfo}Trying connect to [{tempUrl}]')                            #: Log dosyasına bağlantı başlangıcında bilgi veriliyor.
+        urlResponseCode = requests.get(tempUrl)                                         #: Get response code.
+        urlDom = BeautifulSoup(urlResponseCode.content.decode('utf-8'), 'html.parser')  #: Get page dom.               
+        return urlDom                                                                   #: Return page dom.
+    except:                                                                             #: Dom edinirken hata gerçekleşirse..
         print(f'{preBlankCount}Connection to address failed.')
         txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]')
+
 def doReset():  # Porgramı yeniden başlat
     try:
         os.system('echo Press and any key to reboot & pause >nul')
@@ -87,20 +86,16 @@ def getListLastPageNo():  # Listenin son sayfasını öğren
         return lastPageNo
 
 def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
-    try:
-        # > Son sayfaya bağlanmak için bir ön hazırlık.
-        lastPageDom = doReadPage(f'{url}{tempLastPageNo}')
-        # > Sayfa kodları çekildi.
-        lastPageArticles = lastPageDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
-        lastPageMoviesCount =  len(lastPageArticles) #: Number of movies.
-        # < Film sayısı öğrenildi.
-        # > Toplam film sayısını belirlemek.
-        movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount
-        txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.")
-        return movieCount
-    except:
+    try:                                                                                                                                ## Listenin son sayfa işlemleri.
+        lastPageDom = doReadPage(f'{url}{tempLastPageNo}')                                                                              #: Getting lastpage dom.
+        lastPageArticles = lastPageDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li") #: Sayfa kodları çekildi.
+        lastPageMoviesCount =  len(lastPageArticles)                                                                                    #: Film sayısı öğrenildi.
+        movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount                                                                  #: Toplam film sayısını belirlemek.
+        txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.")                                                   #: Film sayısı hesaplandıktan sonra ekrana yazdırılır.
+        return movieCount                                                                                                               #: Film sayısı çağrıya gönderilir.
+    except:                                                                                                                             ## Olası hata durumunda.
         print(f'Error getting movie count.')
-        txtLog(f'{preLogErr}Film sayısı elde edilirkren hata oluştu.')
+        txtLog(f'{preLogErr}An error occurred while obtaining the number of movies.')
 
 def settingsFileSet(): #: Ayar dosyası kurulumu.
     if os.path.exists('settings.json'):
@@ -116,7 +111,7 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
     else:
         while True:
             try:
-                print('Ayar dosyası bulunamadı. Lütfen gerekli bilgileri girin.')
+                print('The settings file could not be found. Please enter the required information.')
                 logDirName = input('Log directory Name: ')
                 exportDirName = input('Export directory Name: ')
                 settings_dict = {
@@ -127,10 +122,10 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
                     json.dump(settings_dict, json_file)
                 break
             except Exception as msgExcept:
-                print(f'Ayarlarınız {msgExcept} nedeniyle kaydedilemedi.')
+                print(f'Your settings could not be saved due to {msgExcept}.')
     return logDirName, exportDirName
 
-def signature(x): #: x: 0 ilk, 1 son
+def signature(x): #: x: 0 start msg, 1 end msg
     try:
         if x == True:                                                           ## İmza seçimi bu olması durumunda.
             try:                                                                ## Liste sayfasından bilgiler çekmek.
@@ -164,7 +159,7 @@ def signature(x): #: x: 0 ilk, 1 son
                 search_selected_decadeyear = currentDom.select(".smenu-subselected")[3].text                    #: Liste sayfasından ilgili filtre bilgisi alınıyor.
                 search_selected_genre = currentDom.select(".smenu-subselected")[2].text                         #: Liste sayfasından ilgili filtre bilgisi alınıyor.
                 search_selected_sortby = currentDom.select(".smenu-subselected")[0].text                        #: Liste sayfasından ilgili filtre bilgisi alınıyor.
-                                                                                                                ## Ekrana yazdırmalar.
+                                                                                                                ## Seçili filtreleri ekrana yazdırmalar.
                 print(f'{preCmdMiddleDot} Filtered as {search_selected_decadeyear} movies only was done by')    #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
                 print(f'{preCmdMiddleDot} Filtered as {search_selected_genre} only movies')                     #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
                 print(f'{preCmdMiddleDot} Movies sorted by {search_selected_sortby}')                           #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
@@ -232,24 +227,21 @@ def cmdBlink(m,c):
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
 cmdRunTime = datetime.now().strftime('%d%m%Y%H%M%S') #: Run time check - Generate session hash
 os.system(f'color & cls & title Welcome %USERNAME%.')
-# siteProtocol, siteUrl = "https://", "letterboxd.com/"     # Saf domain'in parçalanarak birleştirilmesi
-# siteDomain = siteProtocol + siteUrl                       # Saf domain'in parçalanarak birleştirilmesi
-## Mesajlar, Log Mesaj atamaları
-# Cmd
-preCmdInput = cmdPre(">","green")
-preCmdErr = cmdPre("!","red")
-preCmdInfo = cmdPre("#","yellow")
-preCmdMiddleDot = cmdPre(u"\u00B7","cyan") # middle dot
-preBlankCount = 4*' '
-# Log
-preLogInfo = "Bilgi: "
-preLogErr = "Hata: "
-# Messages
-msgCancel = "The session was canceled because you did not verify the information."
+# siteProtocol, siteUrl = "https://", "letterboxd.com/"     #: Saf domain'in parçalanarak birleştirilmesi
+# siteDomain = siteProtocol + siteUrl                       #: Saf domain'in parçalanarak birleştirilmesi
+
+msgCancel = "The session was canceled because you did not verify the information."  #: Cancel msg
+preCmdMiddleDot = cmdPre(u"\u00B7","cyan")                                          #: Cmd middle dot pre
+preCmdInput = cmdPre(">","green")                                                   #: Cmd input msg pre
+preCmdInfo = cmdPre("#","yellow")                                                   #: Cmd info msg pre
+preCmdErr = cmdPre("!","red")                                                       #: Cmd error msg pre
+preBlankCount = 4*' '                                                               #: Cmd msg pre blank calc
+preLogInfo = "Bilgi: "                                                              #: Log file ingo msg pre
+preLogErr = "Hata: "                                                                #: Log file err msg pre
 
 print(f'{preCmdInfo} Session hash: {cmdBlink(cmdRunTime,"yellow")}') #: Oturum için farklı bir isim üretildi.
 logDirName, exportDirName = settingsFileSet()
-logFilePath = f'{logDirName}/{cmdRunTime}.txt' #: logging, dircheck
+logFilePath = f'{logDirName}/{cmdRunTime}.txt'
 dirCheck([logDirName]) # Log file check
 open_csv = f'{exportDirName}/{cmdRunTime}.csv' 
 
