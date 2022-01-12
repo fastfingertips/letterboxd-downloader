@@ -14,22 +14,17 @@ try: #: Term Color NET/lOCAL
 except:
     from libs.termcolor110.termcolor import colored, cprint
 
-def dirCheck(l, e): # l= LOG FILE, e = EXPORT FILE
+def dirCheck(dirs): # l= LOG FILE, e = EXPORT FILE
     # Buradaki ifler tekli kontrol yapabş-ilmemize yarar. Örneğin e'yi false yollarım ve sadece l'yi çekebilirim.
-    if l: #: Log directory
-        if os.path.exists(l):
-            txtLog(f'{preLogInfo}{l} klasörü halihazırda var.')
-        else:
-            os.makedirs(l)
-            txtLog(f'{preLogInfo}{l} klasörü oluşturuldu') #: Oluşturulamaz ise bir izin hatası olabilir.
-    if e: #: Exports directory
-        if os.path.exists(e):
-            txtLog(f'{preLogInfo}{e} klasörü halihazırda var.')
-        else:
-            os.makedirs(e)
-            txtLog(f'{preLogInfo}{e} klasörü oluşturuldu') #: Oluşturulamaz ise bir izin hatası olabilir.
-    
+    for dir in dirs:
+        if dir: #: Log directory
+            if os.path.exists(dir):
+                txtLog(f'{preLogInfo}{dir} folder already exists.')
+            else:
+                os.makedirs(dir)
+                txtLog(f'{preLogInfo}{dir} folder created.') #: Oluşturulamaz ise bir izin hatası olabilir.
     print(f'{preCmdInfo} Log location created: {cmdBlink(logFilePath, "yellow")}')
+
 
 def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
     try:
@@ -46,14 +41,13 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
                 movieYear = movie.find('small').text
             except:
                 movieYear = "Yok"
-            if loopCount > 10 xxxx
             # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
-            print(f'{loopCount})  {movieName} ({movieYear})')
+            print(f'{loopCount}) {movieName} ({movieYear})')
             writer.writerow([str(movieName), str(movieYear)])
             loopCount += 1
         return loopCount
     except:
-        print('Film bilgilerini elde ederken bir hatayla karşılaşıldı.')
+        print('An error was encountered while obtaining movie information.')
 
 def doReadPage(tempUrl): #: Url'si belirtilen saufanın okunup, dom alınması.
     try:
@@ -71,7 +65,7 @@ def doReset():  # Porgramı yeniden başlat
         os.system('echo Confirm reboot press any key again & pause >nul')
         os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
     except:
-        log = 'Programın yeniden başlatılmaya çalışılması başarısız.'
+        log = 'Attempting to restart the program failed.'
         print(log)
         txtLog(preLogErr + log)
 
@@ -138,43 +132,42 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
 
 def signature(x): #: x: 0 ilk, 1 son
     try:
-        if x == True:
-            #! os.system('cls') #: İlk imza gösteriminde öncesini temizle.
-            try: #: Liste sayfasından bilgiler çekmek.
-                print(colored('\nList info;', color="yellow"))
-                ## Liste bilgileri alınır.
+        if x == True:                                                           ## İmza seçimi bu olması durumunda.
+            try:                                                                ## Liste sayfasından bilgiler çekmek.
+                print(colored('\nList info;', color="yellow"))                  #: Liste başlığı.
+                                                                                ## Liste bilgileri alınır.
                 listBy = soup.select("[itemprop=name]")[0].text                 #: Liste sahibin ismini çekiliyor.
                 listTitle = soup.select("[itemprop=title]")[0].text.strip()     #: Liste başlığının ismini çekiliyor.
                 listPublicationTime = soup.select(".published time")[0].text    #: Liste oluşturulma tarihi çekiliyor.
-                listPT = arrow.get(listPublicationTime)                      #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/
+                listPT = arrow.get(listPublicationTime)                         #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/
                 listMovieCount =  getMovieCount(getListLastPageNo())            #: Listedeki film sayısı hesaplanıyor.
-                ## Liste bilgileri yazdırılır.
-                print(f'{preCmdMiddleDot} List by {listBy}')
-                print(f'{preCmdMiddleDot} List title: {listTitle}')
-                print(f'{preCmdMiddleDot} Number of movies: {listMovieCount}')
-                print(f'{preCmdMiddleDot} Published: {listPT.humanize()}')   #: or print(f'Published: {listPtime.humanize(granularity=["year","month", "day", "hour", "minute"])}')
-                #!< now_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")  #: utcnow: https://newbedev.com/python-utc-datetime-object-s-iso-format-doesn-t-include-z-zulu-or-zero-offset
-                # s = arrow.get(now_time) | time_x = s-f | print(f'Time since publication: {time_x}')
-                try: #: Search list update time
+                                                                                ## Liste bilgileri yazdırılır.
+                print(f'{preCmdMiddleDot} List by {listBy}')                    # Liste sahibinin görünen adı yazdırılıyor.
+                print(f'{preCmdMiddleDot} List title: {listTitle}')             #: Liste başlığı yazdırılıyor.
+                print(f'{preCmdMiddleDot} Number of movies: {listMovieCount}')  #: Listede bulunan film sayısı yazdırılıyor.
+                print(f'{preCmdMiddleDot} Published: {listPT.humanize()}')      #: or print(f'Published: {listPtime.humanize(granularity=["year","month", "day", "hour", "minute"])}')
+                try:                                                            ## Search list update time
                     listUpdateTime = soup.select(".updated time")[0].text       #: Liste düzenlenme vakti çekiliyor.
-                    listUT = arrow.get(listUpdateTime)                       #: Çekilen liste düzenlenme vakti düzenleniyor.
-                    msgListUpdateTime = listUT.humanize()                            #: 
-                except:
-                    msgListUpdateTime = 'No editing'
-                finally:
-                    print(f'{preCmdMiddleDot} Updated: {msgListUpdateTime}')
-            except:
-                txtLog(f'{preLogErr}Film sahibi görünür adı ve liste adı istenirken hata oluştu.')
-        else:
-            print(f'\n{preCmdMiddleDot} Filename: {open_csv}\n{preCmdMiddleDot} Film sayısı: {loopCount-1}\n{preCmdMiddleDot} Tüm filmler ', end="")
-            cprint(open_csv, 'yellow', attrs=['blink'], end=" dosyasına aktarıldı.\n")
-            try: #: Seçili olan filtreyi yazdırdık.
-                search_selected_decadeyear = currentDom.select(".smenu-subselected")[3].text
-                print(f'{preCmdMiddleDot} Filtered as {search_selected_decadeyear} movies only was done by')
-                search_selected_genre = currentDom.select(".smenu-subselected")[2].text
-                print(f'{preCmdMiddleDot} Filtered as {search_selected_genre} only movies')
-                search_selected_sortby = currentDom.select(".smenu-subselected")[0].text
-                print(f'{preCmdMiddleDot} Movies sorted by {search_selected_sortby}')
+                    listUT = arrow.get(listUpdateTime)                          #: Çekilen liste düzenlenme vakti düzenleniyor.
+                    msgListUpdateTime = listUT.humanize()                       #: Çekilen liste düzenlenme vakti kullanıma hazırlanıyor.
+                except:                                                         ## Hata alınırsa liste düzenlenmemiş varsayılır.
+                    msgListUpdateTime = 'No editing.'                           #: Liste düzenlenmemiş.
+                finally:                                                        ## Kontrol sonu işlemleri.
+                    print(f'{preCmdMiddleDot} Updated: {msgListUpdateTime}')    #: Hazırlık sonu mesajı.
+            except:                                                             ## Hata alınması durumunda yapıalcak işlemler.
+                txtLog(f'{preLogErr}Liste bilgileri çekilirken hata.')          #: Log dosyasına hata hakkında bilgi yazdırılıyor.
+        else:                                                                                                   ## Diğer imzayı istemesi durumunda.
+            print(f'\n{preCmdMiddleDot} Filename: {open_csv}')                                                  #: CSV dosyasının ismi hakkında ekrana bilgi yazdırılır.
+            print(f'{preCmdMiddleDot} Film sayısı: {loopCount-1}')                                              #: Film sayısı hakkında ekrana bilgi yazdırılır.
+            print(f'{preCmdMiddleDot} Tüm filmler {cmdBlink(open_csv,"yellow")} dosyasına aktarıldı.')          #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
+            try:                                                                                                ## Seçili olan filtreleri ekrana yazdırabilmek için işlemler.
+                search_selected_decadeyear = currentDom.select(".smenu-subselected")[3].text                    #: Liste sayfasından ilgili filtre bilgisi alınıyor.
+                search_selected_genre = currentDom.select(".smenu-subselected")[2].text                         #: Liste sayfasından ilgili filtre bilgisi alınıyor.
+                search_selected_sortby = currentDom.select(".smenu-subselected")[0].text                        #: Liste sayfasından ilgili filtre bilgisi alınıyor.
+                                                                                                                ## Ekrana yazdırmalar.
+                print(f'{preCmdMiddleDot} Filtered as {search_selected_decadeyear} movies only was done by')    #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
+                print(f'{preCmdMiddleDot} Filtered as {search_selected_genre} only movies')                     #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
+                print(f'{preCmdMiddleDot} Movies sorted by {search_selected_sortby}')                           #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
             except:
                 txtLog(f'{preLogErr}Film filtre bilgileri alınamadı..')
         log = f'{preLogInfo}İmza yazdırma işlemleri tamamlandı.'
@@ -257,7 +250,7 @@ msgCancel = "The session was canceled because you did not verify the information
 print(f'{preCmdInfo} Session hash: {cmdBlink(cmdRunTime,"yellow")}') #: Oturum için farklı bir isim üretildi.
 logDirName, exportDirName = settingsFileSet()
 logFilePath = f'{logDirName}/{cmdRunTime}.txt' #: logging, dircheck
-dirCheck(logDirName, False) # Log file check
+dirCheck([logDirName]) # Log file check
 open_csv = f'{exportDirName}/{cmdRunTime}.csv' 
 
 while True:
@@ -279,7 +272,7 @@ while True:
             txtLog(f'{preLogInfo}Saf sayfaya erişim başlatılıyor.')
             soup = doReadPage(editedListVisitUrl) #: Verinin çekileceği dom'a filtre ekleniyor.
             lastPageNo = getListLastPageNo()
-            dirCheck(False, exportDirName) #: Export klasörünün kontrolü.
+            dirCheck([exportDirName]) #: Export klasörünün kontrolü.
             with open(f'{open_csv}', 'w', newline='', encoding="utf-8") as file: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
                 writer = csv.writer(file)
                 writer.writerow(["Title", "Year"])
