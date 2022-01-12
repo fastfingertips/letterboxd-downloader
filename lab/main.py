@@ -1,59 +1,94 @@
+import os #: https://stackoverflow.com/a/48010814
 import sys
 import csv
-import requests
-import arrow
 import json
-from datetime import datetime, timedelta, date, timezone
-from dateutil.relativedelta import relativedelta
+import arrow
+import requests
+from pandas import DataFrame
 from bs4 import BeautifulSoup
 from typing import Collection
-from pandas import DataFrame
-import os  # https://stackoverflow.com/a/48010814
-# Term Color NET/lOCAL
-try:
+from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta, date, timezone
+try: #: Term Color NET/lOCAL
     from termcolor import colored, cprint
 except:
-    from labs.termcolor110.termcolor import colored, cprint
+    from libs.termcolor110.termcolor import colored, cprint
 
-def settings_set():
-    if os.path.exists('settings.json'):
-        while True:
+def checkUser(): #: Kullanıcının var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
+    try:
+        userDisplayName = profileVisit.select(".title-1")[0].text
+        print(f'{preBlankCount}{colored("Found it: ", color="green")}{userDisplayName}')
+        txtLog(f'{preLogInfo}{userName} kullanıcısı bulundu: {str(userDisplayName)}', checkUser.__name__)
+        userAvailable = True
+    except:
+        print(f'{preBlankCount}{colored("Kullanıcı bulunamadı. Tekrar deneyin.", color="red")}')
+        txtLog(f'{preLogInfo}{userName} kullanıcısı bulunamadı.', checkUser.__name__)
+        userAvailable = False
+    finally:
+        return userAvailable
+def dirCheck(l, e): # l= LOG FILE, e = EXPORT FILE
+    # Buradaki ifler tekli kontrol yapabş-ilmemize yarar. Örneğin e'yi false yollarım ve sadece l'yi çekebilirim.
+    if l: #: Log directory
+        if os.path.exists(l):
+            txtLog(f'{preLogInfo}{l} klasörü halihazırda var.')
+        else:
+            os.makedirs(l)
+            txtLog(f'{preLogInfo}{l} klasörü oluşturuldu') #: Oluşturulamaz ise bir izin hatası olabilir.
+    if e: #: Exports directory
+        if os.path.exists(e):
+            txtLog(f'{preLogInfo}{e} klasörü halihazırda var.')
+        else:
+            os.makedirs(e)
+            txtLog(f'{preLogInfo}{e} klasörü oluşturuldu') #: Oluşturulamaz ise bir izin hatası olabilir.
+def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
+    try:
+        # > Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
+        articles = tempCurrentDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
+        loopCount = tempLoopCount
+        # > Filmleri ekrana ve dosyaya yazdırma işlemleri
+        for currentArticle in articles:
+            # Oda ismini çektik
+            movie = currentArticle.find('h2', attrs={'class': 'headline-2 prettify'})
+            movieName = movie.find('a').text
+            # Film yılı bazen boş olabiliyor. Önlem alıyoruz"
             try:
-                with open("settings.json") as jsonFile:
-                    jsonObject = json.load(jsonFile)
-                    logDirName = jsonObject['log_dir']
-                    exportDirName = jsonObject['export_dir']
-                    break
-            except Exception as msgExcept:
-                print(f'Ayarlarınız {msgExcept} nedeniyle alınamadı.')
-    else:
-        while True:
-            try:
-                print('Ayar dosyası bulunamadı. Lütfen gerekli bilgileri girin.')
-                logDirName = input('Log directory Name: ')
-                exportDirName = input('Export directory Name: ')
-                settings_dict = {
-                    'log_dir': logDirName,
-                    'export_dir': exportDirName,
-                }
-                with open('settings.json', 'w') as json_file:
-                    json.dump(settings_dict, json_file)
-                break
-            except Exception as msgExcept:
-                print(f'Ayarlarınız {msgExcept} nedeniyle kaydedilemedi.')
-    return logDirName, exportDirName
-
-def test_pause():
-    os.system('echo Test için durduruluyor. & pause >nul')
-
-def filtre_sor():
+                movieYear = movie.find('small').text
+            except:
+                movieYear = "Yok"
+            # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
+            print(f'{loopCount})  {movieName} ({movieYear})')
+            writer.writerow([str(movieName), str(movieYear)])
+            loopCount += 1
+        return loopCount
+    except:
+        print('Film bilgilerini elde ederken bir hatayla karşılaşıldı.')
+def doReadPage(tempUrl): #: Url'si belirtilen saufanın okunup, dom alınması.
+    try:
+        urlResponseCode = requests.get(tempUrl)
+        # > Sayfa kodları çekildi.
+        urlDom = BeautifulSoup(urlResponseCode.content.decode('utf-8'), 'html.parser')
+        txtLog(f'{preLogInfo}Trying connect to [{tempUrl}]')
+        return urlDom
+    except:
+        print('Connection to address failed.')
+        txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]')
+def doReset():  # Porgramı yeniden başlat
+    try:
+        os.system('echo Press and any key to reboot & pause >nul')
+        os.system('echo Confirm reboot press any key again & pause >nul')
+        os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
+    except:
+        log = 'Programın yeniden başlatılmaya çalışılması başarısız.'
+        print(log)
+        txtLog(preLogErr + log)
+def filterPreferences(): #: Filtre seçenekleri.
     # Filter req
     while True:
         filter_yn = input(
             f'{preCmdInput} Listeye filtre uygulanacak mı? [{colored("Y", color="green")}/{colored("N", color="red")}]: ').lower()
         if filter_yn == "y":
             w_filter = True
-            logging(f'{preLogInfo}Listeye filtre uygulanacak.')
+            txtLog(f'{preLogInfo}Listeye filtre uygulanacak.')
             bypassedFilters = 0
             while True:
                 decadeyear_dory = input(f'\n{preCmdInput} Want {colored("D", color="green")}ecade or {colored("Y", color="green")}ear filter? [{colored("D", color="green")}/{colored("Y", color="green")}/{colored("N", color="red")}]: ').lower()
@@ -151,17 +186,47 @@ def filtre_sor():
             msgDecadeYear, msgGenre, msgSortby = '', '', ''
             bypassedFilters = 3
             filterConfirm = True
-            logging(f'{preLogInfo}Listeye filtre uygulanmayacak.')
+            txtLog(f'{preLogInfo}Listeye filtre uygulanmayacak.')
         else: #: Filtre isteyip istemediği anlaşılmayınca
             filterConfirm = False
             print("Tam anlayamadık? Tekrar deneyin.")
-            logging(f'{preLogInfo}Kullanıcı soruya cevap veremedi.')
+            txtLog(f'{preLogInfo}Kullanıcı soruya cevap veremedi.')
         if filterConfirm: #: While döngüsünden çıkmak için.
             break
     allFiltres = f'{w_decadeyear}{w_genre}{w_sortby}'
     filtresMsg = f'{msgDecadeYear}{msgGenre}{msgSortby}'
     return allFiltres, w_filter, filtresMsg, bypassedFilters
-
+def getListLastPageNo():  # Listenin son sayfasını öğren
+    try:
+        # > Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al.
+        # > Son'linin içindeki bağlantının metnini çektik. Bu bize kaç sayfalı bir listemiz olduğunuz verecek.
+        txtLog(f'{preLogInfo}Listedeki sayfa sayısı denetleniyor..')
+        lastPageNo = soup.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text
+        txtLog(f'{preLogInfo}Liste birden çok sayfaya ({lastPageNo}) sahiptir.')
+        getMovieCount(lastPageNo)
+    except:
+        # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
+        lastPageNo = 1
+        getMovieCount(lastPageNo)
+        txtLog(f'{preLogInfo}Birden fazla sayfa yok, bu liste tek sayfadır.')
+    finally:
+        txtLog(f'{preLogInfo}Sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPageNo} olduğu öğrenildi.')
+        return lastPageNo
+def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
+    try:
+        # > Son sayfaya bağlanmak için bir ön hazırlık.
+        lastPageDom = doReadPage(f'{url}{tempLastPageNo}')
+        # > Sayfa kodları çekildi.
+        lastPageArticles = lastPageDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
+        lastPageMoviesCount =  len(lastPageArticles) #: Number of movies.
+        # < Film sayısı öğrenildi.
+        # > Toplam film sayısını belirlemek.
+        movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount
+        txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.")
+        return movieCount
+    except:
+        print(f'Film sayısını elde ederken hata.')
+        txtLog(f'{preLogErr}Film sayısı elde edilirkren hata oluştu.s')
 def getUlFilters(tempUlNum): #: Sıralama yöntemlerini çekmek. Genre: 3, Sortby: 1
     # Filtre yöntemlerinden listenin sıralama yöntemleri olan ul etiketini yani 2.sıradaki ul'u seçtik.
     filtersDom = soup.find_all('ul', attrs={'class': 'smenu-menu'})[tempUlNum].find_all("li") # şu anki dom içinde belirtilen ul içindeki filtreler.
@@ -198,7 +263,33 @@ def getUlFilters(tempUlNum): #: Sıralama yöntemlerini çekmek. Genre: 3, Sortb
     filterNum = int(input(f'{preCmdInput} Filter [{colored("Num", "cyan")}]: '))
     print(f'{preBlankCount}{colored("Selected:", color="green")} [{colored(filterNum, color="cyan")}]: {filterNames[filterNum]}\n')
     return filterNames[filterNum], filterAdresses[filterNum], filterNum
-
+def settingsFileSet(): #: Ayar dosyası kurulumu.
+    if os.path.exists('settings.json'):
+        while True:
+            try:
+                with open("settings.json") as jsonFile:
+                    jsonObject = json.load(jsonFile)
+                    logDirName = jsonObject['log_dir']
+                    exportDirName = jsonObject['export_dir']
+                    break
+            except Exception as msgExcept:
+                print(f'Ayarlarınız {msgExcept} nedeniyle alınamadı.')
+    else:
+        while True:
+            try:
+                print('Ayar dosyası bulunamadı. Lütfen gerekli bilgileri girin.')
+                logDirName = input('Log directory Name: ')
+                exportDirName = input('Export directory Name: ')
+                settings_dict = {
+                    'log_dir': logDirName,
+                    'export_dir': exportDirName,
+                }
+                with open('settings.json', 'w') as json_file:
+                    json.dump(settings_dict, json_file)
+                break
+            except Exception as msgExcept:
+                print(f'Ayarlarınız {msgExcept} nedeniyle kaydedilemedi.')
+    return logDirName, exportDirName
 def signature(x): #: x: 0 ilk, 1 son
     try:
         if x == True:
@@ -229,7 +320,7 @@ def signature(x): #: x: 0 ilk, 1 son
                 finally:
                     print(f'{preCmdMiddleDot} Updated: {msg_Utime}')
             except:
-                logging(f'{preLogErr}Film sahibi görünür adı ve liste adı istenirken hata oluştu.')
+                txtLog(f'{preLogErr}Film sahibi görünür adı ve liste adı istenirken hata oluştu.')
         else:
             print(f'\n{preCmdMiddleDot} Filename: {csvFileName}\n{preCmdMiddleDot} Film sayısı: {loopCount-1}\n{preCmdMiddleDot} Tüm filmler ', end="")
             cprint(open_csv, 'yellow', attrs=['blink'], end=" dosyasına aktarıldı.\n")
@@ -241,32 +332,14 @@ def signature(x): #: x: 0 ilk, 1 son
                 search_selected_sortby = currentDom.select(".smenu-subselected")[0].text
                 print(f'{preCmdMiddleDot} Movies sorted by {search_selected_sortby}')
             except:
-                logging(f'{preLogErr}Film filtre bilgileri alınamadı..')
+                txtLog(f'{preLogErr}Film filtre bilgileri alınamadı..')
         log = f'{preLogInfo}İmza yazdırma işlemleri tamamlandı.'
     except:
         print('İmza seçimi başarısız.')
         log = f'{preLogErr}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.'
     finally:
-        logging(log)
-
-def dir_check(l, e): # l= LOG FILE, e = EXPORT FILE
-    # Buradaki ifler tekli kontrol yapabş-ilmemize yarar. Örneğin e'yi false yollarım ve sadece l'yi çekebilirim.
-    if l: #: Log directory
-        if os.path.exists(l):
-            logging(f'{preLogInfo}{l} klasörü halihazırda var.')
-        else:
-            os.makedirs(l)
-            logging(f'{preLogInfo}{l} klasörü oluşturuldu') #: Oluşturulamaz ise bir izin hatası olabilir.
-    if e: #: Exports directory
-        if os.path.exists(e):
-            logging(f'{preLogInfo}{e} klasörü halihazırda var.')
-        else:
-            os.makedirs(e)
-            logging(f'{preLogInfo}{e} klasörü oluşturuldu') #: Oluşturulamaz ise bir izin hatası olabilir.
-
-
-
-def logging(r_message, r_loglocation=None): #: None: Kullanıcı log lokasyonunu belirtmese de olur.
+        txtLog(log)
+def txtLog(r_message, r_loglocation=None): #: None: Kullanıcı log lokasyonunu belirtmese de olur.
     try:
         f = open(logFilePath, "a")
         f.writelines(f'{r_message}\n')
@@ -276,56 +349,6 @@ def logging(r_message, r_loglocation=None): #: None: Kullanıcı log lokasyonunu
             print(f'Loglama işlemi {r_loglocation} konumunda {e} nedeniyle başarısız.')
         else:
             print(f'Loglama işlemi {e} nedeniyle başarısız.')
-
-def readpage(tempUrl):
-    try:
-        urlResponseCode = requests.get(tempUrl)
-        print(urlResponseCode)
-        # > Sayfa kodları çekildi.
-        urlDom = BeautifulSoup(urlResponseCode.content.decode('utf-8'), 'html.parser')
-        logging(f'{preLogInfo}Trying connect to [{tempUrl}]')
-        return urlDom
-    except:
-        print('Connection to address failed.')
-        logging(f'{preLogErr}Connection to address failed [{tempUrl}]')
-
-def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
-    try:
-        # > Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
-        articles = tempCurrentDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
-        loopCount = tempLoopCount
-        # > Filmleri ekrana ve dosyaya yazdırma işlemleri
-        for currentArticle in articles:
-            # Oda ismini çektik
-            movie = currentArticle.find('h2', attrs={'class': 'headline-2 prettify'})
-            movieName = movie.find('a').text
-            # Film yılı bazen boş olabiliyor. Önlem alıyoruz"
-            try:
-                movieYear = movie.find('small').text
-            except:
-                movieYear = "Yok"
-            # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
-            print(f'{loopCount})  {movieName} ({movieYear})')
-            writer.writerow([str(movieName), str(movieYear)])
-            loopCount += 1
-        return loopCount
-    except:
-        print('Film bilgilerini elde ederken bir hatayla karşılaşıldı.')
-
-def check_user(): #: Kullanıcının var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
-    try:
-        userDisplayName = profileVisit.select(".title-1")[0].text
-        print(f'{preBlankCount}{colored("Found it: ", color="green")}{userDisplayName}')
-        logging(f'{preLogInfo}{userName} kullanıcısı bulundu: {str(userDisplayName)}', check_user.__name__)
-        userAvailable = True
-    except:
-        print(f'{preBlankCount}{colored("Kullanıcı bulunamadı. Tekrar deneyin.", color="red")}')
-        logging(f'{preLogInfo}{userName} kullanıcısı bulunamadı.', check_user.__name__)
-        userAvailable = False
-    finally:
-        return userAvailable
-
-
 def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
     try:
         # > bu meta etiketinden veri almayı deniyor eğer yoksa liste değil.
@@ -333,20 +356,20 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
             meta_test = visitList.find('meta', property="og:type").attrs['content']
             # Meta etiketindeki bilgi sorgulanır. Sayfanın liste olup olmadığı anlaşışılır
             if meta_test == "letterboxd:list":
-                logging(f'{preLogInfo}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {meta_test}')
+                txtLog(f'{preLogInfo}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {meta_test}')
                 # Liste ismini alıyoruz.
                 currentListName = visitList.find('meta', property="og:title").attrs['content']
                 print(f'{preBlankCount}{colored("Found it: ", color="green")}{currentListName}')
                 # Liste yönlendirimesi var mı bakıyoruz
                 currentUrl = visitList.find('meta', property="og:url").attrs['content']
                 if currentUrl == visitUserListUrl:
-                    logging(f'{preLogInfo}Liste adresi yönlendime içermiyor.')
+                    txtLog(f'{preLogInfo}Liste adresi yönlendime içermiyor.')
                     currentUrl = visitUserListUrl
                 else:
                     print(f'[{colored("!", color="yellow")}] Girdiğiniz liste linki eskimiştir, muhtemelen liste ismi yakın bir zamanda değişildi.')
                     print(f'{preBlankCount}{colored(visitUserListUrl, color="yellow")} adresini değiştirdik.')
                     print(f'{preBlankCount}{colored(currentUrl, color="green")} adresinden devam ediyoruz.')
-                logging(f'{preLogInfo}{list_name} listesi bulundu: {currentListName}')
+                txtLog(f'{preLogInfo}{list_name} listesi bulundu: {currentListName}')
                 currentListAvaliable = True
         except:
             print(f'{preBlankCount}Bu kullanıcının böyle bir listesi yok.')
@@ -356,52 +379,11 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
         currentListAvaliable = False
     finally:
         return currentListAvaliable, currentUrl
-
-def getListLastPageNo():  # Listenin son sayfasını öğren
-    try:
-        # > Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al.
-        # > Son'linin içindeki bağlantının metnini çektik. Bu bize kaç sayfalı bir listemiz olduğunuz verecek.
-        logging(f'{preLogInfo}Listedeki sayfa sayısı denetleniyor..')
-        lastPageNo = soup.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text
-        logging(f'{preLogInfo}Liste birden çok sayfaya ({lastPageNo}) sahiptir.')
-        getMovieCount(lastPageNo)
-    except:
-        # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
-        lastPageNo = 1
-        getMovieCount(lastPageNo)
-        logging(f'{preLogInfo}Birden fazla sayfa yok, bu liste tek sayfadır.')
-    finally:
-        logging(f'{preLogInfo}Sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPageNo} olduğu öğrenildi.')
-        return lastPageNo
-
-def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
-    try:
-        # > Son sayfaya bağlanmak için bir ön hazırlık.
-        lastPageDom = readpage(f'{url}{tempLastPageNo}')
-        # > Sayfa kodları çekildi.
-        lastPageArticles = lastPageDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
-        lastPageMoviesCount =  len(lastPageArticles) #: Number of movies.
-        # < Film sayısı öğrenildi.
-        # > Toplam film sayısını belirlemek.
-        movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount
-        logging(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.")
-        return movieCount
-    except:
-        print(f'Film sayısını elde ederken hata.')
-        logging(f'{preLogErr}Film sayısı elde edilirkren hata oluştu.s')
-
-def doReset():  # Porgramı yeniden başlat
-    try:
-        os.system('echo Press and any key to reboot & pause >nul')
-        os.system('echo Confirm reboot press any key again & pause >nul')
-        os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
-    except:
-        log = 'Programın yeniden başlatılmaya çalışılması başarısız.'
-        print(log)
-        logging(preLogErr + log)
-
-def cmdPre(s,c):
+def test_pause(): #: Geliştirici duraklatmaları için kalıp.
+    os.system('echo Test için durduruluyor. & pause >nul')
+def cmdPre(s,c): #: Mesaj ön ekleri için kalıp.
     return f'[{colored(s, color=c)}]'
+
 # > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
 os.system('color & cls')
@@ -425,10 +407,10 @@ msgCancel = "Bilgileri doğrulamadığınız için oturum iptal edildi."
 cmdRunTime = datetime.now().strftime('%d%m%Y%H%M%S')
 print(f'[{colored("#", color="yellow")}] Session hash: ', end="") # Oturum için farklı bir isim üretildi.
 cprint(cmdRunTime, 'yellow', attrs=['blink'])
-logDirName, exportDirName = settings_set()
+logDirName, exportDirName = settingsFileSet()
 # Log file path
 logFilePath = f'{logDirName}/{cmdRunTime}.txt'
-dir_check(logDirName, False) # Log file check
+dirCheck(logDirName, False) # Log file check
 print(f'[{colored("#", color="yellow")}] Log location created: ', end="")
 cprint(logFilePath, 'yellow', attrs=['blink'])
 
@@ -436,8 +418,8 @@ while True:
     # > Kullanıcı eğer domainden değilde direkt olarak girerse yazıyı küçültüyoruz.
     userName = str(input(f'{preCmdInput} Username(Not display name): ')).lower()
     # Kullanıcı mevcutmu bakıyoruz
-    profileVisit = readpage(f'{siteDomain}{userName}')
-    userAvailable = check_user()
+    profileVisit = doReadPage(f'{siteDomain}{userName}')
+    userAvailable = checkUser()
     if userAvailable:
         break
 
@@ -457,7 +439,7 @@ while True:
     list_name = str(input(f'{preCmdInput} Listname(Domain): ')).lower()
     # Kullanıcının böyle bir listesi mevcutmu bakıyoruz
     visitUserListUrl = f'{siteDomain}{userName}/list/{list_name}/'
-    visitList = readpage(visitUserListUrl)
+    visitList = doReadPage(visitUserListUrl)
     userListAvailable, approvedListUrl = userListCheck()
     # Listenin asıl ismi
     # Approverd boş geldiğinde boşluk değerini değiştirmez
@@ -466,9 +448,9 @@ while True:
         break
 
 editedListVisitUrl = f'{approvedListUrl}detail/' # Guest generate url. approvedListUrl https://letterboxd.com/username/list/listname/
-soup = readpage(editedListVisitUrl)
+soup = doReadPage(editedListVisitUrl)
 # Filtrelerin çekilmesi ve domaine uygulanması
-allFiltres, w_filter, filtresMsg, bypassedFilters = filtre_sor()
+allFiltres, w_filter, filtresMsg, bypassedFilters = filterPreferences()
 # Filtreler varsa URL'e işleniyor
 url = f'{editedListVisitUrl}{allFiltres}page/'
 print(f'url: {url}')
@@ -479,11 +461,11 @@ print(f'{preCmdMiddleDot} Link: {editedListVisitUrl}{allFiltres}')
 ent = input(f'\n{preCmdInput} Press enter to confirm the entered information. (Enter)')
 if ent == "":
     print(f'{preBlankCount}{colored("Liste bilgilerini onayladınız.", color="green")}')
-    logging(f'{preLogInfo}Saf sayfaya erişim başlatılıyor.')
-    soup = readpage(editedListVisitUrl+allFiltres) #: Verinin çekileceği dom'a filtre ekleniyor.
+    txtLog(f'{preLogInfo}Saf sayfaya erişim başlatılıyor.')
+    soup = doReadPage(editedListVisitUrl+allFiltres) #: Verinin çekileceği dom'a filtre ekleniyor.
     lastPageNo = getListLastPageNo()
     print(type(lastPageNo))
-    dir_check(False, exportDirName) #: Export klasörünün kontrolü.
+    dirCheck(False, exportDirName) #: Export klasörünün kontrolü.
     with open(f'{open_csv}', 'w', newline='', encoding="utf-8") as file: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
         writer = csv.writer(file)
         writer.writerow(["Title", "Year"])
@@ -492,15 +474,15 @@ if ent == "":
         # x sıfırdan başlıyor
         print("\nListedeki filmler:")
         for x in range(int(lastPageNo)):
-            logging(f'Connecting to: {url}{str(x+1)}')
-            currentDom = readpage(f'{url}{str(x+1)}')
+            txtLog(f'Connecting to: {url}{str(x+1)}')
+            currentDom = doReadPage(f'{url}{str(x+1)}')
             loopCount = doPullFilms(loopCount, currentDom)
         # Açtığımız dosyayı manuel kapattık
         file.close()
-    logging(f'{preLogInfo}Success!')
+    txtLog(f'{preLogInfo}Success!')
     signature(0)
     doReset()
 else:
     print(msgCancel)
-    logging(preLogInfo + msgCancel)
+    txtLog(preLogInfo + msgCancel)
     doReset()

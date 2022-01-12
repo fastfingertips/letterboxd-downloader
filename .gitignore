@@ -114,7 +114,9 @@ dmypy.json
 .pyre/
 
 # My Settings
+# lab
+lab/.vs/
+lab/funcs
 lab/exports
 lab/logs
-/exports
-/logs
+lab/settings.json

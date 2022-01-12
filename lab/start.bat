@@ -1,5 +1,5 @@
 @echo off
 title Thank you %USERNAME%
 cls
-python boxdcvv.py
+python main.py
 pause

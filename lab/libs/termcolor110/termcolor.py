@@ -26,7 +26,6 @@
 from __future__ import print_function
 import os
 
-
 __ALL__ = [ 'colored', 'cprint' ]
 
 VERSION = (1, 1, 0)
@@ -155,14 +154,11 @@ if __name__ == '__main__':
     cprint('Blink yellow color', 'yellow', attrs=['blink'])
     cprint('Reversed blue color', 'blue', attrs=['reverse'])
     cprint('Concealed Magenta color', 'magenta', attrs=['concealed'])
-    cprint('Bold underline reverse cyan color', 'cyan',
-            attrs=['bold', 'underline', 'reverse'])
-    cprint('Dark blink concealed white color', 'white',
-            attrs=['dark', 'blink', 'concealed'])
+    cprint('Bold underline reverse cyan color', 'cyan', attrs=['bold', 'underline', 'reverse'])
+    cprint('Dark blink concealed white color', 'white', attrs=['dark', 'blink', 'concealed'])
     print(('-' * 78))
 
     print('Test mixing:')
-    cprint('Underline red on grey color', 'red', 'on_grey',
-            ['underline'])
+    cprint('Underline red on grey color', 'red', 'on_grey', ['underline'])
     cprint('Reversed green on red color', 'green', 'on_red', ['reverse'])
 
