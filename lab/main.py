@@ -29,7 +29,7 @@ def dirCheck(l, e): # l= LOG FILE, e = EXPORT FILE
             os.makedirs(e)
             txtLog(f'{preLogInfo}{e} klasörü oluşturuldu') #: Oluşturulamaz ise bir izin hatası olabilir.
     
-    print(f'[{colored("#", color="yellow")}] Log location created: {colored(logFilePath, "yellow", attrs=["blink"])}')
+    print(f'{preCmdInfo} Log location created: {cmdBlink(logFilePath, "yellow")}')
 
 def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
     try:
@@ -225,9 +225,11 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
 def test_pause(): #: Geliştirici duraklatmaları için kalıp.
     os.system('echo Test için durduruluyor. & pause >nul')
 
-def cmdPre(s,c): #: Mesaj ön ekleri için kalıp.
-    return f'[{colored(s, color=c)}]'
+def cmdPre(m,c): #: Mesaj ön ekleri için kalıp.
+    return f'[{colored(m,color=c)}]'
 
+def cmdBlink(m,c):
+    return colored(m,c,attrs=["blink"])
 # > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
 os.system('color & cls')
@@ -240,6 +242,7 @@ os.system('color & cls')
 # Cmd
 preCmdInput = cmdPre(">","green")
 preCmdErr = cmdPre("!","red")
+preCmdInfo = cmdPre("#","yellow")
 preCmdMiddleDot = cmdPre(u"\u00B7","cyan") # middle dot
 preBlankCount = 4*' '
 # Log
@@ -249,7 +252,7 @@ preLogErr = "Hata: "
 msgCancel = "The session was canceled because you did not verify the information."
 
 cmdRunTime = datetime.now().strftime('%d%m%Y%H%M%S') #: Run time check - Generate session hash
-print(f'[{colored("#", color="yellow")}] Session hash: {colored(cmdRunTime, "yellow", attrs=["blink"])}') #: Oturum için farklı bir isim üretildi.
+print(f'{preCmdInfo} Session hash: {cmdBlink(cmdRunTime,"yellow")}') #: Oturum için farklı bir isim üretildi.
 logDirName, exportDirName = settingsFileSet()
 logFilePath = f'{logDirName}/{cmdRunTime}.txt' #: logging, dircheck
 dirCheck(logDirName, False) # Log file check
