@@ -138,9 +138,9 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
 def signature(x): #: x: 0 ilk, 1 son
     try:
         if x == True:
-            os.system('cls') #: İlk imza gösteriminde öncesini temizle.
+            #! os.system('cls') #: İlk imza gösteriminde öncesini temizle.
             try: #: Liste sayfasından bilgiler çekmek.
-                print(colored('List info;', color="yellow"))
+                print(colored('\nList info;', color="yellow"))
                 listBy = soup.select("[itemprop=name]")[0].text #: Liste sahibin ismini çektik
                 print(f'{preCmdMiddleDot} List by {listBy}')
                 listTitle = soup.select("[itemprop=title]")[0].text.strip() #: Liste başlığının ismini çektik
@@ -193,8 +193,8 @@ def txtLog(r_message, r_loglocation=None): #: None: Kullanıcı log lokasyonunu 
 
 def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
     try:
-        # > bu meta etiketinden veri almayı deniyor eğer yoksa liste değil.
-        try:
+        
+        try: #: meta etiketinden veri almayı dener eğer yoksa liste değil.
             meta_test = visitList.find('meta', property="og:type").attrs['content']
             # Meta etiketindeki bilgi sorgulanır. Sayfanın liste olup olmadığı anlaşışılır
             if meta_test == "letterboxd:list":
@@ -213,7 +213,7 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                     print(f'{preBlankCount}{colored(currentUrl, color="green")} adresinden devam ediyoruz.')
                 txtLog(f'{preLogInfo}{listUrl} listesi bulundu: {currentListName}')
                 currentListAvaliable = True
-        except:
+        except: #: liste imzası olmadığı belirlenir.
             print(f'{preBlankCount}Bu kullanıcının böyle bir listesi yok.')
             currentUrl = ''
             currentListAvaliable = False
@@ -232,12 +232,10 @@ def cmdBlink(m,c):
     return colored(m,c,attrs=["blink"])
 # > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
-os.system('color & cls')
-
-
+cmdRunTime = datetime.now().strftime('%d%m%Y%H%M%S') #: Run time check - Generate session hash
+os.system(f'color & cls & title Welcome %USERNAME%.')
 # siteProtocol, siteUrl = "https://", "letterboxd.com/"     # Saf domain'in parçalanarak birleştirilmesi
 # siteDomain = siteProtocol + siteUrl                       # Saf domain'in parçalanarak birleştirilmesi
-
 ## Mesajlar, Log Mesaj atamaları
 # Cmd
 preCmdInput = cmdPre(">","green")
@@ -251,7 +249,6 @@ preLogErr = "Hata: "
 # Messages
 msgCancel = "The session was canceled because you did not verify the information."
 
-cmdRunTime = datetime.now().strftime('%d%m%Y%H%M%S') #: Run time check - Generate session hash
 print(f'{preCmdInfo} Session hash: {cmdBlink(cmdRunTime,"yellow")}') #: Oturum için farklı bir isim üretildi.
 logDirName, exportDirName = settingsFileSet()
 logFilePath = f'{logDirName}/{cmdRunTime}.txt' #: logging, dircheck
@@ -267,7 +264,6 @@ while True:
         editedListVisitUrl = f'{approvedListUrl}detail/' # Guest generate url. approvedListUrl https://letterboxd.com/username/list/listname/
         soup = doReadPage(editedListVisitUrl)
         url = f'{editedListVisitUrl}page/'
-        print(f'Url: {url}')
         # Karşılama mesajı, kullanıcının girdiği bilgleri ve girilen bilgilere dayanarak listenin bilgilerini yazdırır.
         signature(1)
         # > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
