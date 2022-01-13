@@ -15,8 +15,6 @@ except:
     from libs.termcolor110.termcolor import colored, cprint
 from inspect import currentframe
 
-
-
 def dirCheck(dirs): # List
     # Buradaki ifler tekli kontrol yapabş-ilmemize yarar. Örneğin e'yi false yollarım ve sadece l'yi çekebilirim.
     for dir in dirs:
@@ -151,7 +149,8 @@ def signature(x): #: x: 0 start msg, 1 end msg
                 listPublicationTime = soup.select(".published time")[0].text                                #: Liste oluşturulma tarihi çekiliyor.
                 listPT = arrow.get(listPublicationTime)                                                     #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/
                 listMovieCount =  getMovieCount(getListLastPageNo())                                        #: Listedeki film sayısı hesaplanıyor.
-                                                                                                            ## Liste bilgileri yazdırılır.
+                
+                print(supLine)                                                                                            ## Liste bilgileri yazdırılır.
                 print(f'{preCmdMiddleDot} List by {listBy}')                                                # Liste sahibinin görünen adı yazdırılıyor.
                 print(f'{preCmdMiddleDot} List title: {listTitle}')                                         #: Liste başlığı yazdırılıyor.
                 print(f'{preCmdMiddleDot} Number of movies: {listMovieCount}')                              #: Listede bulunan film sayısı yazdırılıyor.
@@ -168,12 +167,13 @@ def signature(x): #: x: 0 start msg, 1 end msg
                     msgListUpdateTime = 'No editing.'                                                       #: Liste düzenlenmemiş.
                 finally:                                                                                    ## Kontrol sonu işlemleri.
                     print(f'{preCmdMiddleDot} Updated: {msgListUpdateTime}')                                #: Hazırlık sonu mesajı.
+                    print(subLine)
             except Exception as e:
                 if cmdLogOnOff:
                     errorLine(e)                                                                                        ## Hata alınması durumunda yapıalcak işlemler.
                     txtLog(f'{preLogErr}Liste bilgileri çekilirken hata.')                                      #: Log dosyasına hata hakkında bilgi yazdırılıyor.
-        else:                                                                                               ## Diğer imzayı istemesi durumunda.
-            print('_'*30)
+        else:         
+            print(supLine)
             print(f'{preCmdMiddleDot} Tüm filmler {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.')       #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
             print(f'{preCmdMiddleDot} Filename: {openCsv}')                                               #: CSV dosyasının ismi hakkında ekrana bilgi yazdırılır.
             print(f'{preCmdMiddleDot} Film sayısı: {loopCount-1}')                                          #: Film sayısı hakkında ekrana bilgi yazdırılır.
@@ -185,7 +185,7 @@ def signature(x): #: x: 0 start msg, 1 end msg
                 print(f'{preCmdMiddleDot} Filtered as {domSelectedDecadeYear} movies only was done by')     #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
                 print(f'{preCmdMiddleDot} Filtered as {domSelectedGenre} only movies')                      #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
                 print(f'{preCmdMiddleDot} Movies sorted by {domSelectedSortBy}')                            #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
-                print('¯'*30)
+                print(subLine)
             except Exception as e:
                 if cmdLogOnOff:
                     errorLine(e)                                                                                           ## Filtre bilgileri edinirken bir hata oluşursa..
@@ -283,6 +283,8 @@ def errorLine(e):
 # > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
 
+supLine = '¯'*30                                                                                      ## Diğer imzayı istemesi durumunda.
+subLine = '_'*30   
 msgDevBug = 'An uncontrolled error has occurred. Please notify the developer.'      #: Kontrolsüz hataların oluştuğu yerlerde kullanılır.
 msgCancel = "The session was canceled because you did not verify the information."  #: Cancel msg
 msgUrlErr = "Enter a different URL, it's already entered. You can end the login by putting a period at the end of the url."
@@ -300,7 +302,8 @@ preLogErr = "Hata: "                                                            
 sessionHash = getRunTime()                                                          #: Generate start hash
 logDirName, exportDirName = settingsFileSet()                                       #: Set Export dir and Log dir
 logFilePath = f'{logDirName}/{sessionHash}.txt'                                     #: Set log file dir
-dirCheck([logDirName])                                                              #: Log file check      
+dirCheck([logDirName])                                                              #: Log file check   
+
 
 
 while True:
