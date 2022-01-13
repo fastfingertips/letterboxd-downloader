@@ -196,7 +196,7 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                 txtLog(f'{preLogInfo}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {metaOgType}')
                 metaOgUrl = getMetaContent('og:url')                                    #: Liste yönlendirmesi var mı bakıyoruz
                 metaOgTitle = getMetaContent('og:title')                             #: Liste ismini alıyoruz.
-                bodyDataOwner = urlListItemDom.find('body').attrs['data-owner']                                              #: Liste sahibinin kullanıcı ismi.
+                bodyDataOwner = getBodyOwner()                                             #: Liste sahibinin kullanıcı ismi.
                 print(f'{preBlankCount}{colored("Found it: ", color="green")}@{bodyDataOwner} "{metaOgTitle}"')          #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
                 if metaOgUrl == urlListItem:
                     txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.')
@@ -216,7 +216,7 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
         return currentListAvaliable, metaOgUrl
 
 def test_pause(): #: Geliştirici duraklatmaları için kalıp.
-    os.system(f"echo {preCmdInfo} {cmdBlink('Enter to continue.','green')} & pause >nul")
+    os.system(f"echo {preCmdInfo} {cmdBlink('Enter to continue.','yellow')} & pause >nul")
 
 def cmdPre(m,c): #: Mesaj ön ekleri için kalıp.
     return f'[{colored(m,color=c)}]'
