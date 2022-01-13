@@ -2,6 +2,7 @@ import os #: https://stackoverflow.com/a/48010814
 import sys
 import csv
 import json
+from types import NoneType
 import arrow
 import requests
 from pandas import DataFrame
@@ -56,7 +57,7 @@ def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
         return urlDom                                                                   #: Return page dom.
     except Exception as e:                                                              #: Dom edinirken hata gerçekleşirse..
         if cmdLogOnOff:
-                print(preCmdErr, e)
+            print(preCmdErr,msgDevBug,e)
         txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]')
 
 def doReset():  # Porgramı yeniden başlat
@@ -66,7 +67,7 @@ def doReset():  # Porgramı yeniden başlat
         os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
     except Exception as e:                                                              #: Dom edinirken hata gerçekleşirse..
         if cmdLogOnOff:
-                print(preCmdErr, e)
+                print(preCmdErr,msgDevBug,e)
         txtLog(preLogErr + 'Attempting to restart the program failed.')
 
 def getListLastPageNo():  # Listenin son sayfasını öğren
@@ -74,16 +75,16 @@ def getListLastPageNo():  # Listenin son sayfasını öğren
         # > Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al.
         # > Son'linin içindeki bağlantının metnini çektik. Bu bize kaç sayfalı bir listemiz olduğunuz verecek.
         txtLog(f'{preLogInfo}Listedeki sayfa sayısı denetleniyor..')
-        lastPageNo = soup.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text
+        lastPageNo = soup.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text    # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
         txtLog(f'{preLogInfo}Liste birden çok sayfaya ({lastPageNo}) sahiptir.')
         getMovieCount(lastPageNo)
-    except Exception as e:                                                              #: Dom edinirken hata gerçekleşirse..
+    except NoneType:                                                                            ## Kontrolümüzde..
+        txtLog(f'{preLogInfo}Birden fazla sayfa yok, bu liste tek sayfadır.')                   
+        lastPageNo = 1                                                                          #: Sayfa sayısı bilgisi alınamadığında sayfa sayısı 1 olarak işaretlenir.
+        getMovieCount(lastPageNo)                                                               #: Sayfa bilgisi gönderiliyor.
+    except Exception as e:                                                                      ## Kontrolsüz! : Dom edinirken hata gerçekleşirse..
         if cmdLogOnOff:
-                print(preCmdErr, e)
-        # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
-        lastPageNo = 1
-        getMovieCount(lastPageNo)
-        txtLog(f'{preLogInfo}Birden fazla sayfa yok, bu liste tek sayfadır.')
+            print(preCmdErr,msgDevBug,e)                                                           
     finally:
         txtLog(f'{preLogInfo}Sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPageNo} olduğu öğrenildi.')
         return lastPageNo
@@ -99,7 +100,7 @@ def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
     except Exception as e:        
         print(f'Error getting movie count.')                                                      #: Dom edinirken hata gerçekleşirse..
         if cmdLogOnOff:
-                print(preCmdErr, e)                                                                                                                           ## Olası hata durumunda.
+                print(preCmdErr,msgDevBug,e)                                                                                                                           ## Olası hata durumunda.
         txtLog(f'{preLogErr}An error occurred while obtaining the number of movies.')
 
 def settingsFileSet(): #: Ayar dosyası kurulumu.
@@ -186,7 +187,7 @@ def txtLog(r_message, r_loglocation=None):                                      
         f = open(logFilePath, "a")                                                                          #: Eklemek üzere bir dosya açar, mevcut değilse dosyayı oluşturur
         f.writelines(f'{r_message}\n')                                                                      #:
         f.close()                                                                                           #:
-    except Exception as e:                                                                                  ## 
+    except Exception as e:                                                                                ## 
         if r_loglocation is not None:                                                                       ##
             print(f'Loglama işlemi {r_loglocation} konumunda {e} nedeniyle başarısız.')                     #:
         else:                                                                                               ##
@@ -228,12 +229,12 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                 currentListAvaliable = True
         except Exception as e: #: liste imzası olmadığı belirlenir.
             if cmdLogOnOff:
-                print(preCmdErr, e)
+                print(preCmdErr,msgDevBug,e)  
             metaOgUrl = ''
             currentListAvaliable = False
     except Exception as e:
         if cmdLogOnOff:
-                print(preCmdErr, e)
+            print(preCmdErr,msgDevBug,e)  
         currentListAvaliable = False
     finally:
         return currentListAvaliable, metaOgUrl
@@ -262,11 +263,12 @@ def getItCleanAfter(_):
 # > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
 
-siteProtocol, siteUrl = "https://", "letterboxd.com/"                               #: Saf domain'in parçalanarak birleştirilmesi
-siteDomain = siteProtocol + siteUrl                                                 #: Saf domain'in parçalanarak birleştirilmesi
-cmdLogOnOff = True                                                                 #: Cmd ekran bildirmeleri
+msgDevBug = 'An uncontrolled error has occurred. Please notify the developer.'      #: Kontrolsüz hataların oluştuğu yerlerde kullanılır.
 msgCancel = "The session was canceled because you did not verify the information."  #: Cancel msg
 msgUrlErr = "Enter a different URL, it's already entered. You can end the login by putting a period at the end of the url."
+siteProtocol, siteUrl = "https://", "letterboxd.com/"                               #: Saf domain'in parçalanarak birleştirilmesi
+siteDomain = siteProtocol + siteUrl                                                 #: Saf domain'in parçalanarak birleştirilmesi
+cmdLogOnOff = True                                                                  #: Cmd ekran bildirmeleri
 preCmdMiddleDot = cmdPre(u"\u00B7","cyan")                                          #: Cmd middle dot pre
 preCmdInput = cmdPre(">","green")                                                   #: Cmd input msg pre
 preCmdInfo = cmdPre("#","yellow")                                                   #: Cmd info msg pre
@@ -277,7 +279,8 @@ preLogErr = "Hata: "                                                            
 sessionHash = getRunTime()                                                          #: Generate start hash
 logDirName, exportDirName = settingsFileSet()                                       #: Set Export dir and Log dir
 logFilePath = f'{logDirName}/{sessionHash}.txt'                                     #: Set log file dir
-dirCheck([logDirName])                                                              #: Log file check                                     
+dirCheck([logDirName])                                                              #: Log file check      
+
 
 while True:
     os.system(f'color & cls & title Welcome %USERNAME%.')                           #: İlk başlangıç ve yeni başlangıçlara hazırlık.
@@ -306,7 +309,7 @@ while True:
                         print(f"{preBlankCount}{colored('Url acquisition completed. Moving on to the next steps.','green')}")       #: URL alımının sonlandığı bilgisini ekrana yazdırıyoruz.
                         break                                                                                                       #: URL alımını sonlandırıyoruz. Döngüden çıktık.
                 else:                                                                                                               ## Doğrulanmış URL daha önce işlem görecek URL listine eklenmiş ise..
-                    print(f'{preCmdInfo} You have already entered this address list.')                                               #: URL'in daha önce girildiğini ekrana yazdırıyoruz.
+                    print(f'{preCmdErr} You have already entered this address list.')                                               #: URL'in daha önce girildiğini ekrana yazdırıyoruz.
                     inputLoopNo -= 1                                                                                                #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
             else:                                                                                                                   ## Kullanıcının girdiği URL doğrulanmazsa..
                 print(f"{preCmdInfo} You did not enter a valid url.")                                                               #: Kullanıcının url'i doğrulanmadığında bilgilendirilir.
