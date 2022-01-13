@@ -202,11 +202,11 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                     txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.')
                 else:
                     #print(f'[{colored("!", color="yellow")}] Girdiğiniz liste linki eskimiştir, muhtemelen liste ismi yakın bir zamanda değişildi.')
-                    print(f'{preBlankCount}{colored(urlListItem, color="yellow")} adresini değiştirdik.')
-                    print(f'{preBlankCount}{colored(metaOgUrl, color="green")} adresinden devam ediyoruz.')
+                    print(f'{preBlankCount}{cmdPre("-","red")} {colored(urlListItem, color="yellow")} adresini değiştirdik.')
+                    print(f'{preBlankCount}{cmdPre("+","green")} {colored(metaOgUrl, color="green")} adresinden devam ediyoruz.')
                 txtLog(f'{preLogInfo}{urlListItem} listesi bulundu: {metaOgTitle}')
                 currentListAvaliable = True
-        except Exception as e: #: liste imzası olmadığı belirlenir.
+        except Exception as e: #: liste imzası olmadığı belirlenir.git
             print(f'{preBlankCount}List not found.', e)
             metaOgUrl = ''
             currentListAvaliable = False
@@ -284,7 +284,7 @@ while True:
                         print(msgUrlErr)
                         inputLoopNo -= 1
                 else:
-                    if urlListItem not in urlList:
+                    if approvedListUrl not in urlList:
                         urlList.append(approvedListUrl) # adding the element
                     else:
                         print(msgUrlErr)
