@@ -129,7 +129,8 @@ def signature(x): #: x: 0 start msg, 1 end msg
     try:
         if x == True:                                                           ## İmza seçimi bu olması durumunda.
             try:                                                                ## Liste sayfasından bilgiler çekmek.
-                print(colored('\nList info;', color="yellow"))                  #: Liste başlığı.
+                print(f"\nProcess No: ({len(urlList)}/{processLoopNo})")
+                print(colored('List info;', color="yellow"))                    #: Liste başlığı.
                                                                                 ## Liste bilgileri alınır.
                 listBy = soup.select("[itemprop=name]")[0].text                 #: Liste sahibin ismini çekiliyor.
                 listTitle = soup.select("[itemprop=title]")[0].text.strip()     #: Liste başlığının ismini çekiliyor.
@@ -137,6 +138,7 @@ def signature(x): #: x: 0 start msg, 1 end msg
                 listPT = arrow.get(listPublicationTime)                         #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/
                 listMovieCount =  getMovieCount(getListLastPageNo())            #: Listedeki film sayısı hesaplanıyor.
                                                                                 ## Liste bilgileri yazdırılır.
+                print(f'{preCmdMiddleDot} List Url: {currentUrListItem}')       #: List URL                              
                 print(f'{preCmdMiddleDot} List by {listBy}')                    # Liste sahibinin görünen adı yazdırılıyor.
                 print(f'{preCmdMiddleDot} List title: {listTitle}')             #: Liste başlığı yazdırılıyor.
                 print(f'{preCmdMiddleDot} Number of movies: {listMovieCount}')  #: Listede bulunan film sayısı yazdırılıyor.
@@ -156,13 +158,13 @@ def signature(x): #: x: 0 start msg, 1 end msg
             print(f'{preCmdMiddleDot} Film sayısı: {loopCount-1}')                                              #: Film sayısı hakkında ekrana bilgi yazdırılır.
             print(f'{preCmdMiddleDot} Tüm filmler {cmdBlink(open_csv,"yellow")} dosyasına aktarıldı.')          #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
             try:                                                                                                ## Seçili olan filtreleri ekrana yazdırabilmek için işlemler.
-                search_selected_decadeyear = currentDom.select(".smenu-subselected")[3].text                    #: Liste sayfasından ilgili filtre bilgisi alınıyor.
-                search_selected_genre = currentDom.select(".smenu-subselected")[2].text                         #: Liste sayfasından ilgili filtre bilgisi alınıyor.
-                search_selected_sortby = currentDom.select(".smenu-subselected")[0].text                        #: Liste sayfasından ilgili filtre bilgisi alınıyor.
+                domSelectedDecadeYear = currentDom.select(".smenu-subselected")[3].text                    #: Liste sayfasından ilgili filtre bilgisi alınıyor.
+                domSelectedGenre = currentDom.select(".smenu-subselected")[2].text                         #: Liste sayfasından ilgili filtre bilgisi alınıyor.
+                domSelectedSortBy = currentDom.select(".smenu-subselected")[0].text                        #: Liste sayfasından ilgili filtre bilgisi alınıyor.
                                                                                                                 ## Seçili filtreleri ekrana yazdırmalar.
-                print(f'{preCmdMiddleDot} Filtered as {search_selected_decadeyear} movies only was done by')    #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
-                print(f'{preCmdMiddleDot} Filtered as {search_selected_genre} only movies')                     #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
-                print(f'{preCmdMiddleDot} Movies sorted by {search_selected_sortby}')                           #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
+                print(f'{preCmdMiddleDot} Filtered as {domSelectedDecadeYear} movies only was done by')    #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
+                print(f'{preCmdMiddleDot} Filtered as {domSelectedGenre} only movies')                     #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
+                print(f'{preCmdMiddleDot} Movies sorted by {domSelectedSortBy}')                           #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
             except:
                 txtLog(f'{preLogErr}Film filtre bilgileri alınamadı..')
         log = f'{preLogInfo}İmza yazdırma işlemleri tamamlandı.'
@@ -185,34 +187,31 @@ def txtLog(r_message, r_loglocation=None): #: None: Kullanıcı log lokasyonunu 
 
 def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
     try:
-        
         try: #: meta etiketinden veri almayı dener eğer yoksa liste değil.
-            meta_test = visitList.find('meta', property="og:type").attrs['content']
-            # Meta etiketindeki bilgi sorgulanır. Sayfanın liste olup olmadığı anlaşışılır
-            if meta_test == "letterboxd:list":
-                txtLog(f'{preLogInfo}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {meta_test}')
-                # Liste ismini alıyoruz.
-                currentListName = visitList.find('meta', property="og:title").attrs['content']
-                print(f'{preBlankCount}{colored("Found it: ", color="green")}{currentListName}')
-                # Liste yönlendirimesi var mı bakıyoruz
-                currentUrl = visitList.find('meta', property="og:url").attrs['content']
-                if currentUrl == visitUserListUrl:
-                    txtLog(f'{preLogInfo}Liste adresi yönlendime içermiyor.')
-                    currentUrl = visitUserListUrl
+            metaOgType = getMetaContent('og:type') 
+            # Meta etiketindeki bilgi sorgulanır. Sayfanın liste olup olmadığı anlaşılır.
+            if metaOgType == "letterboxd:list":
+                txtLog(f'{preLogInfo}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {metaOgType}')
+                metaOgUrl = getMetaContent('og:url')                                    #: Liste yönlendirmesi var mı bakıyoruz
+                metaOgTitle = getMetaContent('og:title')                             #: Liste ismini alıyoruz.
+                bodyDataOwner = urlListItemDom.find('body').attrs['data-owner']                                              #: Liste sahibinin kullanıcı ismi.
+                print(f'{preBlankCount}{colored("Found it: ", color="green")}@{bodyDataOwner} "{metaOgTitle}"')          #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
+                if metaOgUrl == urlListItem:
+                    txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.')
                 else:
-                    print(f'[{colored("!", color="yellow")}] Girdiğiniz liste linki eskimiştir, muhtemelen liste ismi yakın bir zamanda değişildi.')
-                    print(f'{preBlankCount}{colored(visitUserListUrl, color="yellow")} adresini değiştirdik.')
-                    print(f'{preBlankCount}{colored(currentUrl, color="green")} adresinden devam ediyoruz.')
-                txtLog(f'{preLogInfo}{listUrl} listesi bulundu: {currentListName}')
+                    #print(f'[{colored("!", color="yellow")}] Girdiğiniz liste linki eskimiştir, muhtemelen liste ismi yakın bir zamanda değişildi.')
+                    print(f'{preBlankCount}{colored(urlListItem, color="yellow")} adresini değiştirdik.')
+                    print(f'{preBlankCount}{colored(metaOgUrl, color="green")} adresinden devam ediyoruz.')
+                txtLog(f'{preLogInfo}{urlListItem} listesi bulundu: {metaOgTitle}')
                 currentListAvaliable = True
-        except: #: liste imzası olmadığı belirlenir.
-            print(f'{preBlankCount}List not found.')
-            currentUrl = ''
+        except Exception as e: #: liste imzası olmadığı belirlenir.
+            print(f'{preBlankCount}List not found.', e)
+            metaOgUrl = ''
             currentListAvaliable = False
     except:
         currentListAvaliable = False
     finally:
-        return currentListAvaliable, currentUrl
+        return currentListAvaliable, metaOgUrl
 
 def test_pause(): #: Geliştirici duraklatmaları için kalıp.
     os.system('echo Test için durduruluyor. & pause >nul')
@@ -223,9 +222,21 @@ def cmdPre(m,c): #: Mesaj ön ekleri için kalıp.
 def cmdBlink(m,c):
     return colored(m,c,attrs=["blink"])
     
+def getRunTime():
+    return datetime.now().strftime('%d%m%Y%H%M%S')
+
+def getMetaContent(_):
+    return urlListItemDom.find('meta', property=_).attrs['content']
+
+def getBodyOwner():
+    return urlListItemDom.find('body').attrs['data-owner']
+
+def getItCleanAfter(_):
+    return currentUrListItem[currentUrListItem.index(_)+len(_):].replace('/',"")
+
 # > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
-cmdRunTime = datetime.now().strftime('%d%m%Y%H%M%S') #: Run time check - Generate session hash
+ #: Run time check - Generate session hash
 os.system(f'color & cls & title Welcome %USERNAME%.')
 # siteProtocol, siteUrl = "https://", "letterboxd.com/"     #: Saf domain'in parçalanarak birleştirilmesi
 # siteDomain = siteProtocol + siteUrl                       #: Saf domain'in parçalanarak birleştirilmesi
@@ -238,31 +249,62 @@ preCmdErr = cmdPre("!","red")                                                   
 preBlankCount = 4*' '                                                               #: Cmd msg pre blank calc
 preLogInfo = "Bilgi: "                                                              #: Log file ingo msg pre
 preLogErr = "Hata: "                                                                #: Log file err msg pre
-
-print(f'{preCmdInfo} Session hash: {cmdBlink(cmdRunTime,"yellow")}') #: Oturum için farklı bir isim üretildi.
-logDirName, exportDirName = settingsFileSet()
-logFilePath = f'{logDirName}/{cmdRunTime}.txt'
+sessionHash = getRunTime()                                                          #: Generate start hash
+logDirName, exportDirName = settingsFileSet()                                       #: Set Export dir and Log dir
+logFilePath = f'{logDirName}/{sessionHash}.txt'                                     #: Set log file dir
 dirCheck([logDirName]) # Log file check
-open_csv = f'{exportDirName}/{cmdRunTime}.csv' 
 
 while True:
-    listUrl = str(input(f'{preCmdInput} List Url: ')).lower() #: List url alındı ve str küçültüldü.
-    visitUserListUrl = listUrl
-    visitList = doReadPage(visitUserListUrl)
-    userListAvailable, approvedListUrl = userListCheck() #: Liste mevcutluğu kontrol ediliyor.
-    if userListAvailable:
-        editedListVisitUrl = f'{approvedListUrl}detail/' # Guest generate url. approvedListUrl https://letterboxd.com/username/list/listname/
-        soup = doReadPage(editedListVisitUrl)
-        url = f'{editedListVisitUrl}page/'
+    print(f'{preCmdInfo} Session hash: {cmdBlink(sessionHash,"yellow")}')                #: Oturum için farklı bir isim üretildi.
+    urlList = []
+    inputLoopNo = 0 
+    processLoopNo = 0
+
+    while True:
+        inputLoopNo += 1
+        urlListItem = str(input(f'{inputLoopNo})  List URL (Press ENTER to end the entry): ')).lower()  #: List url alındı ve str küçültüldü.
+        if len(urlListItem) > 0:                                                                        #: No Blank
+            if urlListItem == ".":                                                                      
+                break
+            else:
+                pass
+            urlListItemDom = doReadPage(urlListItem)
+            userListAvailable, approvedListUrl = userListCheck()                                        #: Liste mevcutluğu kontrol ediliyor.
+            if userListAvailable: 
+                if urlListItem[-1] == ".":
+                    if urlListItem not in urlList:
+                        urlList.append(approvedListUrl) # adding the element
+                        print("Url'ler alındı. Sonraki işleme geçiliyor.")
+                        break
+                    else:
+                        print('Farklı bir URL girin bu zaten girilmiş.')
+                        inputLoopNo -= 1
+                else:
+                    if urlListItem not in urlList:
+                        urlList.append(approvedListUrl) # adding the element
+                    else:
+                        print('Farklı bir URL girin bu zaten girilmiş.')
+                        inputLoopNo -= 1
+            else:
+                pass
+        else:
+            pass
+
+    for currentUrListItem in urlList:
+        processLoopNo += 1
+        open_csv = f"{exportDirName}/{getRunTime()}_{getBodyOwner()}_{getItCleanAfter('/list/')}.csv" 
+        editedUrlListItem = f'{currentUrListItem}detail/' # Guest generate url. approvedListUrl https://letterboxd.com/username/list/listname/
+        soup = doReadPage(editedUrlListItem)
+        url = f'{editedUrlListItem}page/'
         # Karşılama mesajı, kullanıcının girdiği bilgleri ve girilen bilgilere dayanarak listenin bilgilerini yazdırır.
         signature(1)
         # > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
-        print(f'{preCmdMiddleDot} Link: {editedListVisitUrl}')
+        print(f'{preCmdMiddleDot} Link: {editedUrlListItem}')
         ent = input(f'\n{preCmdInput} Press enter to confirm the entered information. (Enter)')
         if ent == "":
             print(f'{preBlankCount}{colored("List confirmed.", color="green")}')
             txtLog(f'{preLogInfo}Saf sayfaya erişim başlatılıyor.')
-            soup = doReadPage(editedListVisitUrl) #: Verinin çekileceği dom'a filtre ekleniyor.
+            soup = doReadPage(editedUrlListItem) #: Verinin çekileceği dom'a filtre ekleniyor.
             lastPageNo = getListLastPageNo()
             dirCheck([exportDirName]) #: Export klasörünün kontrolü.
             with open(f'{open_csv}', 'w', newline='', encoding="utf-8") as file: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
@@ -280,9 +322,6 @@ while True:
                 file.close()
             txtLog(f'{preLogInfo}Success!')
             signature(0)
-            doReset()
         else:
             print(msgCancel)
             txtLog(preLogInfo + msgCancel)
-            doReset()
-        break
