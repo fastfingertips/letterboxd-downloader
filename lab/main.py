@@ -138,11 +138,13 @@ def signature(x): #: x: 0 start msg, 1 end msg
                 listPT = arrow.get(listPublicationTime)                         #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/
                 listMovieCount =  getMovieCount(getListLastPageNo())            #: Listedeki film sayısı hesaplanıyor.
                                                                                 ## Liste bilgileri yazdırılır.
-                print(f'{preCmdMiddleDot} List Url: {currentUrListItem}')       #: List URL                              
+                
                 print(f'{preCmdMiddleDot} List by {listBy}')                    # Liste sahibinin görünen adı yazdırılıyor.
                 print(f'{preCmdMiddleDot} List title: {listTitle}')             #: Liste başlığı yazdırılıyor.
+                print(f'{preCmdMiddleDot} List URL: {currentUrListItem}')       #: List URL                              
                 print(f'{preCmdMiddleDot} Number of movies: {listMovieCount}')  #: Listede bulunan film sayısı yazdırılıyor.
                 print(f'{preCmdMiddleDot} Published: {listPT.humanize()}')      #: or print(f'Published: {listPtime.humanize(granularity=["year","month", "day", "hour", "minute"])}')
+                print(f'{preCmdMiddleDot} Process URL: {editedUrlListItem}')
                 try:                                                            ## Search list update time
                     listUpdateTime = soup.select(".updated time")[0].text       #: Liste düzenlenme vakti çekiliyor.
                     listUT = arrow.get(listUpdateTime)                          #: Çekilen liste düzenlenme vakti düzenleniyor.
@@ -214,7 +216,7 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
         return currentListAvaliable, metaOgUrl
 
 def test_pause(): #: Geliştirici duraklatmaları için kalıp.
-    os.system('echo Test için durduruluyor. & pause >nul')
+    os.system(f"echo {preCmdInfo} {cmdBlink('Enter to continue.','green')} & pause >nul")
 
 def cmdPre(m,c): #: Mesaj ön ekleri için kalıp.
     return f'[{colored(m,color=c)}]'
@@ -290,7 +292,7 @@ while True:
             else:
                 pass
         else:
-            pass
+            inputLoopNo -= 1
 
     for currentUrListItem in urlList:
         processLoopNo += 1
@@ -301,7 +303,6 @@ while True:
         # Karşılama mesajı, kullanıcının girdiği bilgleri ve girilen bilgilere dayanarak listenin bilgilerini yazdırır.
         signature(1)
         # > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
-        print(f'{preCmdMiddleDot} Link: {editedUrlListItem}')
         ent = input(f'\n{preCmdInput} Press enter to confirm the entered information. (Enter)')
         if ent == "":
             print(f'{preBlankCount}{colored("List confirmed.", color="green")}')
@@ -315,7 +316,7 @@ while True:
                 # Filmleri çekiyoruz
                 loopCount = 1
                 # x sıfırdan başlıyor
-                print("\nListedeki filmler:")
+                print("\nMovies on the list:")
                 for x in range(int(lastPageNo)):
                     txtLog(f'Connecting to: {url}{str(x+1)}')
                     currentDom = doReadPage(f'{url}{str(x+1)}')
@@ -327,3 +328,4 @@ while True:
         else:
             print(msgCancel)
             txtLog(preLogInfo + msgCancel)
+    test_pause()
