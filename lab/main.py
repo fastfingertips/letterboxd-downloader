@@ -55,7 +55,7 @@ def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
         urlDom = BeautifulSoup(urlResponseCode.content.decode('utf-8'), 'html.parser')  #: Get page dom.               
         return urlDom                                                                   #: Return page dom.
     except:                                                                             #: Dom edinirken hata gerçekleşirse..
-        print(f'{preBlankCount}Connection to address failed.')
+        print(f'{preCmdErr} Connection to address failed.')
         txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]')
 
 def doReset():  # Porgramı yeniden başlat
@@ -207,7 +207,8 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                 txtLog(f'{preLogInfo}{urlListItem} listesi bulundu: {metaOgTitle}')
                 currentListAvaliable = True
         except Exception as e: #: liste imzası olmadığı belirlenir.git
-            print(f'{preBlankCount}List not found.', e)
+            if logOnOff:
+                print(f'{preCmdErr} List not found.', e)
             metaOgUrl = ''
             currentListAvaliable = False
     except:
@@ -242,7 +243,7 @@ def getItCleanAfter(_):
 
 # siteProtocol, siteUrl = "https://", "letterboxd.com/"     #: Saf domain'in parçalanarak birleştirilmesi
 # siteDomain = siteProtocol + siteUrl                       #: Saf domain'in parçalanarak birleştirilmesi
-
+logOnOff = True
 msgCancel = "The session was canceled because you did not verify the information."  #: Cancel msg
 msgUrlErr = "Enter a different URL, it's already entered. You can end the login by putting a period at the end of the url."
 preCmdMiddleDot = cmdPre(u"\u00B7","cyan")                                          #: Cmd middle dot pre
@@ -278,7 +279,7 @@ while True:
                 if urlListItem[-1] == ".":
                     if urlListItem not in urlList:
                         urlList.append(approvedListUrl) # adding the element
-                        print("Url alımı tamamlandı. Sonraki işleme geçiliyor.")
+                        print(f"{preBlankCount} {colored('Url acquisition completed. Moving on to the next steps.','green')}")
                         break
                     else:
                         print(msgUrlErr)
@@ -290,7 +291,7 @@ while True:
                         print(msgUrlErr)
                         inputLoopNo -= 1
             else:
-                pass
+                print(f"{preCmdErr} Invalid URL entry.")
         else:
             inputLoopNo -= 1
 
