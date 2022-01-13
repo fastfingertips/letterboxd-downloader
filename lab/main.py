@@ -198,13 +198,27 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                 metaOgUrl = getMetaContent('og:url')                                    #: Liste yönlendirmesi var mı bakıyoruz
                 metaOgTitle = getMetaContent('og:title')                             #: Liste ismini alıyoruz.
                 bodyDataOwner = getBodyOwner()                                             #: Liste sahibinin kullanıcı ismi.
-                print(f'{preBlankCount}{colored("Found it: ", color="green")}@{bodyDataOwner} "{metaOgTitle}"')          #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
+                print(f'{preBlankCount}{colored("Found it: ", color="green")}@{colored(bodyDataOwner,"yellow")} "{colored(metaOgTitle,"yellow")}"')          #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
                 if metaOgUrl == urlListItem:
                     txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.')
                 else:
                     #print(f'[{colored("!", color="yellow")}] Girdiğiniz liste linki eskimiştir, muhtemelen liste ismi yakın bir zamanda değişildi.')
-                    print(f'{preBlankCount}{cmdPre("-","red")} {colored(urlListItem, color="yellow")} adresini değiştirdik.')
-                    print(f'{preBlankCount}{cmdPre("+","green")} {colored(metaOgUrl, color="green")} adresinden devam ediyoruz.')
+                    print(f'{preBlankCount}({colored("+","red")}): {colored(urlListItem, color="yellow")} adresini')
+                    if urlListItem in metaOgUrl:
+                        msgInputUrl = colored(urlListItem, color="yellow")
+                        msgMetaOgUrlChange = colored(metaOgUrl.replace(urlListItem,""), color="green")
+                    else:
+                        metaLoop = len(metaOgUrl)
+                        msgMetaOgUrlChange = ''
+                        msgInputUrl = ''
+                        for i in range(metaLoop):
+                                # print(urlListItem[i], metaOgUrl[i], urlListItem[i]==metaOgUrl[i])
+                                if urlListItem[i] == metaOgUrl[i]:
+                                    msgMetaOgUrlChange += colored(metaOgUrl[i], color="yellow")
+                                else:
+                                    msgMetaOgUrlChange += colored(metaOgUrl[i], color="green")
+
+                    print(f'{preBlankCount}({colored("+","green")}): {msgInputUrl}{msgMetaOgUrlChange} şeklinde değiştirdik.')
                 txtLog(f'{preLogInfo}{urlListItem} listesi bulundu: {metaOgTitle}')
                 currentListAvaliable = True
         except Exception as e: #: liste imzası olmadığı belirlenir.git
