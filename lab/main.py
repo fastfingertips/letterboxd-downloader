@@ -156,9 +156,9 @@ def signature(x): #: x: 0 start msg, 1 end msg
             except:                                                             ## Hata alınması durumunda yapıalcak işlemler.
                 txtLog(f'{preLogErr}Liste bilgileri çekilirken hata.')          #: Log dosyasına hata hakkında bilgi yazdırılıyor.
         else:                                                                                                   ## Diğer imzayı istemesi durumunda.
-            print(f'\n{preCmdMiddleDot} Filename: {open_csv}')                                                  #: CSV dosyasının ismi hakkında ekrana bilgi yazdırılır.
+            print(f'\n{preCmdMiddleDot} Filename: {openCsv}')                                                  #: CSV dosyasının ismi hakkında ekrana bilgi yazdırılır.
             print(f'{preCmdMiddleDot} Film sayısı: {loopCount-1}')                                              #: Film sayısı hakkında ekrana bilgi yazdırılır.
-            print(f'{preCmdMiddleDot} Tüm filmler {cmdBlink(open_csv,"yellow")} dosyasına aktarıldı.')          #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
+            print(f'{preCmdMiddleDot} Tüm filmler {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.')          #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
             try:                                                                                                ## Seçili olan filtreleri ekrana yazdırabilmek için işlemler.
                 domSelectedDecadeYear = currentDom.select(".smenu-subselected")[3].text                    #: Liste sayfasından ilgili filtre bilgisi alınıyor.
                 domSelectedGenre = currentDom.select(".smenu-subselected")[2].text                         #: Liste sayfasından ilgili filtre bilgisi alınıyor.
@@ -296,7 +296,7 @@ while True:
 
     for currentUrListItem in urlList:
         processLoopNo += 1
-        open_csv = f"{exportDirName}/{getRunTime()}_{getBodyOwner()}_{getItCleanAfter('/list/')}.csv" 
+        openCsv = f"{exportDirName}/{getRunTime()}_{getBodyOwner()}_{getItCleanAfter('/list/')}.csv" 
         editedUrlListItem = f'{currentUrListItem}detail/' # Guest generate url. approvedListUrl https://letterboxd.com/username/list/listname/
         soup = doReadPage(editedUrlListItem)
         url = f'{editedUrlListItem}page/'
@@ -310,8 +310,8 @@ while True:
             soup = doReadPage(editedUrlListItem) #: Verinin çekileceği dom'a filtre ekleniyor.
             lastPageNo = getListLastPageNo()
             dirCheck([exportDirName]) #: Export klasörünün kontrolü.
-            with open(f'{open_csv}', 'w', newline='', encoding="utf-8") as file: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
-                writer = csv.writer(file)
+            with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
+                writer = csv.writer(csvFile)
                 writer.writerow(["Title", "Year"])
                 # Filmleri çekiyoruz
                 loopCount = 1
@@ -322,7 +322,7 @@ while True:
                     currentDom = doReadPage(f'{url}{str(x+1)}')
                     loopCount = doPullFilms(loopCount, currentDom)
                 # Açtığımız dosyayı manuel kapattık
-                file.close()
+                csvFile.close()
             txtLog(f'{preLogInfo}Success!')
             signature(0)
         else:
