@@ -140,17 +140,16 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
 def signature(x): #: x: 0 start msg, 1 end msg
     try:
         if x == True:                                                                                       ## Kullanıcı tarafından belirlen imza seçimi bu olması durumunda.
-            try:                                                                                            ## Liste sayfasından bilgiler çekmek.
-                print(f"\nProcess No: ({len(urlList)}/{processLoopNo})")                                    #: İşlem durumu, sırası ekrana bastırılır.
-                print(colored('List info;', color="yellow"))                                                #: Liste başlığı.
-                                                                                                            ## Liste bilgileri alınır.
+            try:                                                                                            ## Liste sayfasından bilgiler çekmek.                                                                                                            ## Liste bilgileri alınır.
                 listBy = soup.select("[itemprop=name]")[0].text                                             #: Liste sahibin ismini çekiliyor.
                 listTitle = soup.select("[itemprop=title]")[0].text.strip()                                 #: Liste başlığının ismini çekiliyor.
                 listPublicationTime = soup.select(".published time")[0].text                                #: Liste oluşturulma tarihi çekiliyor.
                 listPT = arrow.get(listPublicationTime)                                                     #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/
-                listMovieCount =  getMovieCount(getListLastPageNo())                                        #: Listedeki film sayısı hesaplanıyor.
-                
-                print(supLine)                                                                                            ## Liste bilgileri yazdırılır.
+                listMovieCount =  getMovieCount(getListLastPageNo())                                        #: Listedeki film sayısı hesaplanıyor.                
+                                                                                                           ## Liste bilgileri yazdırılır.              
+                print(f"\n{preBlankCount}Process No: ({len(urlList)}/{processLoopNo})")                                    #: İşlem durumu, sırası ekrana bastırılır.
+                print(supLine) 
+                print(f'{preCmdInfo} {colored("List info;", color="yellow")}')                                                #: Liste başlığı.
                 print(f'{preCmdMiddleDot} List by {listBy}')                                                # Liste sahibinin görünen adı yazdırılıyor.
                 print(f'{preCmdMiddleDot} List title: {listTitle}')                                         #: Liste başlığı yazdırılıyor.
                 print(f'{preCmdMiddleDot} Number of movies: {listMovieCount}')                              #: Listede bulunan film sayısı yazdırılıyor.
@@ -283,8 +282,8 @@ def errorLine(e):
 # > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
 
-supLine = '¯'*30                                                                                      ## Diğer imzayı istemesi durumunda.
-subLine = '_'*30   
+supLine = '_'*80                                                                                      ## Diğer imzayı istemesi durumunda.
+subLine = '¯'*80  
 msgDevBug = 'An uncontrolled error has occurred. Please notify the developer.'      #: Kontrolsüz hataların oluştuğu yerlerde kullanılır.
 msgCancel = "The session was canceled because you did not verify the information."  #: Cancel msg
 msgUrlErr = "Enter a different URL, it's already entered. You can end the login by putting a period at the end of the url."
