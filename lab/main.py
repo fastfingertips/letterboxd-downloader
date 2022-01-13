@@ -13,6 +13,9 @@ try: #: Term Color NET/lOCAL
     from termcolor import colored, cprint
 except:
     from libs.termcolor110.termcolor import colored, cprint
+from inspect import currentframe
+
+
 
 def dirCheck(dirs): # List
     # Buradaki ifler tekli kontrol yapabş-ilmemize yarar. Örneğin e'yi false yollarım ve sadece l'yi çekebilirim.
@@ -45,29 +48,31 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
             writer.writerow([str(movieName), str(movieYear)])
             loopCount += 1
         return loopCount
-    except:
-        print('An error was encountered while obtaining movie information.')
+    except Exception as e:
+        if cmdLogOnOff:
+            errorLine(e)  
+            txtLog('An error was encountered while obtaining movie information.')
 
 def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
     try:
         txtLog(f'{preLogInfo}Trying connect to [{tempUrl}]')                            #: Log dosyasına bağlantı başlangıcında bilgi veriliyor.
         urlResponseCode = requests.get(tempUrl)                                         #: Get response code.
         urlDom = BeautifulSoup(urlResponseCode.content.decode('utf-8'), 'html.parser')  #: Get page dom.               
-        return urlDom                                                                   #: Return page dom.
-    except Exception as e:                                                              #: Dom edinirken hata gerçekleşirse..
+        return urlDom                                                                #: Return page dom.
+    except Exception as e:
         if cmdLogOnOff:
-            print(preCmdErr,msgDevBug,e)
-        txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]')
+            errorLine(e)                                                                #: Dom edinirken hata gerçekleşirse..
+            txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]')
 
 def doReset():  # Porgramı yeniden başlat
     try:
         os.system('echo Press and any key to reboot & pause >nul')
         os.system('echo Confirm reboot press any key again & pause >nul')
         os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
-    except Exception as e:                                                              #: Dom edinirken hata gerçekleşirse..
+    except Exception as e:
         if cmdLogOnOff:
-                print(preCmdErr,msgDevBug,e)
-        txtLog(preLogErr + 'Attempting to restart the program failed.')
+            errorLine(e)  
+            txtLog(preLogErr + 'Attempting to restart the program failed.')
 
 def getListLastPageNo():  # Listenin son sayfasını öğren
     try:
@@ -78,12 +83,12 @@ def getListLastPageNo():  # Listenin son sayfasını öğren
         txtLog(f'{preLogInfo}Liste birden çok sayfaya ({lastPageNo}) sahiptir.')
         getMovieCount(lastPageNo)
     except AttributeError:                                                                            ## Kontrolümüzde..
-        txtLog(f'{preLogInfo}Birden fazla sayfa yok, bu liste tek sayfadır.')                   
+        txtLog(f'{preLogInfo}Birden fazla sayfa yok, bu liste tek sayfadır.',AttributeError)                   
         lastPageNo = 1                                                                          #: Sayfa sayısı bilgisi alınamadığında sayfa sayısı 1 olarak işaretlenir.
         getMovieCount(lastPageNo)                                                               #: Sayfa bilgisi gönderiliyor.
-    except Exception as e:                                                                      ## Kontrolsüz! : Dom edinirken hata gerçekleşirse..
+    except Exception as e:
         if cmdLogOnOff:
-            print(preCmdErr,msgDevBug,e)                                                           
+            errorLine(e)                                                             
     finally:
         txtLog(f'{preLogInfo}Sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPageNo} olduğu öğrenildi.')
         return lastPageNo
@@ -96,11 +101,11 @@ def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
         movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount                                                                  #: Toplam film sayısını belirlemek.
         txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.")                                                   #: Film sayısı hesaplandıktan sonra ekrana yazdırılır.
         return movieCount                                                                                                               #: Film sayısı çağrıya gönderilir.
-    except Exception as e:        
-        print(f'Error getting movie count.')                                                      #: Dom edinirken hata gerçekleşirse..
+    except Exception as e:
         if cmdLogOnOff:
-                print(preCmdErr,msgDevBug,e)                                                                                                                           ## Olası hata durumunda.
-        txtLog(f'{preLogErr}An error occurred while obtaining the number of movies.')
+            errorLine(e)          
+            txtLog(f'Error getting movie count.')                                                      #: Dom edinirken hata gerçekleşirse..                                                                                                                        ## Olası hata durumunda.
+            txtLog(f'{preLogErr}An error occurred while obtaining the number of movies.')
 
 def settingsFileSet(): #: Ayar dosyası kurulumu.
     if os.path.exists(settingsFileName):
@@ -111,8 +116,10 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
                     logDirName = jsonObject['log_dir']
                     exportDirName = jsonObject['export_dir']
                     break
-            except Exception as msgExcept:
-                print(f'Ayarlarınız {msgExcept} nedeniyle alınamadı.')
+            except Exception as e:
+                if cmdLogOnOff:
+                    errorLine(e)  
+                    txtLog(f'Ayarlarınız {e} nedeniyle alınamadı.')
     else:
         while True:
             try:
@@ -126,8 +133,10 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
                 with open(settingsFileName, 'w') as json_file:
                     json.dump(settings_dict, json_file)
                 break
-            except Exception as msgExcept:
-                print(f'Your settings could not be saved due to {msgExcept}.')
+            except Exception as e:
+                if cmdLogOnOff:
+                    errorLine(e)   
+                    txtLog(f'Your settings could not be saved due to {e}.')
     return logDirName, exportDirName
 
 def signature(x): #: x: 0 start msg, 1 end msg
@@ -145,24 +154,29 @@ def signature(x): #: x: 0 start msg, 1 end msg
                                                                                                             ## Liste bilgileri yazdırılır.
                 print(f'{preCmdMiddleDot} List by {listBy}')                                                # Liste sahibinin görünen adı yazdırılıyor.
                 print(f'{preCmdMiddleDot} List title: {listTitle}')                                         #: Liste başlığı yazdırılıyor.
-                print(f'{preCmdMiddleDot} List URL: {currentUrListItem}')                                   #: List URL                              
                 print(f'{preCmdMiddleDot} Number of movies: {listMovieCount}')                              #: Listede bulunan film sayısı yazdırılıyor.
                 print(f'{preCmdMiddleDot} Published: {listPT.humanize()}')                                  #: or print(f'Published: {listPtime.humanize(granularity=["year","month", "day", "hour", "minute"])}')
+                print(f'{preCmdMiddleDot} List URL: {currentUrListItem}')                                   #: List URL                              
                 print(f'{preCmdMiddleDot} Process URL: {editedUrlListItem}')                                #: İşlem görecek URL ekrana bastırılır.
                 try:                                                                                        ## Search list update time
                     listUpdateTime = soup.select(".updated time")[0].text                                   #: Liste düzenlenme vakti çekiliyor.
                     listUT = arrow.get(listUpdateTime)                                                      #: Çekilen liste düzenlenme vakti düzenleniyor.
                     msgListUpdateTime = listUT.humanize()                                                   #: Çekilen liste düzenlenme vakti kullanıma hazırlanıyor.
-                except:                                                                                     ## Hata alınırsa liste düzenlenmemiş varsayılır.
+                except Exception as e:
+                    if cmdLogOnOff:
+                        errorLine(e)                                                                                     ## Hata alınırsa liste düzenlenmemiş varsayılır.
                     msgListUpdateTime = 'No editing.'                                                       #: Liste düzenlenmemiş.
                 finally:                                                                                    ## Kontrol sonu işlemleri.
                     print(f'{preCmdMiddleDot} Updated: {msgListUpdateTime}')                                #: Hazırlık sonu mesajı.
-            except:                                                                                         ## Hata alınması durumunda yapıalcak işlemler.
-                txtLog(f'{preLogErr}Liste bilgileri çekilirken hata.')                                      #: Log dosyasına hata hakkında bilgi yazdırılıyor.
+            except Exception as e:
+                if cmdLogOnOff:
+                    errorLine(e)                                                                                        ## Hata alınması durumunda yapıalcak işlemler.
+                    txtLog(f'{preLogErr}Liste bilgileri çekilirken hata.')                                      #: Log dosyasına hata hakkında bilgi yazdırılıyor.
         else:                                                                                               ## Diğer imzayı istemesi durumunda.
-            print(f'\n{preCmdMiddleDot} Filename: {openCsv}')                                               #: CSV dosyasının ismi hakkında ekrana bilgi yazdırılır.
-            print(f'{preCmdMiddleDot} Film sayısı: {loopCount-1}')                                          #: Film sayısı hakkında ekrana bilgi yazdırılır.
+            print('_'*30)
             print(f'{preCmdMiddleDot} Tüm filmler {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.')       #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
+            print(f'{preCmdMiddleDot} Filename: {openCsv}')                                               #: CSV dosyasının ismi hakkında ekrana bilgi yazdırılır.
+            print(f'{preCmdMiddleDot} Film sayısı: {loopCount-1}')                                          #: Film sayısı hakkında ekrana bilgi yazdırılır.
             try:                                                                                            ## Seçili olan filtreleri ekrana yazdırabilmek için işlemler.
                 domSelectedDecadeYear = currentDom.select(".smenu-subselected")[3].text                     #: Liste sayfasından ilgili filtre bilgisi alınıyor.
                 domSelectedGenre = currentDom.select(".smenu-subselected")[2].text                          #: Liste sayfasından ilgili filtre bilgisi alınıyor.
@@ -171,12 +185,15 @@ def signature(x): #: x: 0 start msg, 1 end msg
                 print(f'{preCmdMiddleDot} Filtered as {domSelectedDecadeYear} movies only was done by')     #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
                 print(f'{preCmdMiddleDot} Filtered as {domSelectedGenre} only movies')                      #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
                 print(f'{preCmdMiddleDot} Movies sorted by {domSelectedSortBy}')                            #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
-            except:                                                                                         ## Filtre bilgileri edinirken bir hata oluşursa..
-                txtLog(f'{preLogErr}Film filtre bilgileri alınamadı..')                                     #: Log dosyasına hata bilgisi verilir.
+                print('¯'*30)
+            except Exception as e:
+                if cmdLogOnOff:
+                    errorLine(e)                                                                                           ## Filtre bilgileri edinirken bir hata oluşursa..
+                    txtLog(f'{preLogErr}Film filtre bilgileri alınamadı..')                                     #: Log dosyasına hata bilgisi verilir.
         log = f'{preLogInfo}İmza yazdırma işlemleri tamamlandı.'                                            #: İmza sonu log bilgisi işlenir.
-    except:                                                                                                 ## İmza sürecinde bir hata gerçekleşirse..
-        if cmdLogOnOff:                                                                                     #: Duruma bağlı cmd ekran bilgisi
-            print('İmza seçimi başarısız.')                                                                 #: Ekrana bilgi.
+    except Exception as e: #: İmza seçimi başarısız.
+        if cmdLogOnOff:
+            errorLine(e)                                                                                     #: Duruma bağlı cmd ekran bilgisi                                                               #: Ekrana bilgi.
         log = f'{preLogErr}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.'                       #: Log dosyasına yazılacak bilgi aktarması.
     finally:                                                                                                ## Seçili imza sonunda uygulanacaklar..
         txtLog(log)                                                                                         #: Log dosyasına bilgi verilir.
@@ -226,14 +243,14 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                     print(f'{preBlankCount}({colored("+","green")}): {msgInputUrl}{msgMetaOgUrlChange} şeklinde değiştirdik.')
                 txtLog(f'{preLogInfo}{urlListItem} listesi bulundu: {metaOgTitle}')
                 currentListAvaliable = True
-        except Exception as e: #: liste imzası olmadığı belirlenir.
+        except Exception as e:
             if cmdLogOnOff:
-                print(preCmdErr,msgDevBug,e)  
+                errorLine(e)
             metaOgUrl = ''
             currentListAvaliable = False
     except Exception as e:
         if cmdLogOnOff:
-            print(preCmdErr,msgDevBug,e)  
+            errorLine(e)
         currentListAvaliable = False
     finally:
         return currentListAvaliable, metaOgUrl
@@ -257,8 +274,12 @@ def getBodyOwner():
     return urlListItemDom.find('body').attrs['data-owner']
 
 def getItCleanAfter(_):
-    return currentUrListItem[currentUrListItem.index(_)+len(_):].replace('/',"")
+    return txtLog(currentUrListItem[currentUrListItem.index(_)+len(_):].replace('/',""))
 
+# Error Code generator
+def errorLine(e):
+    cl = currentframe()
+    txtLog(f'{preLogErr} Error on line {cl.f_back.f_lineno} Exception Message: {e}')
 # > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
 
