@@ -268,7 +268,7 @@ while True:
 
     while True:
         inputLoopNo += 1
-        urlListItem = str(input(f'{preCmdInput}[{inputLoopNo}]  List URL (Press ENTER to end the entry): ')).lower()  #: List url alındı ve str küçültüldü.
+        urlListItem = str(input(f'{preCmdInput} List URL[{inputLoopNo}]: ')).lower()  #: List url alındı ve str küçültüldü.
  
         if len(urlListItem) > 0:   
             if siteDomain in urlListItem and urlListItem != ".":
@@ -281,13 +281,13 @@ while True:
                             print(f"{preBlankCount}{colored('Url acquisition completed. Moving on to the next steps.','green')}")
                             break
                         else:
-                            print(msgUrlErr)
+                            print(preCmdErr,msgUrlErr)
                             inputLoopNo -= 1
                     else:
                         if approvedListUrl not in urlList:
                             urlList.append(approvedListUrl) # adding the element
                         else:
-                            print(msgUrlErr)
+                            print(preCmdErr,msgUrlErr)
                             inputLoopNo -= 1
                 else:
                     print(f"{preCmdErr} Invalid URL entry.")
