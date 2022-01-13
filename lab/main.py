@@ -2,7 +2,6 @@ import os #: https://stackoverflow.com/a/48010814
 import sys
 import csv
 import json
-from types import NoneType
 import arrow
 import requests
 from pandas import DataFrame
@@ -78,7 +77,7 @@ def getListLastPageNo():  # Listenin son sayfasını öğren
         lastPageNo = soup.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text    # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
         txtLog(f'{preLogInfo}Liste birden çok sayfaya ({lastPageNo}) sahiptir.')
         getMovieCount(lastPageNo)
-    except NoneType:                                                                            ## Kontrolümüzde..
+    except AttributeError:                                                                            ## Kontrolümüzde..
         txtLog(f'{preLogInfo}Birden fazla sayfa yok, bu liste tek sayfadır.')                   
         lastPageNo = 1                                                                          #: Sayfa sayısı bilgisi alınamadığında sayfa sayısı 1 olarak işaretlenir.
         getMovieCount(lastPageNo)                                                               #: Sayfa bilgisi gönderiliyor.
@@ -104,10 +103,10 @@ def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
         txtLog(f'{preLogErr}An error occurred while obtaining the number of movies.')
 
 def settingsFileSet(): #: Ayar dosyası kurulumu.
-    if os.path.exists('settings.json'):
+    if os.path.exists(settingsFileName):
         while True:
             try:
-                with open("settings.json") as jsonFile:
+                with open(settingsFileName) as jsonFile:
                     jsonObject = json.load(jsonFile)
                     logDirName = jsonObject['log_dir']
                     exportDirName = jsonObject['export_dir']
@@ -117,14 +116,14 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
     else:
         while True:
             try:
-                print('The settings file could not be found. Please enter the required information.')
-                logDirName = input('Log directory Name: ')
-                exportDirName = input('Export directory Name: ')
+                print(f'{preCmdErr} The settings file could not be found. Please enter the required information.')
+                logDirName = input(f'{preCmdInput} Log directory Name: ')
+                exportDirName = input(f'{preCmdInput} Export directory Name: ')
                 settings_dict = {
                     'log_dir': logDirName,
                     'export_dir': exportDirName,
                 }
-                with open('settings.json', 'w') as json_file:
+                with open(settingsFileName, 'w') as json_file:
                     json.dump(settings_dict, json_file)
                 break
             except Exception as msgExcept:
@@ -269,6 +268,7 @@ msgUrlErr = "Enter a different URL, it's already entered. You can end the login 
 siteProtocol, siteUrl = "https://", "letterboxd.com/"                               #: Saf domain'in parçalanarak birleştirilmesi
 siteDomain = siteProtocol + siteUrl                                                 #: Saf domain'in parçalanarak birleştirilmesi
 cmdLogOnOff = True                                                                  #: Cmd ekran bildirmeleri
+settingsFileName = 'settings'+'.json'
 preCmdMiddleDot = cmdPre(u"\u00B7","cyan")                                          #: Cmd middle dot pre
 preCmdInput = cmdPre(">","green")                                                   #: Cmd input msg pre
 preCmdInfo = cmdPre("#","yellow")                                                   #: Cmd info msg pre
