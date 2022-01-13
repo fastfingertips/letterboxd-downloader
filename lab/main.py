@@ -171,7 +171,8 @@ def signature(x): #: x: 0 start msg, 1 end msg
                 txtLog(f'{preLogErr}Film filtre bilgileri alınamadı..')
         log = f'{preLogInfo}İmza yazdırma işlemleri tamamlandı.'
     except:
-        print('İmza seçimi başarısız.')
+        if logOnOff:
+            print('İmza seçimi başarısız.')
         log = f'{preLogErr}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.'
     finally:
         txtLog(log)
