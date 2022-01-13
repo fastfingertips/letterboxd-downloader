@@ -127,66 +127,65 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
 
 def signature(x): #: x: 0 start msg, 1 end msg
     try:
-        if x == True:                                                           ## İmza seçimi bu olması durumunda.
-            try:                                                                ## Liste sayfasından bilgiler çekmek.
-                print(f"\nProcess No: ({len(urlList)}/{processLoopNo})")
-                print(colored('List info;', color="yellow"))                    #: Liste başlığı.
-                                                                                ## Liste bilgileri alınır.
-                listBy = soup.select("[itemprop=name]")[0].text                 #: Liste sahibin ismini çekiliyor.
-                listTitle = soup.select("[itemprop=title]")[0].text.strip()     #: Liste başlığının ismini çekiliyor.
-                listPublicationTime = soup.select(".published time")[0].text    #: Liste oluşturulma tarihi çekiliyor.
-                listPT = arrow.get(listPublicationTime)                         #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/
-                listMovieCount =  getMovieCount(getListLastPageNo())            #: Listedeki film sayısı hesaplanıyor.
-                                                                                ## Liste bilgileri yazdırılır.
-                
-                print(f'{preCmdMiddleDot} List by {listBy}')                    # Liste sahibinin görünen adı yazdırılıyor.
-                print(f'{preCmdMiddleDot} List title: {listTitle}')             #: Liste başlığı yazdırılıyor.
-                print(f'{preCmdMiddleDot} List URL: {currentUrListItem}')       #: List URL                              
-                print(f'{preCmdMiddleDot} Number of movies: {listMovieCount}')  #: Listede bulunan film sayısı yazdırılıyor.
-                print(f'{preCmdMiddleDot} Published: {listPT.humanize()}')      #: or print(f'Published: {listPtime.humanize(granularity=["year","month", "day", "hour", "minute"])}')
-                print(f'{preCmdMiddleDot} Process URL: {editedUrlListItem}')
-                try:                                                            ## Search list update time
-                    listUpdateTime = soup.select(".updated time")[0].text       #: Liste düzenlenme vakti çekiliyor.
-                    listUT = arrow.get(listUpdateTime)                          #: Çekilen liste düzenlenme vakti düzenleniyor.
-                    msgListUpdateTime = listUT.humanize()                       #: Çekilen liste düzenlenme vakti kullanıma hazırlanıyor.
-                except:                                                         ## Hata alınırsa liste düzenlenmemiş varsayılır.
-                    msgListUpdateTime = 'No editing.'                           #: Liste düzenlenmemiş.
-                finally:                                                        ## Kontrol sonu işlemleri.
-                    print(f'{preCmdMiddleDot} Updated: {msgListUpdateTime}')    #: Hazırlık sonu mesajı.
-            except:                                                             ## Hata alınması durumunda yapıalcak işlemler.
-                txtLog(f'{preLogErr}Liste bilgileri çekilirken hata.')          #: Log dosyasına hata hakkında bilgi yazdırılıyor.
-        else:                                                                                                   ## Diğer imzayı istemesi durumunda.
-            print(f'\n{preCmdMiddleDot} Filename: {openCsv}')                                                  #: CSV dosyasının ismi hakkında ekrana bilgi yazdırılır.
-            print(f'{preCmdMiddleDot} Film sayısı: {loopCount-1}')                                              #: Film sayısı hakkında ekrana bilgi yazdırılır.
-            print(f'{preCmdMiddleDot} Tüm filmler {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.')          #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
-            try:                                                                                                ## Seçili olan filtreleri ekrana yazdırabilmek için işlemler.
-                domSelectedDecadeYear = currentDom.select(".smenu-subselected")[3].text                    #: Liste sayfasından ilgili filtre bilgisi alınıyor.
-                domSelectedGenre = currentDom.select(".smenu-subselected")[2].text                         #: Liste sayfasından ilgili filtre bilgisi alınıyor.
-                domSelectedSortBy = currentDom.select(".smenu-subselected")[0].text                        #: Liste sayfasından ilgili filtre bilgisi alınıyor.
-                                                                                                                ## Seçili filtreleri ekrana yazdırmalar.
-                print(f'{preCmdMiddleDot} Filtered as {domSelectedDecadeYear} movies only was done by')    #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
-                print(f'{preCmdMiddleDot} Filtered as {domSelectedGenre} only movies')                     #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
-                print(f'{preCmdMiddleDot} Movies sorted by {domSelectedSortBy}')                           #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
-            except:
-                txtLog(f'{preLogErr}Film filtre bilgileri alınamadı..')
-        log = f'{preLogInfo}İmza yazdırma işlemleri tamamlandı.'
-    except:
-        if logOnOff:
-            print('İmza seçimi başarısız.')
-        log = f'{preLogErr}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.'
-    finally:
-        txtLog(log)
+        if x == True:                                                                                       ## Kullanıcı tarafından belirlen imza seçimi bu olması durumunda.
+            try:                                                                                            ## Liste sayfasından bilgiler çekmek.
+                print(f"\nProcess No: ({len(urlList)}/{processLoopNo})")                                    #: İşlem durumu, sırası ekrana bastırılır.
+                print(colored('List info;', color="yellow"))                                                #: Liste başlığı.
+                                                                                                            ## Liste bilgileri alınır.
+                listBy = soup.select("[itemprop=name]")[0].text                                             #: Liste sahibin ismini çekiliyor.
+                listTitle = soup.select("[itemprop=title]")[0].text.strip()                                 #: Liste başlığının ismini çekiliyor.
+                listPublicationTime = soup.select(".published time")[0].text                                #: Liste oluşturulma tarihi çekiliyor.
+                listPT = arrow.get(listPublicationTime)                                                     #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/
+                listMovieCount =  getMovieCount(getListLastPageNo())                                        #: Listedeki film sayısı hesaplanıyor.
+                                                                                                            ## Liste bilgileri yazdırılır.
+                print(f'{preCmdMiddleDot} List by {listBy}')                                                # Liste sahibinin görünen adı yazdırılıyor.
+                print(f'{preCmdMiddleDot} List title: {listTitle}')                                         #: Liste başlığı yazdırılıyor.
+                print(f'{preCmdMiddleDot} List URL: {currentUrListItem}')                                   #: List URL                              
+                print(f'{preCmdMiddleDot} Number of movies: {listMovieCount}')                              #: Listede bulunan film sayısı yazdırılıyor.
+                print(f'{preCmdMiddleDot} Published: {listPT.humanize()}')                                  #: or print(f'Published: {listPtime.humanize(granularity=["year","month", "day", "hour", "minute"])}')
+                print(f'{preCmdMiddleDot} Process URL: {editedUrlListItem}')                                #: İşlem görecek URL ekrana bastırılır.
+                try:                                                                                        ## Search list update time
+                    listUpdateTime = soup.select(".updated time")[0].text                                   #: Liste düzenlenme vakti çekiliyor.
+                    listUT = arrow.get(listUpdateTime)                                                      #: Çekilen liste düzenlenme vakti düzenleniyor.
+                    msgListUpdateTime = listUT.humanize()                                                   #: Çekilen liste düzenlenme vakti kullanıma hazırlanıyor.
+                except:                                                                                     ## Hata alınırsa liste düzenlenmemiş varsayılır.
+                    msgListUpdateTime = 'No editing.'                                                       #: Liste düzenlenmemiş.
+                finally:                                                                                    ## Kontrol sonu işlemleri.
+                    print(f'{preCmdMiddleDot} Updated: {msgListUpdateTime}')                                #: Hazırlık sonu mesajı.
+            except:                                                                                         ## Hata alınması durumunda yapıalcak işlemler.
+                txtLog(f'{preLogErr}Liste bilgileri çekilirken hata.')                                      #: Log dosyasına hata hakkında bilgi yazdırılıyor.
+        else:                                                                                               ## Diğer imzayı istemesi durumunda.
+            print(f'\n{preCmdMiddleDot} Filename: {openCsv}')                                               #: CSV dosyasının ismi hakkında ekrana bilgi yazdırılır.
+            print(f'{preCmdMiddleDot} Film sayısı: {loopCount-1}')                                          #: Film sayısı hakkında ekrana bilgi yazdırılır.
+            print(f'{preCmdMiddleDot} Tüm filmler {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.')       #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
+            try:                                                                                            ## Seçili olan filtreleri ekrana yazdırabilmek için işlemler.
+                domSelectedDecadeYear = currentDom.select(".smenu-subselected")[3].text                     #: Liste sayfasından ilgili filtre bilgisi alınıyor.
+                domSelectedGenre = currentDom.select(".smenu-subselected")[2].text                          #: Liste sayfasından ilgili filtre bilgisi alınıyor.
+                domSelectedSortBy = currentDom.select(".smenu-subselected")[0].text                         #: Liste sayfasından ilgili filtre bilgisi alınıyor.
+                                                                                                            ## Seçili filtreleri ekrana yazdırmalar.
+                print(f'{preCmdMiddleDot} Filtered as {domSelectedDecadeYear} movies only was done by')     #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
+                print(f'{preCmdMiddleDot} Filtered as {domSelectedGenre} only movies')                      #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
+                print(f'{preCmdMiddleDot} Movies sorted by {domSelectedSortBy}')                            #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
+            except:                                                                                         ## Filtre bilgileri edinirken bir hata oluşursa..
+                txtLog(f'{preLogErr}Film filtre bilgileri alınamadı..')                                     #: Log dosyasına hata bilgisi verilir.
+        log = f'{preLogInfo}İmza yazdırma işlemleri tamamlandı.'                                            #: İmza sonu log bilgisi işlenir.
+    except:                                                                                                 ## İmza sürecinde bir hata gerçekleşirse..
+        if cmdLogOnOff:                                                                                     #: Duruma bağlı cmd ekran bilgisi
+            print('İmza seçimi başarısız.')                                                                 #: Ekrana bilgi.
+        log = f'{preLogErr}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.'                       #: Log dosyasına yazılacak bilgi aktarması.
+    finally:                                                                                                ## Seçili imza sonunda uygulanacaklar..
+        txtLog(log)                                                                                         #: Log dosyasına bilgi verilir.
 
-def txtLog(r_message, r_loglocation=None): #: None: Kullanıcı log lokasyonunu belirtmese de olur.
-    try:
-        f = open(logFilePath, "a")
-        f.writelines(f'{r_message}\n')
-        f.close()
-    except Exception as e:
-        if r_loglocation is not None:
-            print(f'Loglama işlemi {r_loglocation} konumunda {e} nedeniyle başarısız.')
-        else:
-            print(f'Loglama işlemi {e} nedeniyle başarısız.')
+def txtLog(r_message, r_loglocation=None):                                                                  #: None: Kullanıcı log lokasyonunu belirtmese de olur.
+    try:                                                                                                    ## Denenecek işlemler..
+        f = open(logFilePath, "a")                                                                          #: Eklemek üzere bir dosya açar, mevcut değilse dosyayı oluşturur
+        f.writelines(f'{r_message}\n')                                                                      #:
+        f.close()                                                                                           #:
+    except Exception as e:                                                                                  ## 
+        if r_loglocation is not None:                                                                       ##
+            print(f'Loglama işlemi {r_loglocation} konumunda {e} nedeniyle başarısız.')                     #:
+        else:                                                                                               ##
+            print(f'Loglama işlemi {e} nedeniyle başarısız.')                                               #:
 
 def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
     try:
@@ -196,13 +195,13 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
             if metaOgType == "letterboxd:list":
                 txtLog(f'{preLogInfo}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {metaOgType}')
                 metaOgUrl = getMetaContent('og:url')                                    #: Liste yönlendirmesi var mı bakıyoruz
-                metaOgTitle = getMetaContent('og:title')                             #: Liste ismini alıyoruz.
-                bodyDataOwner = getBodyOwner()                                             #: Liste sahibinin kullanıcı ismi.
+                metaOgTitle = getMetaContent('og:title')                                #: Liste ismini alıyoruz.
+                bodyDataOwner = getBodyOwner()                                          #: Liste sahibinin kullanıcı ismi.
                 print(f'{preBlankCount}{colored("Found it: ", color="green")}@{colored(bodyDataOwner,"yellow")} "{colored(metaOgTitle,"yellow")}"')          #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
                 if metaOgUrl == urlListItem:                                                                            #: Girilen URL Meta ile aynıysa..
                     txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.')                                          #: Log'a bilgi ver.
                 else:
-                    if logOnOff:                                                                                                   #: Girilen URL Meta ile uyuşmuyorsa..
+                    if cmdLogOnOff:                                                                                     #: Girilen URL Meta ile uyuşmuyorsa..
                         print(f'{preCmdInfo} Girdiğiniz liste linki yönlendirme içeriyor, muhtemelen liste ismi yakın bir zamanda değişildi veya hatalı girdiniz.')
                     print(f'{preBlankCount}({colored("+","red")}): {colored(urlListItem, color="yellow")} adresini')
                     if urlListItem in metaOgUrl:
@@ -213,7 +212,7 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                         msgMetaOgUrlChange = ''
                         msgInputUrl = ''
                         for i in range(metaLoop):
-                                # print(urlListItem[i], metaOgUrl[i], urlListItem[i]==metaOgUrl[i])
+                                # print(urlListItem[i], metaOgUrl[i], urlListItem[i]==metaOgUrl[i]) #: Dev test
                                 if urlListItem[i] == metaOgUrl[i]:
                                     msgMetaOgUrlChange += colored(metaOgUrl[i], color="yellow")
                                 else:
@@ -222,8 +221,8 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                     print(f'{preBlankCount}({colored("+","green")}): {msgInputUrl}{msgMetaOgUrlChange} şeklinde değiştirdik.')
                 txtLog(f'{preLogInfo}{urlListItem} listesi bulundu: {metaOgTitle}')
                 currentListAvaliable = True
-        except Exception as e: #: liste imzası olmadığı belirlenir.git
-            if logOnOff:
+        except Exception as e: #: liste imzası olmadığı belirlenir.
+            if cmdLogOnOff:
                 print(f'{preCmdErr} List not found.', e)
             metaOgUrl = ''
             currentListAvaliable = False
@@ -259,7 +258,7 @@ def getItCleanAfter(_):
 
 siteProtocol, siteUrl = "https://", "letterboxd.com/"     #: Saf domain'in parçalanarak birleştirilmesi
 siteDomain = siteProtocol + siteUrl                       #: Saf domain'in parçalanarak birleştirilmesi
-logOnOff = False
+cmdLogOnOff = False
 msgCancel = "The session was canceled because you did not verify the information."  #: Cancel msg
 msgUrlErr = "Enter a different URL, it's already entered. You can end the login by putting a period at the end of the url."
 preCmdMiddleDot = cmdPre(u"\u00B7","cyan")                                          #: Cmd middle dot pre
