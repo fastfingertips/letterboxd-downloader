@@ -237,11 +237,12 @@ def getItCleanAfter(_):
 # > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
  #: Run time check - Generate session hash
-os.system(f'color & cls & title Welcome %USERNAME%.')
+
 # siteProtocol, siteUrl = "https://", "letterboxd.com/"     #: Saf domain'in parçalanarak birleştirilmesi
 # siteDomain = siteProtocol + siteUrl                       #: Saf domain'in parçalanarak birleştirilmesi
 
 msgCancel = "The session was canceled because you did not verify the information."  #: Cancel msg
+msgUrlErr = "Enter a different URL, it's already entered. You can end the login by putting a period at the end of the url."
 preCmdMiddleDot = cmdPre(u"\u00B7","cyan")                                          #: Cmd middle dot pre
 preCmdInput = cmdPre(">","green")                                                   #: Cmd input msg pre
 preCmdInfo = cmdPre("#","yellow")                                                   #: Cmd info msg pre
@@ -255,6 +256,7 @@ logFilePath = f'{logDirName}/{sessionHash}.txt'                                 
 dirCheck([logDirName]) # Log file check
 
 while True:
+    os.system(f'color & cls & title Welcome %USERNAME%.')
     print(f'{preCmdInfo} Session hash: {cmdBlink(sessionHash,"yellow")}')                #: Oturum için farklı bir isim üretildi.
     urlList = []
     inputLoopNo = 0 
@@ -274,16 +276,16 @@ while True:
                 if urlListItem[-1] == ".":
                     if urlListItem not in urlList:
                         urlList.append(approvedListUrl) # adding the element
-                        print("Url'ler alındı. Sonraki işleme geçiliyor.")
+                        print("Url alımı tamamlandı. Sonraki işleme geçiliyor.")
                         break
                     else:
-                        print('Farklı bir URL girin bu zaten girilmiş.')
+                        print(msgUrlErr)
                         inputLoopNo -= 1
                 else:
                     if urlListItem not in urlList:
                         urlList.append(approvedListUrl) # adding the element
                     else:
-                        print('Farklı bir URL girin bu zaten girilmiş.')
+                        print(msgUrlErr)
                         inputLoopNo -= 1
             else:
                 pass
