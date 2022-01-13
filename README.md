@@ -2,5 +2,5 @@
 Attempts to extract data from letterboxd with bs4
 
 
-https://user-images.githubusercontent.com/46646991/149183638-4c68dc07-51b7-4469-a528-aabea9b32b08.mp4
+https://user-images.githubusercontent.com/46646991/149370896-6aecb2dc-f1b6-4d55-946a-392f98c4ce5a.mp4
 
