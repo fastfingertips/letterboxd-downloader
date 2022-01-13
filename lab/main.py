@@ -54,8 +54,9 @@ def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
         urlResponseCode = requests.get(tempUrl)                                         #: Get response code.
         urlDom = BeautifulSoup(urlResponseCode.content.decode('utf-8'), 'html.parser')  #: Get page dom.               
         return urlDom                                                                   #: Return page dom.
-    except:                                                                             #: Dom edinirken hata gerçekleşirse..
-        print(f'{preCmdErr} Connection to address failed.')
+    except Exception as e:                                                              #: Dom edinirken hata gerçekleşirse..
+        if cmdLogOnOff:
+                print(preCmdErr, e)
         txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]')
 
 def doReset():  # Porgramı yeniden başlat
@@ -63,10 +64,10 @@ def doReset():  # Porgramı yeniden başlat
         os.system('echo Press and any key to reboot & pause >nul')
         os.system('echo Confirm reboot press any key again & pause >nul')
         os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
-    except:
-        log = 'Attempting to restart the program failed.'
-        print(log)
-        txtLog(preLogErr + log)
+    except Exception as e:                                                              #: Dom edinirken hata gerçekleşirse..
+        if cmdLogOnOff:
+                print(preCmdErr, e)
+        txtLog(preLogErr + 'Attempting to restart the program failed.')
 
 def getListLastPageNo():  # Listenin son sayfasını öğren
     try:
@@ -76,7 +77,9 @@ def getListLastPageNo():  # Listenin son sayfasını öğren
         lastPageNo = soup.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text
         txtLog(f'{preLogInfo}Liste birden çok sayfaya ({lastPageNo}) sahiptir.')
         getMovieCount(lastPageNo)
-    except:
+    except Exception as e:                                                              #: Dom edinirken hata gerçekleşirse..
+        if cmdLogOnOff:
+                print(preCmdErr, e)
         # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
         lastPageNo = 1
         getMovieCount(lastPageNo)
@@ -93,8 +96,10 @@ def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
         movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount                                                                  #: Toplam film sayısını belirlemek.
         txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.")                                                   #: Film sayısı hesaplandıktan sonra ekrana yazdırılır.
         return movieCount                                                                                                               #: Film sayısı çağrıya gönderilir.
-    except:                                                                                                                             ## Olası hata durumunda.
-        print(f'Error getting movie count.')
+    except Exception as e:        
+        print(f'Error getting movie count.')                                                      #: Dom edinirken hata gerçekleşirse..
+        if cmdLogOnOff:
+                print(preCmdErr, e)                                                                                                                           ## Olası hata durumunda.
         txtLog(f'{preLogErr}An error occurred while obtaining the number of movies.')
 
 def settingsFileSet(): #: Ayar dosyası kurulumu.
@@ -191,20 +196,21 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
     try:
         try: #: meta etiketinden veri almayı dener eğer yoksa liste değil.
             metaOgType = getMetaContent('og:type') 
-            # Meta etiketindeki bilgi sorgulanır. Sayfanın liste olup olmadığı anlaşılır.
-            if metaOgType == "letterboxd:list":
+
+            if metaOgType == "letterboxd:list":                                                                                 # Meta etiketindeki bilgi sorgulanır. Sayfanın liste olup olmadığı anlaşılır.
                 txtLog(f'{preLogInfo}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {metaOgType}')
-                metaOgUrl = getMetaContent('og:url')                                    #: Liste yönlendirmesi var mı bakıyoruz
-                metaOgTitle = getMetaContent('og:title')                                #: Liste ismini alıyoruz.
-                bodyDataOwner = getBodyOwner()                                          #: Liste sahibinin kullanıcı ismi.
+                metaOgUrl = getMetaContent('og:url')                                                                            #: Liste yönlendirmesi var mı bakıyoruz
+                metaOgTitle = getMetaContent('og:title')                                                                        #: Liste ismini alıyoruz.
+                bodyDataOwner = getBodyOwner()                                                                                  #: Liste sahibinin kullanıcı ismi.
+
                 print(f'{preBlankCount}{colored("Found it: ", color="green")}@{colored(bodyDataOwner,"yellow")} "{colored(metaOgTitle,"yellow")}"')          #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
-                if metaOgUrl == urlListItem:                                                                            #: Girilen URL Meta ile aynıysa..
-                    txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.')                                          #: Log'a bilgi ver.
+                if urlListItem == metaOgUrl:                                                                                    #: Girilen URL Meta ile aynıysa..
+                    txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.')                                                  #: Log'a bilgi ver.
                 else:
-                    if cmdLogOnOff:                                                                                     #: Girilen URL Meta ile uyuşmuyorsa..
+                    if cmdLogOnOff:                                                                                             #: Girilen URL Meta ile uyuşmuyorsa..
                         print(f'{preCmdInfo} Girdiğiniz liste linki yönlendirme içeriyor, muhtemelen liste ismi yakın bir zamanda değişildi veya hatalı girdiniz.')
                     print(f'{preBlankCount}({colored("+","red")}): {colored(urlListItem, color="yellow")} adresini')
-                    if urlListItem in metaOgUrl:
+                    if urlListItem in metaOgUrl:                                                                                #:
                         msgInputUrl = colored(urlListItem, color="yellow")
                         msgMetaOgUrlChange = colored(metaOgUrl.replace(urlListItem,""), color="green")
                     else:
@@ -217,16 +223,17 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                                     msgMetaOgUrlChange += colored(metaOgUrl[i], color="yellow")
                                 else:
                                     msgMetaOgUrlChange += colored(metaOgUrl[i], color="green")
-
                     print(f'{preBlankCount}({colored("+","green")}): {msgInputUrl}{msgMetaOgUrlChange} şeklinde değiştirdik.')
                 txtLog(f'{preLogInfo}{urlListItem} listesi bulundu: {metaOgTitle}')
                 currentListAvaliable = True
         except Exception as e: #: liste imzası olmadığı belirlenir.
             if cmdLogOnOff:
-                print(f'{preCmdErr} List not found.', e)
+                print(preCmdErr, e)
             metaOgUrl = ''
             currentListAvaliable = False
-    except:
+    except Exception as e:
+        if cmdLogOnOff:
+                print(preCmdErr, e)
         currentListAvaliable = False
     finally:
         return currentListAvaliable, metaOgUrl
@@ -254,11 +261,10 @@ def getItCleanAfter(_):
 
 # > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
- #: Run time check - Generate session hash
 
-siteProtocol, siteUrl = "https://", "letterboxd.com/"     #: Saf domain'in parçalanarak birleştirilmesi
-siteDomain = siteProtocol + siteUrl                       #: Saf domain'in parçalanarak birleştirilmesi
-cmdLogOnOff = False
+siteProtocol, siteUrl = "https://", "letterboxd.com/"                               #: Saf domain'in parçalanarak birleştirilmesi
+siteDomain = siteProtocol + siteUrl                                                 #: Saf domain'in parçalanarak birleştirilmesi
+cmdLogOnOff = True                                                                 #: Cmd ekran bildirmeleri
 msgCancel = "The session was canceled because you did not verify the information."  #: Cancel msg
 msgUrlErr = "Enter a different URL, it's already entered. You can end the login by putting a period at the end of the url."
 preCmdMiddleDot = cmdPre(u"\u00B7","cyan")                                          #: Cmd middle dot pre
@@ -271,11 +277,11 @@ preLogErr = "Hata: "                                                            
 sessionHash = getRunTime()                                                          #: Generate start hash
 logDirName, exportDirName = settingsFileSet()                                       #: Set Export dir and Log dir
 logFilePath = f'{logDirName}/{sessionHash}.txt'                                     #: Set log file dir
-dirCheck([logDirName]) # Log file check
+dirCheck([logDirName])                                                              #: Log file check                                     
 
 while True:
-    os.system(f'color & cls & title Welcome %USERNAME%.')
-    print(f'{preCmdInfo} Session hash: {cmdBlink(sessionHash,"yellow")}')                #: Oturum için farklı bir isim üretildi.
+    os.system(f'color & cls & title Welcome %USERNAME%.')                           #:
+    print(f'{preCmdInfo} Session hash: {cmdBlink(sessionHash,"yellow")}')           #: Oturum için farklı bir isim üretildi.
     urlList = []
     inputLoopNo = 0 
     processLoopNo = 0
@@ -283,31 +289,35 @@ while True:
     while True:
         inputLoopNo += 1
         urlListItem = str(input(f'{preCmdInput} List URL[{inputLoopNo}]: ')).lower()  #: List url alındı ve str küçültüldü.
- 
-        if len(urlListItem) > 0:   
-            if siteDomain in urlListItem and urlListItem != ".":
-                urlListItemDom = doReadPage(urlListItem)
-                userListAvailable, approvedListUrl = userListCheck()
-                if userListAvailable: 
-                    if urlListItem[-1] == ".":
-                        if urlListItem not in urlList:
-                            urlList.append(approvedListUrl) # adding the element
-                            print(f"{preBlankCount}{colored('Url acquisition completed. Moving on to the next steps.','green')}")
-                            break
-                        else:
-                            print(preCmdErr,msgUrlErr)
-                            inputLoopNo -= 1
-                    else:
-                        if approvedListUrl not in urlList:
-                            urlList.append(approvedListUrl) # adding the element
-                        else:
-                            print(preCmdErr,msgUrlErr)
-                            inputLoopNo -= 1
-                else:
-                    print(f"{preCmdErr} Invalid URL entry.")
-                    inputLoopNo -= 1
-            else: #: Sadece nokta girildiyse çıkıyoruz.
+
+        if len(urlListItem) > 0:
+            breakLoop = False
+            if urlListItem == ".":
                 break
+            elif urlListItem[-1] == ".":
+                breakLoop = True
+                while urlListItem[-1] == ".":
+                        urlListItem = urlListItem[:len(urlListItem)-1]
+                        print(urlListItem)
+
+
+            urlListItemDom = doReadPage(urlListItem)
+            userListAvailable, approvedListUrl = userListCheck()
+
+            if userListAvailable: 
+                if approvedListUrl not in urlList:
+                    urlList.append(approvedListUrl) # adding the element
+
+                    if breakLoop:
+                        print(f"{preBlankCount}{colored('Url acquisition completed. Moving on to the next steps.','green')}")
+                        break
+
+                else:
+                    print(f'{preCmdErr} You have already entered this address list.')
+                    inputLoopNo -= 1
+            else: 
+                print(f"{preCmdErr} Invalid URL entry.")
+                inputLoopNo -= 1
         else:
             inputLoopNo -= 1
 
