@@ -199,10 +199,11 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                 metaOgTitle = getMetaContent('og:title')                             #: Liste ismini alıyoruz.
                 bodyDataOwner = getBodyOwner()                                             #: Liste sahibinin kullanıcı ismi.
                 print(f'{preBlankCount}{colored("Found it: ", color="green")}@{colored(bodyDataOwner,"yellow")} "{colored(metaOgTitle,"yellow")}"')          #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
-                if metaOgUrl == urlListItem:
-                    txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.')
+                if metaOgUrl == urlListItem:                                                                            #: Girilen URL Meta ile aynıysa..
+                    txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.')                                          #: Log'a bilgi ver.
                 else:
-                    #print(f'[{colored("!", color="yellow")}] Girdiğiniz liste linki eskimiştir, muhtemelen liste ismi yakın bir zamanda değişildi.')
+                    if logOnOff:                                                                                                   #: Girilen URL Meta ile uyuşmuyorsa..
+                        print(f'{preCmdInfo} Girdiğiniz liste linki yönlendirme içeriyor, muhtemelen liste ismi yakın bir zamanda değişildi veya hatalı girdiniz.')
                     print(f'{preBlankCount}({colored("+","red")}): {colored(urlListItem, color="yellow")} adresini')
                     if urlListItem in metaOgUrl:
                         msgInputUrl = colored(urlListItem, color="yellow")
@@ -258,7 +259,7 @@ def getItCleanAfter(_):
 
 siteProtocol, siteUrl = "https://", "letterboxd.com/"     #: Saf domain'in parçalanarak birleştirilmesi
 siteDomain = siteProtocol + siteUrl                       #: Saf domain'in parçalanarak birleştirilmesi
-logOnOff = True
+logOnOff = False
 msgCancel = "The session was canceled because you did not verify the information."  #: Cancel msg
 msgUrlErr = "Enter a different URL, it's already entered. You can end the login by putting a period at the end of the url."
 preCmdMiddleDot = cmdPre(u"\u00B7","cyan")                                          #: Cmd middle dot pre
