@@ -280,46 +280,40 @@ logFilePath = f'{logDirName}/{sessionHash}.txt'                                 
 dirCheck([logDirName])                                                              #: Log file check                                     
 
 while True:
-    os.system(f'color & cls & title Welcome %USERNAME%.')                           #:
+    os.system(f'color & cls & title Welcome %USERNAME%.')                           #: İlk başlangıç ve yeni başlangıçlara hazırlık.
     print(f'{preCmdInfo} Session hash: {cmdBlink(sessionHash,"yellow")}')           #: Oturum için farklı bir isim üretildi.
     urlList = []
+    breakLoop = False
     inputLoopNo = 0 
     processLoopNo = 0
 
     while True:
-        inputLoopNo += 1
-        urlListItem = str(input(f'{preCmdInput} List URL[{inputLoopNo}]: ')).lower()  #: List url alındı ve str küçültüldü.
-
-        if len(urlListItem) > 0:
-            breakLoop = False
-            if urlListItem == ".":
-                break
-            elif urlListItem[-1] == ".":
-                breakLoop = True
-                while urlListItem[-1] == ".":
-                        urlListItem = urlListItem[:len(urlListItem)-1]
-                        print(urlListItem)
-
-
-            urlListItemDom = doReadPage(urlListItem)
-            userListAvailable, approvedListUrl = userListCheck()
-
-            if userListAvailable: 
-                if approvedListUrl not in urlList:
-                    urlList.append(approvedListUrl) # adding the element
-
-                    if breakLoop:
-                        print(f"{preBlankCount}{colored('Url acquisition completed. Moving on to the next steps.','green')}")
-                        break
-
-                else:
-                    print(f'{preCmdErr} You have already entered this address list.')
-                    inputLoopNo -= 1
-            else: 
-                print(f"{preCmdErr} Invalid URL entry.")
-                inputLoopNo -= 1
-        else:
-            inputLoopNo -= 1
+        inputLoopNo += 1                                                                                                            #: Başlangıçta döngü değerini artırıyoruz.  (Konum bilgisi)
+        urlListItem = str(input(f'{preCmdInput} List URL[{inputLoopNo}]: ')).lower()                                                #: List url alındı ve str küçültüldü.       (Alım ve Düzenleme)
+        if len(urlListItem) > 0:                                                                                                    ## Giriş boş değilse..                      (Kontrol)                                   
+            if urlListItem == ".":                                                                                                  ## Url girişi yerine nokta girildiyse..     (Kontrol)
+                break                                                                                                               #: Nokta girişi son bulma emri alınır.      (Emir)
+            elif urlListItem[-1] == ".":                                                                                            ## Girilen url sonunda nokta varsa..        (Kontrol)
+                breakLoop = True                                                                                                    #: Url alımını sonlandıracak bilgi.         (Emir)
+                while urlListItem[-1] == ".":                                                                                       #: Url sonunda nokta olduğu sürece.         (Devamlı kontrol) 
+                        urlListItem = urlListItem[:len(urlListItem)-1]                                                              #: Her defasında Url sonundan nokta siler.  (Düzen aktarma)
+            urlListItemDom = doReadPage(urlListItem)                                                                                #: Sayfa dom'u alınır.
+            userListAvailable, approvedListUrl = userListCheck()                                                                    #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
+            if userListAvailable:                                                                                                   #: Liste kullanıma uygunsa..
+                if approvedListUrl not in urlList:                                                                                  #: Doğrulanmış URL daha önce URL Listesine eklenmediyse..
+                    urlList.append(approvedListUrl)                                                                                 #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
+                    if breakLoop:                                                                                                   #: Kullanıcı URL sonunda nokta belirttiyse bu url sonrası alım sonlanır ve sonraki işlemlere geçilir.
+                        print(f"{preBlankCount}{colored('Url acquisition completed. Moving on to the next steps.','green')}")       #: URL alımının sonlandığı bilgisini ekrana yazdırıyoruz.
+                        break                                                                                                       #: URL alımını sonlandırıyoruz. Döngüden çıktık.
+                else:                                                                                                               ## Doğrulanmış URL daha önce işlem görecek URL listine eklenmiş ise..
+                    print(f'{preCmdInfo} You have already entered this address list.')                                               #: URL'in daha önce girildiğini ekrana yazdırıyoruz.
+                    inputLoopNo -= 1                                                                                                #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
+            else:                                                                                                                   ## Kullanıcının girdiği URL doğrulanmazsa..
+                print(f"{preCmdInfo} You did not enter a valid url.")                                                               #: Kullanıcının url'i doğrulanmadığında bilgilendirilir.
+                inputLoopNo -= 1                                                                                                    #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
+        else:                                                                                                                       ## Kullanıcı genişliğe sahip bir değer girmez ise..
+            print(f"{preCmdInfo} Just enter a period to move on to the next steps. You can also add it at the end of the URL.")
+            inputLoopNo -= 1                                                                                                        #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
 
     for currentUrListItem in urlList:
         processLoopNo += 1
