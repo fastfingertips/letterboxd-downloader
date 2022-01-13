@@ -242,8 +242,8 @@ def getItCleanAfter(_):
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
  #: Run time check - Generate session hash
 
-# siteProtocol, siteUrl = "https://", "letterboxd.com/"     #: Saf domain'in parçalanarak birleştirilmesi
-# siteDomain = siteProtocol + siteUrl                       #: Saf domain'in parçalanarak birleştirilmesi
+siteProtocol, siteUrl = "https://", "letterboxd.com/"     #: Saf domain'in parçalanarak birleştirilmesi
+siteDomain = siteProtocol + siteUrl                       #: Saf domain'in parçalanarak birleştirilmesi
 logOnOff = True
 msgCancel = "The session was canceled because you did not verify the information."  #: Cancel msg
 msgUrlErr = "Enter a different URL, it's already entered. You can end the login by putting a period at the end of the url."
@@ -268,31 +268,32 @@ while True:
 
     while True:
         inputLoopNo += 1
-        urlListItem = str(input(f'{inputLoopNo})  List URL (Press ENTER to end the entry): ')).lower()  #: List url alındı ve str küçültüldü.
-        if len(urlListItem) > 0:                                                                        #: No Blank
-            if urlListItem == ".":                                                                      
-                break
-            else:
-                pass
-            urlListItemDom = doReadPage(urlListItem)
-            userListAvailable, approvedListUrl = userListCheck()                                        #: Liste mevcutluğu kontrol ediliyor.
-            if userListAvailable: 
-                if urlListItem[-1] == ".":
-                    if urlListItem not in urlList:
-                        urlList.append(approvedListUrl) # adding the element
-                        print(f"{preBlankCount} {colored('Url acquisition completed. Moving on to the next steps.','green')}")
-                        break
+        urlListItem = str(input(f'{preCmdInput}[{inputLoopNo}]  List URL (Press ENTER to end the entry): ')).lower()  #: List url alındı ve str küçültüldü.
+ 
+        if len(urlListItem) > 0:   
+            if siteDomain in urlListItem and urlListItem != ".":
+                urlListItemDom = doReadPage(urlListItem)
+                userListAvailable, approvedListUrl = userListCheck()
+                if userListAvailable: 
+                    if urlListItem[-1] == ".":
+                        if urlListItem not in urlList:
+                            urlList.append(approvedListUrl) # adding the element
+                            print(f"{preBlankCount}{colored('Url acquisition completed. Moving on to the next steps.','green')}")
+                            break
+                        else:
+                            print(msgUrlErr)
+                            inputLoopNo -= 1
                     else:
-                        print(msgUrlErr)
-                        inputLoopNo -= 1
+                        if approvedListUrl not in urlList:
+                            urlList.append(approvedListUrl) # adding the element
+                        else:
+                            print(msgUrlErr)
+                            inputLoopNo -= 1
                 else:
-                    if approvedListUrl not in urlList:
-                        urlList.append(approvedListUrl) # adding the element
-                    else:
-                        print(msgUrlErr)
-                        inputLoopNo -= 1
-            else:
-                print(f"{preCmdErr} Invalid URL entry.")
+                    print(f"{preCmdErr} Invalid URL entry.")
+                    inputLoopNo -= 1
+            else: #: Sadece nokta girildiyse çıkıyoruz.
+                break
         else:
             inputLoopNo -= 1
 
