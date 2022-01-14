@@ -141,25 +141,26 @@ def signature(x): #: x: 0 start msg, 1 end msg
     try:
         if x == True:                                                                                       ## Kullanıcı tarafından belirlen imza seçimi bu olması durumunda.
             try:                                                                                            ## Liste sayfasından bilgiler çekmek.                                                                                                            ## Liste bilgileri alınır.
-                listBy = cListDom.select("[itemprop=name]")[0].text                                             #: Liste sahibin ismini çekiliyor.
-                listTitle = cListDom.select("[itemprop=title]")[0].text.strip()                                 #: Liste başlığının ismini çekiliyor.
-                listPublicationTime = cListDom.select(".published time")[0].text                                #: Liste oluşturulma tarihi çekiliyor.
-                listPT = arrow.get(listPublicationTime)                                                     #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/      
+                listBy = cListDom.select("[itemprop=name]")[0].text                                         #: Liste sahibin ismini çekiliyor.
+                listTitle = cListDom.select("[itemprop=title]")[0].text.strip()                             #: Liste başlığının ismini çekiliyor.
+                listPublicationTime = cListDom.select(".published time")[0].text                            #: Liste oluşturulma tarihi çekiliyor.
+                listPT = arrow.get(listPublicationTime).humanize()                                                    #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/      
                 listLastPage = getListLastPageNo()
-                listMovieCount =  getMovieCount(listLastPage)                                        #: Listedeki film sayısı hesaplanıyor.                
-                                                                                                           ## Liste bilgileri yazdırılır.              
-                print(f"\n{preBlankCount}Process No : ({len(urlList)}/{processLoopNo})")                                    #: İşlem durumu, sırası ekrana bastırılır.
-                print(f'{preBlankCount}Process URL: {currentUrListItemDetail}')                                #: İşlem görecek URL ekrana bastırılır.
-                print(supLine) 
-                print(f'{preCmdInfo} {colored("List info;", color="yellow")}')                                                #: Liste başlığı.
-                print(f'{preCmdMiddleDot} List by {listBy}')                                                # Liste sahibinin görünen adı yazdırılıyor.
-                print(f'{preCmdMiddleDot} List title: {listTitle}')                                         #: Liste başlığı yazdırılıyor.
-                print(f'{preCmdMiddleDot} Sayfa sayısı: {listLastPage}')                                      #: Liste sayfa sayısı
-                print(f'{preCmdMiddleDot} Number of movies: {listMovieCount}')                              #: Listede bulunan film sayısı yazdırılıyor.
-                print(f'{preCmdMiddleDot} Published: {listPT.humanize()}')                                  #: or print(f'Published: {listPtime.humanize(granularity=["year","month", "day", "hour", "minute"])}')
-                print(f'{preCmdMiddleDot} List URL: {currentUrListItem}')                                   #: List URL                              
+                listMovieCount =  getMovieCount(listLastPage)    
+
+                                            
+                                                           #: Listedeki film sayısı hesaplanıyor.  
+                try: #: Filtre bilgilerini almak.
+                    domSelectedDecadeYear = cListDom.select(".smenu-subselected")[3].text + 'movies only was done by.'                       #: Liste sayfasından ilgili filtre bilgisi alınıyor.
+                    domSelectedGenre = cListDom.select(".smenu-subselected")[2].text + 'only movies.'                            #: Liste sayfasından ilgili filtre bilgisi alınıyor.
+                    domSelectedSortBy = cListDom.select(".smenu-subselected")[0].text + '.'                           #: Liste sayfasından ilgili filtre bilgisi alınıyor.
+                except Exception as e:
+                    domSelectedDecadeYear, domSelectedGenre, domSelectedSortBy = 3*'?'
+                    if cmdLogOnOff:
+                        errorLine(e)                                                                                           ## Filtre bilgileri edinirken bir hata oluşursa..
+                        txtLog(f'{preLogErr}Film filtre bilgileri alınamadı..')
                 try:                                                                                        ## Search list update time
-                    listUpdateTime = cListDom.select(".updated time")[0].text                                   #: Liste düzenlenme vakti çekiliyor.
+                    listUpdateTime = cListDom.select(".updated time")[0].text                               #: Liste düzenlenme vakti çekiliyor.
                     listUT = arrow.get(listUpdateTime)                                                      #: Çekilen liste düzenlenme vakti düzenleniyor.
                     msgListUpdateTime = listUT.humanize()                                                   #: Çekilen liste düzenlenme vakti kullanıma hazırlanıyor.
                 except Exception as e:
@@ -167,8 +168,21 @@ def signature(x): #: x: 0 start msg, 1 end msg
                         errorLine(e)                                                                                     ## Hata alınırsa liste düzenlenmemiş varsayılır.
                     msgListUpdateTime = 'No editing.'                                                       #: Liste düzenlenmemiş.
                 finally:                                                                                    ## Kontrol sonu işlemleri.
+                    print(f"{preBlankCount}Process State : {processState}")                    #: İşlem durumu, sırası ekrana bastırılır.
+                    print(supLine) 
+                    print(f'{preCmdInfo} {colored("List info;", color="yellow")}')                              #: Liste başlığı.
+                    print(f'{preCmdMiddleDot} List by {listBy}')                                                # Liste sahibinin görünen adı yazdırılıyor.
+                    print(f'{preCmdMiddleDot} List title: {listTitle}')                                         #: Liste başlığı yazdırılıyor.
+                    print(f'{preCmdMiddleDot} List domain name: {cListDomainName}')
+                    print(f'{preCmdMiddleDot} Sayfa sayısı: {listLastPage}')                                    #: Liste sayfa sayısı
+                    print(f'{preCmdMiddleDot} Number of movies: {listMovieCount}')                              #: Listede bulunan film sayısı yazdırılıyor.
+                    print(f'{preCmdMiddleDot} Filtered as {domSelectedDecadeYear}')     #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
+                    print(f'{preCmdMiddleDot} Filtered as {domSelectedGenre}')                      #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
+                    print(f'{preCmdMiddleDot} Movies sorted by {domSelectedSortBy}')                            #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor         
+                    print(f'{preCmdMiddleDot} Published: {listPT}')                                  #: or print(f'Published: {listPtime.humanize(granularity=["year","month", "day", "hour", "minute"])}')
                     print(f'{preCmdMiddleDot} Updated: {msgListUpdateTime}')                                #: Hazırlık sonu mesajı.
-                    print(subLine)
+                    print(f'{preCmdMiddleDot} List URL: {currentUrListItem}')                                   #: List URL                                                                         
+                    print(f'{preCmdMiddleDot} Process URL: {currentUrListItemDetail}')                             #: İşlem görecek URL ekrana bastırılır.
             except Exception as e:
                 if cmdLogOnOff:
                     errorLine(e)                                                                                        ## Hata alınması durumunda yapıalcak işlemler.
@@ -178,19 +192,7 @@ def signature(x): #: x: 0 start msg, 1 end msg
             print(f'{preCmdMiddleDot} Tüm filmler {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.')       #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
             print(f'{preCmdMiddleDot} Filename: {openCsv}')                                               #: CSV dosyasının ismi hakkında ekrana bilgi yazdırılır.
             print(f'{preCmdMiddleDot} Film sayısı: {loopCount-1}')                                          #: Film sayısı hakkında ekrana bilgi yazdırılır.
-            try:                                                                                            ## Seçili olan filtreleri ekrana yazdırabilmek için işlemler.
-                domSelectedDecadeYear = currentDom.select(".smenu-subselected")[3].text                     #: Liste sayfasından ilgili filtre bilgisi alınıyor.
-                domSelectedGenre = currentDom.select(".smenu-subselected")[2].text                          #: Liste sayfasından ilgili filtre bilgisi alınıyor.
-                domSelectedSortBy = currentDom.select(".smenu-subselected")[0].text                         #: Liste sayfasından ilgili filtre bilgisi alınıyor.
-                                                                                                            ## Seçili filtreleri ekrana yazdırmalar.
-                print(f'{preCmdMiddleDot} Filtered as {domSelectedDecadeYear} movies only was done by')     #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
-                print(f'{preCmdMiddleDot} Filtered as {domSelectedGenre} only movies')                      #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
-                print(f'{preCmdMiddleDot} Movies sorted by {domSelectedSortBy}')                            #: Liste sayfasından alınan ilgili filtre bilgisi yazdırılıyor
-                print(subLine)
-            except Exception as e:
-                if cmdLogOnOff:
-                    errorLine(e)                                                                                           ## Filtre bilgileri edinirken bir hata oluşursa..
-                    txtLog(f'{preLogErr}Film filtre bilgileri alınamadı..')                                     #: Log dosyasına hata bilgisi verilir.
+            print(subLine)                               #: Log dosyasına hata bilgisi verilir.
         log = f'{preLogInfo}İmza yazdırma işlemleri tamamlandı.'                                            #: İmza sonu log bilgisi işlenir.
     except Exception as e: #: İmza seçimi başarısız.
         if cmdLogOnOff:
@@ -204,7 +206,7 @@ def txtLog(r_message, r_loglocation=None):                                      
         f = open(logFilePath, "a")                                                                          #: Eklemek üzere bir dosya açar, mevcut değilse dosyayı oluşturur
         f.writelines(f'{r_message}\n')                                                                      #:
         f.close()                                                                                           #:
-    except Exception as e:                                                                                ## 
+    except Exception as e:                                                                                  ## 
         if r_loglocation is not None:                                                                       ##
             print(f'Loglama işlemi {r_loglocation} konumunda {e} nedeniyle başarısız.')                     #:
         else:                                                                                               ##
@@ -222,7 +224,7 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                 bodyDataOwner = getBodyContent(urlListItemDom,'data-owner')                                                                                  #: Liste sahibinin kullanıcı ismi.
 
                 print(f'{preBlankCount}{colored("Found it: ", color="green")}@{colored(bodyDataOwner,"yellow")} "{colored(metaOgTitle,"yellow")}"')          #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
-                if urlListItem == metaOgUrl:                                                                                    #: Girilen URL Meta ile aynıysa..
+                if urlListItem == metaOgUrl or urlListItem+'/' == metaOgUrl:                                                                                    #: Girilen URL Meta ile aynıysa..
                     txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.')                                                  #: Log'a bilgi ver.
                 else:                                                                                           #: Girilen URL Meta ile uyuşmuyorsa..
                     print(f'{preCmdInfo} Girdiğiniz liste linki yönlendirme içeriyor.')
@@ -276,7 +278,7 @@ def getBodyContent(dom, obj):
 
 def currentListDomainName():
     _f_ = '/list/'
-    return txtLog(currentUrListItem[currentUrListItem.index(_f_)+len(_f_):].replace('/',""))
+    return currentUrListItem[currentUrListItem.index(_f_)+len(_f_):].replace('/',"")
 
 # Error Code generator
 def errorLine(e):
@@ -285,6 +287,7 @@ def errorLine(e):
 # > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
 
+os.system(f'color & cls & title Welcome %USERNAME%.')  
 supLine = '_'*80                                                                                      ## Diğer imzayı istemesi durumunda.
 subLine = '¯'*80  
 msgDevBug = 'An uncontrolled error has occurred. Please notify the developer.'      #: Kontrolsüz hataların oluştuğu yerlerde kullanılır.
@@ -309,7 +312,7 @@ dirCheck([logDirName])                                                          
 
 
 while True:
-    os.system(f'color & cls & title Welcome %USERNAME%.')                           #: İlk başlangıç ve yeni başlangıçlara hazırlık.
+    os.system('cls')                      #: İlk başlangıç ve yeni başlangıçlara hazırlık.
     print(f'{preCmdInfo} Session hash: {cmdBlink(sessionHash,"yellow")}')           #: Oturum için farklı bir isim üretildi.
     urlList = []
     breakLoop = False
@@ -320,7 +323,7 @@ while True:
         inputLoopNo += 1                                                                                                            #: Başlangıçta döngü değerini artırıyoruz.  (Konum bilgisi)
         urlListItem = str(input(f'{preCmdInput} List URL[{inputLoopNo}]: ')).lower()                                                #: List url alındı ve str küçültüldü.       (Alım ve Düzenleme)
         if len(urlListItem) > 0:                                                                                                    ## Giriş boş değilse..                      (Kontrol)                                   
-            if urlListItem == ".":                                                                                           ## Url girişi yerine nokta girildiyse..     (Kontrol)
+            if urlListItem == ".":                                                                                                  ## Url girişi yerine nokta girildiyse..     (Kontrol)
                 break                                                                                                               #: Nokta girişi son bulma emri alınır.      (Emir)
             elif urlListItem[-1] == ".":                                                                                            ## Girilen url sonunda nokta varsa..        (Kontrol)
                 breakLoop = True                                                                                                    #: Url alımını sonlandıracak bilgi.         (Emir)
@@ -345,35 +348,35 @@ while True:
 
     print(f"{preCmdInfo} List address acquisition terminated.")                                                                                                       #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
     
-    listEnterPass = False
+    listEnterPassOff = True
     for currentUrListItem in urlList:
         processLoopNo += 1
-        currentUrListItemDetail = f'{currentUrListItem}detail/' # Guest generate url. approvedListUrl https://letterboxd.com/username/list/listname/
-        currentUrListItemDetailPage = f'{currentUrListItemDetail}page/'
-        cListDom = doReadPage(currentUrListItemDetail)            #: Şu anki listey sayfasını oku.
-        cListOwner = getBodyContent(cListDom,'data-owner')  #: Liste sahibini al.
-        cListDomainName = currentListDomainName()           #: Liste domain ismini al.
-        cListRunTime = getRunTime()                         #: Liste işlem vaktini al.
-
-
+        processState = f'[{len(urlList)}/{processLoopNo}]'
+        currentUrListItemDetail = f'{currentUrListItem}detail/'         # Guest generate url. approvedListUrl https://letterboxd.com/username/list/listname/
+        currentUrListItemDetailPage = f'{currentUrListItemDetail}page/' #: Şu ankş listenin sayfa gezintisi url'i
+        cListDom = doReadPage(currentUrListItemDetail)                  #: Şu anki liste sayfasını oku.
+        cListOwner = getBodyContent(cListDom,'data-owner')              #: Liste sahibini al.
+        cListDomainName = currentListDomainName()                       #: Liste domain ismini al.
+        cListRunTime = getRunTime()                                     #: Liste işlem vaktini al.
+        os.system(f'title {processState} Process: @{cListOwner}.') 
         # Karşılama mesajı, kullanıcının girdiği bilgleri ve girilen bilgilere dayanarak listenin bilgilerini yazdırır.
         signature(1)
         # > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
-        if not listEnterPass:
-            listEnter = input(f'\n{preCmdInput} Press enter to confirm the entered information. (Enter)')
-            if listEnter == "" or listEnter == ".":
-                listEnter = True
-                if listEnter == "":
-                    autoEnterMsg = '[Manual]'
-                else:
-                    autoEnterMsg = '[Auto]'
-                    listEnterPass = True
-                    print(f'{preCmdInfo} Listeler otomatik olarak onaylanacak şekilde ayarlandı.')
+        if listEnterPassOff:
+            listEnter = input(f"{preCmdInput} Press enter to confirm the entered information. ({cmdBlink('Enter', 'green')})")
+
+            if listEnter == "":
+                listEnter, autoEnterMsg = True, '[Manual]'
+            elif listEnter == ".":
+                listEnter, autoEnterMsg = True, '[Auto]'
+                listEnterPassOff = False
+                print(f'{preCmdInfo} Listeler otomatik olarak onaylanacak şekilde ayarlandı.')
             else:
                 listEnter = False
                 print(msgCancel)
                 txtLog(preLogInfo + msgCancel)
-
+        
+        print(subLine)
         if listEnter:
             openCsv = f'{exportDirName}/{cListOwner}_{cListDomainName}_{cListRunTime}.csv' 
             print(f"{preBlankCount}{colored(f'List confirmed. {autoEnterMsg}', color='green')}")
@@ -386,16 +389,22 @@ while True:
                 # Filmleri çekiyoruz
                 loopCount = 1
                 # x sıfırdan başlıyor
-                print('\n'+supLine)
-                print(f'{preCmdInfo} Movies on the list;')
+                print(supLine)
+                print(f'{preCmdInfo} {colored("Movies on the list;", color="yellow")}')
                 for x in range(int(lastPageNo)):
                     txtLog(f'Connecting to: {currentUrListItemDetailPage}{str(x+1)}')
                     currentDom = doReadPage(f'{currentUrListItemDetailPage}{str(x+1)}')
                     loopCount = doPullFilms(loopCount, currentDom)
-                # Açtığımız dosyayı manuel kapattık
-                csvFile.close()
+                
+                csvFile.close() #: Açtığımız dosyayı manuel kapattık
                 print(subLine)
-            print(f'{preBlankCount}{colored("Success!", color="green")}')  
-            txtLog(f'{preLogInfo}Success!')
+
+            os.system('title {processState} completed!')
+            print(f"{preBlankCount}{colored(f'{processState} completed!', color='green')}")  
+            txtLog(f'{preLogInfo}{processState} completed!')
             signature(0)
+            
+    os.system('title Export completed successfully!')
+    print(f'{preBlankCount}{colored("Export completed successfully!", color="green")}')  
+    txtLog(f'{preLogInfo}Export completed successfully!')
     test_pause()
