@@ -288,7 +288,7 @@ def errorLine(e):
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
 
 os.system(f'color & cls & title Welcome %USERNAME%.')  
-supLine = '_'*80                                                                                      ## Diğer imzayı istemesi durumunda.
+supLine = '_'*80                                                                    ## Diğer imzayı istemesi durumunda.
 subLine = '¯'*80  
 msgDevBug = 'An uncontrolled error has occurred. Please notify the developer.'      #: Kontrolsüz hataların oluştuğu yerlerde kullanılır.
 msgCancel = "The session was canceled because you did not verify the information."  #: Cancel msg
@@ -346,7 +346,7 @@ while True:
             print(f"{preCmdInfo} Just enter a period to move on to the next steps. You can also add it at the end of the URL.")
             inputLoopNo -= 1     
 
-    print(f"{preCmdInfo} List address acquisition terminated.")                                                                                                       #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
+    print(f"{preCmdInfo} List address acquisition terminated.")                                                                     #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
     
     listEnterPassOff = True
     for currentUrListItem in urlList:
@@ -359,9 +359,8 @@ while True:
         cListDomainName = currentListDomainName()                       #: Liste domain ismini al.
         cListRunTime = getRunTime()                                     #: Liste işlem vaktini al.
         os.system(f'title {processState} Process: @{cListOwner}.') 
-        # Karşılama mesajı, kullanıcının girdiği bilgleri ve girilen bilgilere dayanarak listenin bilgilerini yazdırır.
-        signature(1)
-        # > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
+        
+        signature(1) #: Liste hakkında bilgiler bastırlır.
         if listEnterPassOff:
             listEnter = input(f"{preCmdInput} Press enter to confirm the entered information. ({cmdBlink('Enter', 'green')})")
 
@@ -380,15 +379,13 @@ while True:
         if listEnter:
             openCsv = f'{exportDirName}/{cListOwner}_{cListDomainName}_{cListRunTime}.csv' 
             print(f"{preBlankCount}{colored(f'List confirmed. {autoEnterMsg}', color='green')}")
-            txtLog(f'{preLogInfo} Şimdiki listeye erişim başlatılıyor.')
+            txtLog(f'{preLogInfo}Şimdiki listeye erişim başlatılıyor.')
             lastPageNo = getListLastPageNo()
             dirCheck([exportDirName]) #: Export klasörünün kontrolü.
             with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
                 writer = csv.writer(csvFile)
                 writer.writerow(["Title", "Year"])
-                # Filmleri çekiyoruz
                 loopCount = 1
-                # x sıfırdan başlıyor
                 print(supLine)
                 print(f'{preCmdInfo} {colored("Movies on the list;", color="yellow")}')
                 for x in range(int(lastPageNo)):
@@ -397,7 +394,7 @@ while True:
                     loopCount = doPullFilms(loopCount, currentDom)
                 
                 csvFile.close() #: Açtığımız dosyayı manuel kapattık
-                print(subLine)
+                print(subLine) #: İşlem bitimi sonrası alt çizgi. (Alt çizgi için üst çizgi kullanılır.)
 
             os.system('title {processState} completed!')
             print(f"{preBlankCount}{colored(f'{processState} completed!', color='green')}")  
