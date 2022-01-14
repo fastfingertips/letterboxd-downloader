@@ -77,7 +77,7 @@ def getListLastPageNo():  # Listenin son sayfasını öğren
         # > Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al.
         # > Son'linin içindeki bağlantının metnini çektik. Bu bize kaç sayfalı bir listemiz olduğunuz verecek.
         txtLog(f'{preLogInfo}Listedeki sayfa sayısı denetleniyor..')
-        lastPageNo = soup.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text    # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
+        lastPageNo = cListDom.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text    # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
         txtLog(f'{preLogInfo}Liste birden çok sayfaya ({lastPageNo}) sahiptir.')
         getMovieCount(lastPageNo)
     except AttributeError:                                                                            ## Kontrolümüzde..
@@ -93,7 +93,7 @@ def getListLastPageNo():  # Listenin son sayfasını öğren
 
 def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
     try:                                                                                                                                ## Listenin son sayfa işlemleri.
-        lastPageDom = doReadPage(f'{url}{tempLastPageNo}')                                                                              #: Getting lastpage dom.
+        lastPageDom = doReadPage(f'{currentUrListItemDetailPage}{tempLastPageNo}')                                                                              #: Getting lastpage dom.
         lastPageArticles = lastPageDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li") #: Sayfa kodları çekildi.
         lastPageMoviesCount =  len(lastPageArticles)                                                                                    #: Film sayısı öğrenildi.
         movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount                                                                  #: Toplam film sayısını belirlemek.
@@ -141,23 +141,25 @@ def signature(x): #: x: 0 start msg, 1 end msg
     try:
         if x == True:                                                                                       ## Kullanıcı tarafından belirlen imza seçimi bu olması durumunda.
             try:                                                                                            ## Liste sayfasından bilgiler çekmek.                                                                                                            ## Liste bilgileri alınır.
-                listBy = soup.select("[itemprop=name]")[0].text                                             #: Liste sahibin ismini çekiliyor.
-                listTitle = soup.select("[itemprop=title]")[0].text.strip()                                 #: Liste başlığının ismini çekiliyor.
-                listPublicationTime = soup.select(".published time")[0].text                                #: Liste oluşturulma tarihi çekiliyor.
-                listPT = arrow.get(listPublicationTime)                                                     #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/
-                listMovieCount =  getMovieCount(getListLastPageNo())                                        #: Listedeki film sayısı hesaplanıyor.                
+                listBy = cListDom.select("[itemprop=name]")[0].text                                             #: Liste sahibin ismini çekiliyor.
+                listTitle = cListDom.select("[itemprop=title]")[0].text.strip()                                 #: Liste başlığının ismini çekiliyor.
+                listPublicationTime = cListDom.select(".published time")[0].text                                #: Liste oluşturulma tarihi çekiliyor.
+                listPT = arrow.get(listPublicationTime)                                                     #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/      
+                listLastPage = getListLastPageNo()
+                listMovieCount =  getMovieCount(listLastPage)                                        #: Listedeki film sayısı hesaplanıyor.                
                                                                                                            ## Liste bilgileri yazdırılır.              
-                print(f"\n{preBlankCount}Process No: ({len(urlList)}/{processLoopNo})")                                    #: İşlem durumu, sırası ekrana bastırılır.
+                print(f"\n{preBlankCount}Process No : ({len(urlList)}/{processLoopNo})")                                    #: İşlem durumu, sırası ekrana bastırılır.
+                print(f'{preBlankCount}Process URL: {currentUrListItemDetail}')                                #: İşlem görecek URL ekrana bastırılır.
                 print(supLine) 
                 print(f'{preCmdInfo} {colored("List info;", color="yellow")}')                                                #: Liste başlığı.
                 print(f'{preCmdMiddleDot} List by {listBy}')                                                # Liste sahibinin görünen adı yazdırılıyor.
                 print(f'{preCmdMiddleDot} List title: {listTitle}')                                         #: Liste başlığı yazdırılıyor.
+                print(f'{preCmdMiddleDot} Sayfa sayısı: {listLastPage}')                                      #: Liste sayfa sayısı
                 print(f'{preCmdMiddleDot} Number of movies: {listMovieCount}')                              #: Listede bulunan film sayısı yazdırılıyor.
                 print(f'{preCmdMiddleDot} Published: {listPT.humanize()}')                                  #: or print(f'Published: {listPtime.humanize(granularity=["year","month", "day", "hour", "minute"])}')
                 print(f'{preCmdMiddleDot} List URL: {currentUrListItem}')                                   #: List URL                              
-                print(f'{preCmdMiddleDot} Process URL: {editedUrlListItem}')                                #: İşlem görecek URL ekrana bastırılır.
                 try:                                                                                        ## Search list update time
-                    listUpdateTime = soup.select(".updated time")[0].text                                   #: Liste düzenlenme vakti çekiliyor.
+                    listUpdateTime = cListDom.select(".updated time")[0].text                                   #: Liste düzenlenme vakti çekiliyor.
                     listUT = arrow.get(listUpdateTime)                                                      #: Çekilen liste düzenlenme vakti düzenleniyor.
                     msgListUpdateTime = listUT.humanize()                                                   #: Çekilen liste düzenlenme vakti kullanıma hazırlanıyor.
                 except Exception as e:
@@ -211,20 +213,20 @@ def txtLog(r_message, r_loglocation=None):                                      
 def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
     try:
         try: #: meta etiketinden veri almayı dener eğer yoksa liste değil.
-            metaOgType = getMetaContent('og:type') 
+            metaOgType = getMetaContent(urlListItemDom,'og:type') 
 
             if metaOgType == "letterboxd:list":                                                                                 # Meta etiketindeki bilgi sorgulanır. Sayfanın liste olup olmadığı anlaşılır.
                 txtLog(f'{preLogInfo}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {metaOgType}')
-                metaOgUrl = getMetaContent('og:url')                                                                            #: Liste yönlendirmesi var mı bakıyoruz
-                metaOgTitle = getMetaContent('og:title')                                                                        #: Liste ismini alıyoruz.
-                bodyDataOwner = getBodyOwner()                                                                                  #: Liste sahibinin kullanıcı ismi.
+                metaOgUrl = getMetaContent(urlListItemDom,'og:url')                                                                            #: Liste yönlendirmesi var mı bakıyoruz
+                metaOgTitle = getMetaContent(urlListItemDom, 'og:title')                                                                        #: Liste ismini alıyoruz.
+                bodyDataOwner = getBodyContent(urlListItemDom,'data-owner')                                                                                  #: Liste sahibinin kullanıcı ismi.
 
                 print(f'{preBlankCount}{colored("Found it: ", color="green")}@{colored(bodyDataOwner,"yellow")} "{colored(metaOgTitle,"yellow")}"')          #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
                 if urlListItem == metaOgUrl:                                                                                    #: Girilen URL Meta ile aynıysa..
                     txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.')                                                  #: Log'a bilgi ver.
-                else:
-                    if cmdLogOnOff:                                                                                             #: Girilen URL Meta ile uyuşmuyorsa..
-                        print(f'{preCmdInfo} Girdiğiniz liste linki yönlendirme içeriyor, muhtemelen liste ismi yakın bir zamanda değişildi veya hatalı girdiniz.')
+                else:                                                                                           #: Girilen URL Meta ile uyuşmuyorsa..
+                    print(f'{preCmdInfo} Girdiğiniz liste linki yönlendirme içeriyor.')
+                    print(f'{preBlankCount}Muhtemelen liste ismi yakın bir zamanda değişildi veya hatalı girdiniz.')
                     print(f'{preBlankCount}({colored("+","red")}): {colored(urlListItem, color="yellow")} adresini')
                     if urlListItem in metaOgUrl:                                                                                #:
                         msgInputUrl = colored(urlListItem, color="yellow")
@@ -266,14 +268,15 @@ def cmdBlink(m,c):
 def getRunTime():
     return datetime.now().strftime('%d%m%Y%H%M%S')
 
-def getMetaContent(_):
-    return urlListItemDom.find('meta', property=_).attrs['content']
+def getMetaContent(dom,obj):
+    return dom.find('meta', property=obj).attrs['content']
 
-def getBodyOwner():
-    return urlListItemDom.find('body').attrs['data-owner']
+def getBodyContent(dom, obj):
+    return dom.find('body').attrs[obj]
 
-def getItCleanAfter(_):
-    return txtLog(currentUrListItem[currentUrListItem.index(_)+len(_):].replace('/',""))
+def currentListDomainName():
+    _f_ = '/list/'
+    return txtLog(currentUrListItem[currentUrListItem.index(_f_)+len(_f_):].replace('/',""))
 
 # Error Code generator
 def errorLine(e):
@@ -317,7 +320,7 @@ while True:
         inputLoopNo += 1                                                                                                            #: Başlangıçta döngü değerini artırıyoruz.  (Konum bilgisi)
         urlListItem = str(input(f'{preCmdInput} List URL[{inputLoopNo}]: ')).lower()                                                #: List url alındı ve str küçültüldü.       (Alım ve Düzenleme)
         if len(urlListItem) > 0:                                                                                                    ## Giriş boş değilse..                      (Kontrol)                                   
-            if urlListItem == ".":                                                                                                  ## Url girişi yerine nokta girildiyse..     (Kontrol)
+            if urlListItem == ".":                                                                                           ## Url girişi yerine nokta girildiyse..     (Kontrol)
                 break                                                                                                               #: Nokta girişi son bulma emri alınır.      (Emir)
             elif urlListItem[-1] == ".":                                                                                            ## Girilen url sonunda nokta varsa..        (Kontrol)
                 breakLoop = True                                                                                                    #: Url alımını sonlandıracak bilgi.         (Emir)
@@ -329,7 +332,6 @@ while True:
                 if approvedListUrl not in urlList:                                                                                  #: Doğrulanmış URL daha önce URL Listesine eklenmediyse..
                     urlList.append(approvedListUrl)                                                                                 #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
                     if breakLoop:                                                                                                   #: Kullanıcı URL sonunda nokta belirttiyse bu url sonrası alım sonlanır ve sonraki işlemlere geçilir.
-                        print(f"{preBlankCount}{colored('Url acquisition completed. Moving on to the next steps.','green')}")       #: URL alımının sonlandığı bilgisini ekrana yazdırıyoruz.
                         break                                                                                                       #: URL alımını sonlandırıyoruz. Döngüden çıktık.
                 else:                                                                                                               ## Doğrulanmış URL daha önce işlem görecek URL listine eklenmiş ise..
                     print(f'{preCmdErr} You have already entered this address list.')                                               #: URL'in daha önce girildiğini ekrana yazdırıyoruz.
@@ -339,22 +341,43 @@ while True:
                 inputLoopNo -= 1                                                                                                    #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
         else:                                                                                                                       ## Kullanıcı genişliğe sahip bir değer girmez ise..
             print(f"{preCmdInfo} Just enter a period to move on to the next steps. You can also add it at the end of the URL.")
-            inputLoopNo -= 1                                                                                                        #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
+            inputLoopNo -= 1     
 
+    print(f"{preCmdInfo} List address acquisition terminated.")                                                                                                       #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
+    
+    listEnterPass = False
     for currentUrListItem in urlList:
         processLoopNo += 1
-        openCsv = f"{exportDirName}/{getRunTime()}_{getBodyOwner()}_{getItCleanAfter('/list/')}.csv" 
-        editedUrlListItem = f'{currentUrListItem}detail/' # Guest generate url. approvedListUrl https://letterboxd.com/username/list/listname/
-        soup = doReadPage(editedUrlListItem)
-        url = f'{editedUrlListItem}page/'
+        currentUrListItemDetail = f'{currentUrListItem}detail/' # Guest generate url. approvedListUrl https://letterboxd.com/username/list/listname/
+        currentUrListItemDetailPage = f'{currentUrListItemDetail}page/'
+        cListDom = doReadPage(currentUrListItemDetail)            #: Şu anki listey sayfasını oku.
+        cListOwner = getBodyContent(cListDom,'data-owner')  #: Liste sahibini al.
+        cListDomainName = currentListDomainName()           #: Liste domain ismini al.
+        cListRunTime = getRunTime()                         #: Liste işlem vaktini al.
+
+
         # Karşılama mesajı, kullanıcının girdiği bilgleri ve girilen bilgilere dayanarak listenin bilgilerini yazdırır.
         signature(1)
         # > Domain'in doğru olup olmadığı kullanıcıya sorulur, doğruysa kullanıcı enter'a basar ve program verileri çeker.
-        ent = input(f'\n{preCmdInput} Press enter to confirm the entered information. (Enter)')
-        if ent == "":
-            print(f'{preBlankCount}{colored("List confirmed.", color="green")}')
-            txtLog(f'{preLogInfo}Saf sayfaya erişim başlatılıyor.')
-            soup = doReadPage(editedUrlListItem) #: Verinin çekileceği dom'a filtre ekleniyor.
+        if not listEnterPass:
+            listEnter = input(f'\n{preCmdInput} Press enter to confirm the entered information. (Enter)')
+            if listEnter == "" or listEnter == ".":
+                listEnter = True
+                if listEnter == "":
+                    autoEnterMsg = '[Manual]'
+                else:
+                    autoEnterMsg = '[Auto]'
+                    listEnterPass = True
+                    print(f'{preCmdInfo} Listeler otomatik olarak onaylanacak şekilde ayarlandı.')
+            else:
+                listEnter = False
+                print(msgCancel)
+                txtLog(preLogInfo + msgCancel)
+
+        if listEnter:
+            openCsv = f'{exportDirName}/{cListOwner}_{cListDomainName}_{cListRunTime}.csv' 
+            print(f"{preBlankCount}{colored(f'List confirmed. {autoEnterMsg}', color='green')}")
+            txtLog(f'{preLogInfo} Şimdiki listeye erişim başlatılıyor.')
             lastPageNo = getListLastPageNo()
             dirCheck([exportDirName]) #: Export klasörünün kontrolü.
             with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
@@ -363,16 +386,16 @@ while True:
                 # Filmleri çekiyoruz
                 loopCount = 1
                 # x sıfırdan başlıyor
-                print("\nMovies on the list:")
+                print('\n'+supLine)
+                print(f'{preCmdInfo} Movies on the list;')
                 for x in range(int(lastPageNo)):
-                    txtLog(f'Connecting to: {url}{str(x+1)}')
-                    currentDom = doReadPage(f'{url}{str(x+1)}')
+                    txtLog(f'Connecting to: {currentUrListItemDetailPage}{str(x+1)}')
+                    currentDom = doReadPage(f'{currentUrListItemDetailPage}{str(x+1)}')
                     loopCount = doPullFilms(loopCount, currentDom)
                 # Açtığımız dosyayı manuel kapattık
                 csvFile.close()
+                print(subLine)
+            print(f'{preBlankCount}{colored("Success!", color="green")}')  
             txtLog(f'{preLogInfo}Success!')
             signature(0)
-        else:
-            print(msgCancel)
-            txtLog(preLogInfo + msgCancel)
     test_pause()
