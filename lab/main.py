@@ -18,13 +18,13 @@ from inspect import currentframe
 def dirCheck(dirs): # List
     # Buradaki ifler tekli kontrol yapabş-ilmemize yarar. Örneğin e'yi false yollarım ve sadece l'yi çekebilirim.
     for dir in dirs:
-        if dir: #: Log directory
+        if dir: 
             if os.path.exists(dir):
                 txtLog(f'{preLogInfo}{dir} folder already exists.')
             else:
                 os.makedirs(dir)
                 txtLog(f'{preLogInfo}{dir} folder created.') #: Oluşturulamaz ise bir izin hatası olabilir.
-    print(f'{preCmdInfo} Log location created: {cmdBlink(logFilePath, "yellow")}')
+    print(f'{preCmdInfo} Directory checked: {cmdBlink(dir, "yellow")}')
 
 def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
     try:
