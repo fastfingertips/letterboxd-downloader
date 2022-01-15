@@ -1,23 +1,22 @@
-import os #: https://stackoverflow.com/a/48010814
-import sys
 
+
+
+import csv, sys, os, json #: PMI
+from datetime import datetime #: PMI
+from inspect import currentframe
 while True:
     try:
-        import csv
-        import json
         import arrow
         import requests
         from bs4 import BeautifulSoup
-        from datetime import datetime
-        from inspect import currentframe
         from termcolor import colored
         # from libs.termcolor110.termcolor import colored
         break
     except ImportError as e:
         print('Impor Error: ', e)
         os.system('pipreqs --encoding utf-8 --force')
-        os.system('pip install -r requirements.txt || pip list')
-        exit()
+        os.system('pip install -r requirements.txt & pip list')
+        
 
 def dirCheck(dirs): # List
     for dir in dirs:
@@ -168,11 +167,12 @@ def signature(x): #: x: 0 start msg, 1 end msg
                         errorLine(e)
                     listUT = 'No editing.' #: Hata alınırsa liste düzenlenmemiş varsayılır.
                 finally: ## Kontrol sonu işlemleri.
-                    print(f"{preBlankCount}Process State : {processState}") #: İşlem durumu, sırası ekrana bastırılır.
+                    print(f"{preCmdInfo} {cmdBlink(f'Process State : {processState}','white')}") #: İşlem durumu, sırası ekrana bastırılır.
                     print(supLine) 
                     print(f'{preCmdInfo} {colored("List info;", color="yellow")}') #: Liste başlığı.
                     print(f'{preCmdMiddleDot} List by {listBy}') # Liste sahibinin görünen adı yazdırılıyor.
                     print(f'{preCmdMiddleDot} List title: {listTitle}') #: Liste ismi yazdırılıyor.
+                    print(f'{preCmdMiddleDot} List hash: {cListRunTime}')
                     print(f'{preCmdMiddleDot} List domain name: {cListDomainName}')
                     print(f'{preCmdMiddleDot} Sayfa sayısı: {listLastPage}')
                     print(f'{preCmdMiddleDot} Number of movies: {listMovieCount}')
@@ -213,7 +213,7 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                 metaOgUrl = getMetaContent(urlListItemDom,'og:url') #: Liste yönlendirmesi var mı bakıyoruz
                 metaOgTitle = getMetaContent(urlListItemDom, 'og:title')  #: Liste ismini alıyoruz.
                 bodyDataOwner = getBodyContent(urlListItemDom,'data-owner') #: Liste sahibinin kullanıcı ismi.
-                print(f'{preBlankCount}{colored("Found it: ", color="green")}@{colored(bodyDataOwner,"yellow")} "{colored(metaOgTitle,"yellow")}"') #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
+                print(f'{preCmdInfo} {colored("Found it: ", color="green")}@{colored(bodyDataOwner,"yellow")} "{colored(metaOgTitle,"yellow")}"') #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
                 if urlListItem == metaOgUrl or urlListItem+'/' == metaOgUrl: #: Girilen URL Meta ile aynıysa..
                     txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.',logFilePath)
                 else: ## Girilen URL Meta ile uyuşmuyorsa..
@@ -243,7 +243,7 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
         return currentListAvaliable, metaOgUrl
 
 def test_pause(): #: Geliştirici duraklatmaları için kalıp.
-    os.system(f"echo {preCmdInfo} {cmdBlink('Enter to continue.','yellow')} & pause >nul")
+    os.system(f"echo {preCmdInfo} {cmdBlink('Press enter to continue with the new session.','yellow')} & pause >nul")
 
 def errorLine(e): #: Error Code generator
     cl = currentframe()
@@ -296,28 +296,25 @@ preCmdErr = cmdPre("!","red") #: Cmd error msg pre
 preBlankCount = 4*' ' #: Cmd msg pre blank calc
 preLogInfo = "Info: " #: Log file ingo msg pre
 preLogErr = "Error: " #: Log file err msg pre
-supLine = '_'*80
-subLine = '¯'*80
+supLine = '_'*80 #: sup line lenght
+subLine = '¯'*80 #: sub line lenght
 msgDevBug = 'An uncontrolled error has occurred. Please notify the developer.' #: Kontrolsüz hataların oluştuğu yerlerde kullanılır.
-msgCancel = "The session was canceled because you did not verify the information." #: Cancel msg
+msgCancel = f"The {colored('session was canceled','red')} because you did not verify the information." #: Cancel msg
 msgUrlErr = "Enter a different URL, it's already entered. You can end the login by putting a period at the end of the url."
 siteProtocol, siteUrl = "https://", "letterboxd.com/" #: Saf domain'in parçalanarak birleştirilmesi
 siteDomain = siteProtocol + siteUrl #: Saf domain'in parçalanarak birleştirilmesi
 cmdLogOnOff = True #: Cmd ekran bildirmeleri
-sessionStartHash =  getRunTime() #: Generate start hash
-logDirName, exportDirName = settingsFileSet() #: Set Export dir and Log dir
 
 sessionLoop = 0 #: While döngüne ait 
+sessionStartHash =  getRunTime() #: Generate start hash
+logDirName, exportDirName = settingsFileSet() #: Set Export dir and Log dir
 while True:
     os.system('cls') #: İlk başlangıç ve yeni başlangıçlara temiz bir başlangıç.
-    currenSessionHash = getRunTime()
-    sessionHashes = {'Startup':sessionStartHash,'Current':currenSessionHash}
-    hashChanges = getChanges(len(sessionHashes['Startup']),sessionHashes['Startup'],sessionHashes['Current'])
-
+    currenSessionHash = getRunTime() #: sessionHashes = {'Startup':sessionStartHash,'Current':currenSessionHash}
+    hashChanges = getChanges(len(sessionStartHash),sessionStartHash,currenSessionHash)
     logFilePath = f'{logDirName}/{currenSessionHash}.txt' #: Set log file dir
-    dirCheck([logDirName]) #: Log file check   
-    print(f"{preCmdInfo} Session Hashes: {sessionHashes['Startup']}{':' if sessionHashes['Startup'] == currenSessionHash else ' => '}{hashChanges}") #: Her oturum başlangıcı için farklı bir isim üretildi.
-        
+    print(f"{preCmdInfo} Session Hash: {sessionStartHash}{'' if sessionStartHash == currenSessionHash else ' -> ' + hashChanges}") #: Her oturum başlangıcı için farklı bir isim üretildi.
+    dirCheck([logDirName]) #: Log file check     
     inputLoopNo, urlList, breakLoop = 0, [], False #: While döngüne ait 
     while True:
         inputLoopNo += 1 #: Başlangıçta döngü değerini artırıyoruz.
@@ -350,21 +347,21 @@ while True:
         else: ## Kullanıcı genişliğe sahip bir değer girmez ise..
             print(f"{preCmdInfo} Just enter a period to move on to the next steps. You can also add it at the end of the URL.")
             inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
-    print(f"{preCmdInfo} List address acquisition terminated.")
+    print(f"{preCmdInfo} List address acquisition terminated.\n") #: Liste url alımı sona erdğinde mesaj bastırılır.
     
     listEnterPassOff, processLoopNo = True, 0 #: For döngüne ait 
     for currentUrListItem in urlList:
         processLoopNo += 1
         processState = f'[{len(urlList)}/{processLoopNo}]'
-        currentUrListItemDetail = f'{currentUrListItem}detail/'         # Guest generate url. approvedListUrl https://letterboxd.com/username/list/listname/
-        currentUrListItemDetailPage = f'{currentUrListItemDetail}page/' #: Şu ankş listenin sayfa gezintisi url'i
-        cListDom = doReadPage(currentUrListItemDetail)                  #: Şu anki liste sayfasını oku.
-        cListOwner = getBodyContent(cListDom,'data-owner')              #: Liste sahibini al.
-        cListDomainName = currentListDomainName(currentUrListItem)      #: Liste domain ismini düzenleyerk alır.
-        cListRunTime = getRunTime()                                     #: Liste işlem vaktini al.
+        currentUrListItemDetail = f'{currentUrListItem}detail/' # Url'e detail eklendi.
+        currentUrListItemDetailPage = f'{currentUrListItemDetail}page/' #: Detaylı url'e sayfa gezintisi için parametre eklendi.
+        cListDom = doReadPage(currentUrListItemDetail) #: Şu anki liste sayfasını oku.
+        cListOwner = getBodyContent(cListDom,'data-owner') #: Liste sahibini al.
+        cListDomainName = currentListDomainName(currentUrListItem) #: Liste domain ismini düzenleyerek alır.
+        cListRunTime = getRunTime() #: Liste işlem vaktini al.
         os.system(f'title {processState} Process: @{cListOwner}.') 
         
-        signature(1) #: Liste hakkında bilgiler bastırlır.
+        signature(1) #: Liste hakkında bilgiler bastırılır.
         if listEnterPassOff:
             listEnter = input(f"{preCmdInput} Press enter to confirm the entered information. ({cmdBlink('Enter', 'green')})")
 
@@ -376,13 +373,13 @@ while True:
                 print(f'{preCmdInfo} Listeler otomatik olarak onaylanacak şekilde ayarlandı.')
             else:
                 listEnter = False
-                print(msgCancel)
+                print(preCmdInfo,msgCancel)
                 txtLog(preLogInfo + msgCancel,logFilePath)
         
         print(subLine)
         if listEnter:
             openCsv = f'{exportDirName}/{cListOwner}_{cListDomainName}_{cListRunTime}.csv' 
-            print(f"{preBlankCount}{colored(f'List confirmed. {autoEnterMsg}', color='green')}")
+            print(f"{preCmdInfo} {colored(f'List confirmed. {autoEnterMsg}', color='green')}")
             txtLog(f'{preLogInfo}Şimdiki listeye erişim başlatılıyor.',logFilePath)
             lastPageNo = getListLastPageNo()
             dirCheck([exportDirName]) #: Export klasörünün kontrolü.
@@ -401,11 +398,12 @@ while True:
                 print(subLine) #: İşlem bitimi sonrası alt çizgi. (Alt çizgi için üst çizgi kullanılır.)
 
             os.system('title {processState} completed!')
-            print(f"{preBlankCount}{colored(f'{processState} completed!', color='green')}")  
+            print(f"{preCmdInfo} {colored(f'{processState} completed!', color='green')}")  
             txtLog(f'{preLogInfo}{processState} completed!',logFilePath)
             signature(0)
             
-    os.system('title Finished!')
-    print(f'{preBlankCount}{colored("Export completed successfully!", color="green")}')  
-    txtLog(f'{preLogInfo}Export completed successfully!',logFilePath)
+    os.system('title Session ended!')
+    print(f'{preCmdInfo} {colored("Session ended.", color="green")}')  
+    txtLog(f'{preLogInfo}Session ended.',logFilePath)
     test_pause()
+    
