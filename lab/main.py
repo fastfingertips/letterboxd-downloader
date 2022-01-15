@@ -1,8 +1,10 @@
+from msvcrt import getch
 import os #: https://stackoverflow.com/a/48010814
 import sys
 import csv
 import json
 import arrow
+from click import getchar
 import requests
 from pandas import DataFrame
 from bs4 import BeautifulSoup
@@ -16,7 +18,6 @@ except:
 from inspect import currentframe
 
 def dirCheck(dirs): # List
-    # Buradaki ifler tekli kontrol yapabş-ilmemize yarar. Örneğin e'yi false yollarım ve sadece l'yi çekebilirim.
     for dir in dirs:
         if dir: 
             if os.path.exists(dir):
@@ -231,14 +232,8 @@ def userListCheck(): #: Kullanıcının girilen şekilde bir listesinin var olup
                         msgMetaOgUrlChange = colored(metaOgUrl.replace(urlListItem,""), color="green")
                     else:
                         metaLoop = len(metaOgUrl)
-                        msgMetaOgUrlChange = ''
                         msgInputUrl = ''
-                        for i in range(metaLoop):
-                                # print(urlListItem[i], metaOgUrl[i], urlListItem[i]==metaOgUrl[i]) #: Dev test
-                                if urlListItem[i] == metaOgUrl[i]:
-                                    msgMetaOgUrlChange += colored(metaOgUrl[i], color="yellow")
-                                else:
-                                    msgMetaOgUrlChange += colored(metaOgUrl[i], color="green")
+                        msgMetaOgUrlChange = getChanges(metaLoop,urlListItem,metaOgUrl)
                     print(f'{preBlankCount}({colored("+","green")}): {msgInputUrl}{msgMetaOgUrlChange} şeklinde değiştirdik.')
                 txtLog(f'{preLogInfo}{urlListItem} listesi bulundu: {metaOgTitle}')
                 currentListAvaliable = True
@@ -283,66 +278,82 @@ def errorLine(e):
 # > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
 
-os.system(f'color & cls & title Welcome %USERNAME%.')  
-supLine = '_'*80                                                                    ## Diğer imzayı istemesi durumunda.
-subLine = '¯'*80  
-msgDevBug = 'An uncontrolled error has occurred. Please notify the developer.'      #: Kontrolsüz hataların oluştuğu yerlerde kullanılır.
-msgCancel = "The session was canceled because you did not verify the information."  #: Cancel msg
+def getChanges(loop,key1,key2):
+    change = ''
+    for i in range(loop):
+            # print(key1[i], key2[i], key1[i]==key2[i]) #: Dev test
+            if key1[i] == key2[i]:
+                change += colored(key2[i], color="yellow")
+            else:
+                change += cmdBlink(key2[i],'green')
+    return change
+
+os.system(f'color & cls & title Welcome %USERNAME%.')
+supLine = '_'*80
+subLine = '¯'*80
+msgDevBug = 'An uncontrolled error has occurred. Please notify the developer.' #: Kontrolsüz hataların oluştuğu yerlerde kullanılır.
+msgCancel = "The session was canceled because you did not verify the information." #: Cancel msg
 msgUrlErr = "Enter a different URL, it's already entered. You can end the login by putting a period at the end of the url."
-siteProtocol, siteUrl = "https://", "letterboxd.com/"                               #: Saf domain'in parçalanarak birleştirilmesi
-siteDomain = siteProtocol + siteUrl                                                 #: Saf domain'in parçalanarak birleştirilmesi
-cmdLogOnOff = True                                                                  #: Cmd ekran bildirmeleri
+siteProtocol, siteUrl = "https://", "letterboxd.com/" #: Saf domain'in parçalanarak birleştirilmesi
+siteDomain = siteProtocol + siteUrl #: Saf domain'in parçalanarak birleştirilmesi
+cmdLogOnOff = True #: Cmd ekran bildirmeleri
 settingsFileName = 'settings'+'.json'
-preCmdMiddleDot = cmdPre(u"\u00B7","cyan")                                          #: Cmd middle dot pre
-preCmdInput = cmdPre(">","green")                                                   #: Cmd input msg pre
-preCmdInfo = cmdPre("#","yellow")                                                   #: Cmd info msg pre
-preCmdErr = cmdPre("!","red")                                                       #: Cmd error msg pre
-preBlankCount = 4*' '                                                               #: Cmd msg pre blank calc
-preLogInfo = "Bilgi: "                                                              #: Log file ingo msg pre
-preLogErr = "Hata: "                                                                #: Log file err msg pre
-sessionHash = getRunTime()                                                          #: Generate start hash
-logDirName, exportDirName = settingsFileSet()                                       #: Set Export dir and Log dir
-logFilePath = f'{logDirName}/{sessionHash}.txt'                                     #: Set log file dir
-dirCheck([logDirName])                                                              #: Log file check   
-
-
+preCmdMiddleDot = cmdPre(u"\u00B7","cyan") #: Cmd middle dot pre
+preCmdInput = cmdPre(">","green") #: Cmd input msg pre
+preCmdInfo = cmdPre("#","yellow") #: Cmd info msg pre
+preCmdErr = cmdPre("!","red") #: Cmd error msg pre
+preBlankCount = 4*' ' #: Cmd msg pre blank calc
+preLogInfo = "Bilgi: " #: Log file ingo msg pre
+preLogErr = "Hata: " #: Log file err msg pre
+sessionStartHash =  getRunTime() #: Generate start hash
+logDirName, exportDirName = settingsFileSet() #: Set Export dir and Log dir
 
 while True:
-    os.system('cls')                      #: İlk başlangıç ve yeni başlangıçlara hazırlık.
-    print(f'{preCmdInfo} Session hash: {cmdBlink(sessionHash,"yellow")}')           #: Oturum için farklı bir isim üretildi.
+    os.system('cls') #: İlk başlangıç ve yeni başlangıçlara temiz bir başlangıç.
+    currenSessionHash = getRunTime()
+    sessionHashes = {'Startup':sessionStartHash,'Current':currenSessionHash}
+    hashChanges = getChanges(len(sessionHashes['Startup']),sessionHashes['Startup'],sessionHashes['Current'])
+
+    logFilePath = f'{logDirName}/{currenSessionHash}.txt' #: Set log file dir
+    dirCheck([logDirName]) #: Log file check   
+    print(f"{preCmdInfo} Session Hashes: {sessionHashes['Startup']} => {hashChanges}") #: Her oturum başlangıcı için farklı bir isim üretildi.
     urlList = []
     breakLoop = False
     inputLoopNo = 0 
     processLoopNo = 0
 
     while True:
-        inputLoopNo += 1                                                                                                            #: Başlangıçta döngü değerini artırıyoruz.  (Konum bilgisi)
-        urlListItem = str(input(f'{preCmdInput} List URL[{inputLoopNo}]: ')).lower()                                                #: List url alındı ve str küçültüldü.       (Alım ve Düzenleme)
-        if len(urlListItem) > 0:                                                                                                    ## Giriş boş değilse..                      (Kontrol)                                   
-            if urlListItem == ".":                                                                                                  ## Url girişi yerine nokta girildiyse..     (Kontrol)
-                break                                                                                                               #: Nokta girişi son bulma emri alınır.      (Emir)
-            elif urlListItem[-1] == ".":                                                                                            ## Girilen url sonunda nokta varsa..        (Kontrol)
-                breakLoop = True                                                                                                    #: Url alımını sonlandıracak bilgi.         (Emir)
-                while urlListItem[-1] == ".":                                                                                       #: Url sonunda nokta olduğu sürece.         (Devamlı kontrol) 
-                        urlListItem = urlListItem[:len(urlListItem)-1]                                                              #: Her defasında Url sonundan nokta siler.  (Düzen aktarma)
-            urlListItemDom = doReadPage(urlListItem)                                                                                #: Sayfa dom'u alınır.
-            userListAvailable, approvedListUrl = userListCheck()                                                                    #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
-            if userListAvailable:                                                                                                   #: Liste kullanıma uygunsa..
-                if approvedListUrl not in urlList:                                                                                  #: Doğrulanmış URL daha önce URL Listesine eklenmediyse..
-                    urlList.append(approvedListUrl)                                                                                 #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
-                    if breakLoop:                                                                                                   #: Kullanıcı URL sonunda nokta belirttiyse bu url sonrası alım sonlanır ve sonraki işlemlere geçilir.
-                        break                                                                                                       #: URL alımını sonlandırıyoruz. Döngüden çıktık.
-                else:                                                                                                               ## Doğrulanmış URL daha önce işlem görecek URL listine eklenmiş ise..
-                    print(f'{preCmdErr} You have already entered this address list.')                                               #: URL'in daha önce girildiğini ekrana yazdırıyoruz.
-                    inputLoopNo -= 1                                                                                                #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
-            else:                                                                                                                   ## Kullanıcının girdiği URL doğrulanmazsa..
-                print(f"{preCmdInfo} You did not enter a valid url.")                                                               #: Kullanıcının url'i doğrulanmadığında bilgilendirilir.
-                inputLoopNo -= 1                                                                                                    #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
-        else:                                                                                                                       ## Kullanıcı genişliğe sahip bir değer girmez ise..
+        inputLoopNo += 1 #: Başlangıçta döngü değerini artırıyoruz.
+        urlListItem = str(input(f'{preCmdInput} List URL[{inputLoopNo}]: ')).lower() #: Kullanıcıdan liste url'i alınması ve düzenlenmesi.
+        if len(urlListItem) > 0: ## Giriş boş değilse..
+            if urlListItem == ".": ## Sadece nokta girildiyse..
+                if len(urlList) > 0: ## Url listesinde liste varsa..
+                    break
+                else: ## Url listesinde liste yoksa..
+                    print(f"{preCmdInfo} To finish, you must first specify a list.") #: Liste belirtmeden işlemi sonlandırmaya çalışan kullanıcılar bilgilendiriliyor.
+                    inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
+                    continue
+            elif urlListItem[-1] == ".": ## Girilen url sonunda nokta varsa..
+                breakLoop = True #: Url alımını sonlandıracak bilgi.
+                while urlListItem[-1] == ".": ## Url sonunda nokta olduğu sürece..
+                        urlListItem = urlListItem[:len(urlListItem)-1] #: Her defasında Url sonundan nokta siler.
+            urlListItemDom = doReadPage(urlListItem) #: Sayfa dom'u alınır.
+            userListAvailable, approvedListUrl = userListCheck() #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
+            if userListAvailable: ## Liste kullanıma uygunsa..
+                if approvedListUrl not in urlList: ## Doğrulanmış URL daha önce URL Listesine eklenmediyse..
+                    urlList.append(approvedListUrl) #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
+                    if breakLoop: ## Kullanıcı URL sonunda nokta belirttiyse..
+                        break #: URL alımını sonlandırıyoruz.
+                else: ## Doğrulanmış URL daha önce işlem görecek URL listine eklenmiş ise..
+                    print(f'{preCmdErr} You have already entered this address list.') #: URL'in daha önce girildiğini ekrana yazdırıyoruz.
+                    inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
+            else: ## Kullanıcının girdiği URL doğrulanmazsa..
+                print(f"{preCmdInfo} You did not enter a valid url.")
+                inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
+        else: ## Kullanıcı genişliğe sahip bir değer girmez ise..
             print(f"{preCmdInfo} Just enter a period to move on to the next steps. You can also add it at the end of the URL.")
-            inputLoopNo -= 1     
-
-    print(f"{preCmdInfo} List address acquisition terminated.")                                                                     #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
+            inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
+    print(f"{preCmdInfo} List address acquisition terminated.")
     
     listEnterPassOff = True
     for currentUrListItem in urlList:
