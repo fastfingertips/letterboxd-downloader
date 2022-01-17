@@ -325,24 +325,26 @@ while True:
                 urlListItem = urlListItem[1:] #: Başlangıçdaki soru işaret kaldırıldı.
                 searchList = f'https://letterboxd.com/search/lists/{urlListItem}/'
                 ## Getting
-                searchListDom = doReadPage(searchList)
-                searchMetaTitle = getMetaContent(searchListDom,'og:title')
-                searchLMetaUrl = getMetaContent(searchListDom,'og:url')
-                searchListsQCountMsg = searchListDom.find('h2', attrs={'class':'section-heading'}).text #: Kaç liste bulunduğu hakkında bilgi veren mesajı çekiyoruz.
+                searchListPreviewDom = doReadPage(searchList)
+                searchMetaTitle = getMetaContent(searchListPreviewDom,'og:title')
+                searchLMetaUrl = getMetaContent(searchListPreviewDom,'og:url')
+                searchListsQCountMsg = searchListPreviewDom.find('h2', attrs={'class':'section-heading'}).text #: Kaç liste bulunduğu hakkında bilgi veren mesajı çekiyoruz.
                 try:
-                    searchListsQLastsPage = searchListDom.find_all('li',attrs={'class':'paginate-page'})[-1].text #: Son sayfayı alıyoruz.
+                    searchListsQLastsPage = searchListPreviewDom.find_all('li',attrs={'class':'paginate-page'})[-1].text #: Son sayfayı alıyoruz.
                 except:
                     searchListsQLastsPage = 1 #: Alınamazsa sayfada tek sayfa olduğu varsayılır.
                 finally:
                     print(preCmdInfo,searchMetaTitle)
                     print(preCmdInfo,searchListsQCountMsg)
                     print(preCmdInfo,'Page URL:',searchLMetaUrl)   
-                    print(f'{preCmdInfo} Last Page: {searchListsQLastsPage}', end=' ')
-
+                    print(f'{preCmdInfo} Last Page: {searchListsQLastsPage}')
 
                 sayfa, liste = 0, 0
                 for i in range(int(searchListsQLastsPage)):
                     sayfa += 1
+                    connectionPage = searchList+f'page/{sayfa}'
+                    print(f'{preCmdInfo} Bağlanılan sayfa: {connectionPage}')
+                    searchListDom = doReadPage(connectionPage)
                     listsUrls = searchListDom.find_all('a', attrs={'class':'list-link'}) #: Okunmuş sayfadaki tüm listelerin adresleri.
                     print(f'{preCmdInfo} Current Page: {sayfa}, Current page lists: {len(listsUrls)}')
                     for listsUrl in listsUrls:
@@ -350,9 +352,13 @@ while True:
                         print(f'{preCmdInfo} Sayfa/Liste: {sayfa}/{liste}')
                         urlListItem = siteDomain+listsUrl.get('href') #: https://letterboxd.com + /user_name/list/list_name
                         userListAvailable, approvedListUrl = userListCheck(doReadPage(urlListItem))
-                        if userListAvailable:
-                            urlList.append(approvedListUrl)
-                    searchListDom = doReadPage(searchList)
+                        if approvedListUrl not in urlList:
+                            if userListAvailable:
+                                urlList.append(approvedListUrl)
+                                print('Eklendi.')
+                        else:
+                            print('Bu listeyi daha önce eklemişiz.')
+                            liste -= 1
                 break
             urlListItemDom = doReadPage(urlListItem) #: Sayfa dom'u alınır.
             userListAvailable, approvedListUrl = userListCheck(urlListItemDom) #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
