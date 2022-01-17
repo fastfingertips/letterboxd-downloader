@@ -29,7 +29,6 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
     try:
         # > Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
         articles = tempCurrentDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
-        loopCount = tempLoopCount
         # > Filmleri ekrana ve dosyaya yazdırma işlemleri
         for currentArticle in articles:
             # Oda ismini çektik
@@ -41,10 +40,11 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
             except:
                 movieYear = "Yok"
             # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
-            print(f'{loopCount}) {movieName} ({movieYear})')
+            if cmdPrintFilms:
+                print(f'{tempLoopCount}) {movieName} ({movieYear})')
             writer.writerow([str(movieName), str(movieYear)])
-            loopCount += 1
-        return loopCount
+            tempLoopCount += 1
+        return tempLoopCount
     except Exception as e:
         if cmdLogOnOff:
             errorLine(e)  
@@ -163,7 +163,7 @@ def listSignature(): #: x: 0 start msg, 1 end msg
                     errorLine(e)
                 listUT = 'No editing.' #: Hata alınırsa liste düzenlenmemiş varsayılır.
             finally: ## Kontrol sonu işlemleri.
-                print(f"{preCmdInfo} {cmdBlink(f'Process State : {processState}','white')}") #: İşlem durumu, sırası ekrana bastırılır.
+                print(f"\n{preCmdInfo} {cmdBlink(f'Process State : {processState}','white')}") #: İşlem durumu, sırası ekrana bastırılır.
                 os.system(f'title {processState} Process: @{cListOwner}.')
                 print(supLine) 
                 print(f'{preCmdInfo} {colored("List info;", color="yellow")}') #: Liste başlığı.
@@ -202,7 +202,7 @@ def userListCheck(_urlListItemDom): #: Kullanıcının girilen şekilde bir list
                 metaOgUrl = getMetaContent(_urlListItemDom,'og:url') #: Liste yönlendirmesi var mı bakıyoruz
                 metaOgTitle = getMetaContent(_urlListItemDom, 'og:title')  #: Liste ismini alıyoruz.
                 bodyDataOwner = getBodyContent(_urlListItemDom,'data-owner') #: Liste sahibinin kullanıcı ismi.
-                print(f'{preCmdInfo} {colored("Found it: ", color="green")}@{colored(bodyDataOwner,"yellow")} "{colored(metaOgTitle,"yellow")}"') #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
+                print(f'{preCmdCheck} {colored("Found it: ", color="green")}@{colored(bodyDataOwner,"yellow")} "{colored(metaOgTitle,"yellow")}"') #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
                 if urlListItem == metaOgUrl or urlListItem+'/' == metaOgUrl: #: Girilen URL Meta ile aynıysa..
                     txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.',logFilePath)
                 else: ## Girilen URL Meta ile uyuşmuyorsa..
@@ -277,11 +277,16 @@ def cmdBlink(m,c):
 
 ## Startup
 os.system(f'color & cls & title Welcome %USERNAME%.')
+## Açılıp kapanabilen özellikler..
+cmdPrintFilms = True #: Cmd ekran bildirmeleri
+cmdLogOnOff = True #: Cmd ekran bildirmeleri
 settingsFileName = 'settings'+'.json'
 preCmdMiddleDot = cmdPre(u"\u00B7","cyan") #: Cmd middle dot pre
 preCmdInput = cmdPre(">","green") #: Cmd input msg pre
 preCmdInfo = cmdPre("#","yellow") #: Cmd info msg pre
 preCmdErr = cmdPre("!","red") #: Cmd error msg pre
+preCmdCheck = cmdPre('✓','green') #: Cmd error msg pre
+preCmdUnCheck = cmdPre('X','red')
 preBlankCount = 4*' ' #: Cmd msg pre blank calc
 preLogInfo = "Info: " #: Log file ingo msg pre
 preLogErr = "Error: " #: Log file err msg pre
@@ -292,7 +297,10 @@ msgCancel = f"The {colored('session was canceled','red')} because you did not ve
 msgUrlErr = "Enter a different URL, it's already entered. You can end the login by putting a period at the end of the url."
 siteProtocol, siteUrl = "https://", "letterboxd.com" #: Saf domain'in parçalanarak birleştirilmesi
 siteDomain = siteProtocol + siteUrl #: Saf domain'in parçalanarak birleştirilmesi
-cmdLogOnOff = True #: Cmd ekran bildirmeleri
+if cmdPrintFilms:
+    supLineFilms,subLineFilms = f'{supLine}\n{preCmdInfo} {colored("Movies on the list;", color="yellow")}\n', f'{subLine}\n'
+else:
+    supLineFilms,subLineFilms = '',''
 
 sessionLoop = 0 #: While döngüne ait 
 sessionStartHash =  getRunTime() #: Generate start hash
@@ -302,6 +310,7 @@ while True:
     currenSessionHash = getRunTime() #: sessionHashes = {'Startup':sessionStartHash,'Current':currenSessionHash}
     hashChanges = getChanges(len(sessionStartHash),sessionStartHash,currenSessionHash)
     logFilePath = f'{logDirName}/{currenSessionHash}.txt' #: Set log file dir
+    exportsPath = f'{exportDirName}/{currenSessionHash}/'
     print(f"{preCmdInfo} Session Hash: {sessionStartHash}{'' if sessionStartHash == currenSessionHash else ' -> ' + hashChanges}") #: Her oturum başlangıcı için farklı bir isim üretildi.
     dirCheck([logDirName]) #: Log file check     
     inputLoopNo, urlList, breakLoop = 0, [], False #: While döngüne ait 
@@ -349,15 +358,15 @@ while True:
                     print(f'{preCmdInfo} Current Page: {sayfa}, Current page lists: {len(listsUrls)}')
                     for listsUrl in listsUrls:
                         liste += 1
-                        print(f'{preCmdInfo} Sayfa/Liste: {sayfa}/{liste}')
+                        print(f'{preCmdInfo} P{sayfa}:L{liste}')
                         urlListItem = siteDomain+listsUrl.get('href') #: https://letterboxd.com + /user_name/list/list_name
                         userListAvailable, approvedListUrl = userListCheck(doReadPage(urlListItem))
                         if approvedListUrl not in urlList:
                             if userListAvailable:
                                 urlList.append(approvedListUrl)
-                                print('Eklendi.')
+                                print(f"{preCmdCheck} {colored('Eklendi.','green')}")
                         else:
-                            print('Bu listeyi daha önce eklemişiz.')
+                            print(f'{preCmdUnCheck} Bu listeyi daha önce eklemişiz.')
                             liste -= 1
                 break
             urlListItemDom = doReadPage(urlListItem) #: Sayfa dom'u alınır.
@@ -376,7 +385,7 @@ while True:
         else: ## Kullanıcı genişliğe sahip bir değer girmez ise..
             print(f"{preCmdInfo} Just enter a period to move on to the next steps. You can also add it at the end of the URL.")
             inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
-    print(f"{preCmdInfo} List address acquisition terminated.\n") #: Liste url alımı sona erdğinde mesaj bastırılır.
+    print(f"{preCmdInfo} List address acquisition terminated.") #: Liste url alımı sona erdğinde mesaj bastırılır.
     
     listEnterPassOff, processLoopNo = True, 0 #: For döngüne ait 
     for currentUrListItem in urlList:
@@ -406,31 +415,29 @@ while True:
     
         print(subLine)
         if listEnter:
-            openCsv = f'{exportDirName}/{cListOwner}_{cListDomainName}_{cListRunTime}.csv' 
-            print(f"{preCmdInfo} {colored(f'List confirmed. {autoEnterMsg}', color='green')}")
             txtLog(f'{preLogInfo}Şimdiki listeye erişim başlatılıyor.',logFilePath)
+            dirCheck([exportsPath]) #: Export klasörünün kontrolü.
+            openCsv = f'{exportsPath}{cListOwner}_{cListDomainName}_{cListRunTime}.csv' 
+            print(f"{preCmdInfo} {colored(f'List confirmed. {autoEnterMsg}', color='green')}")
             lastPageNo = getListLastPageNo()
-            dirCheck([exportDirName]) #: Export klasörünün kontrolü.
             
             with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
                 writer = csv.writer(csvFile)
                 writer.writerow(["Title", "Year"]) #: Csv açıldıktan sonra en üste yazılacak başlıklar.
-                loopCount = 1
-                print(supLine)
-                print(f'{preCmdInfo} {colored("Movies on the list;", color="yellow")}')
                 
+                loopCount = 1
+                print(supLineFilms,end='')
                 for x in range(int(lastPageNo)):
                     txtLog(f'Connecting to: {currentUrListItemDetailPage}{str(x+1)}',logFilePath)
                     currentDom = doReadPage(f'{currentUrListItemDetailPage}{str(x+1)}')
                     loopCount = doPullFilms(loopCount, currentDom)
-                
                 csvFile.close() #: Açtığımız dosyayı manuel kapattık
-                print(subLine) #: İşlem bitimi sonrası alt çizgi. (Alt çizgi için üst çizgi kullanılır.)
+                print(subLineFilms,end='') #: İşlem bitimi sonrası alt çizgi. (Alt çizgi için üst çizgi kullanılır.)
             
             os.system(f'title {processState} completed!')
             print(f"{preCmdInfo} {colored(f'{processState} completed!', color='green')}")  
             txtLog(f'{preLogInfo}{processState} completed!',logFilePath)
-            print(f'{preCmdMiddleDot} Listedeki {loopCount-1} film {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.') #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
+            print(f'{preCmdInfo} {loopCount-1} film {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.') #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
             
     os.system(f'title Session: {currenSessionHash} ended!')
     print(f'{preCmdInfo} {colored(f"Session: {currenSessionHash} ended.", color="green")}')  
