@@ -1,4 +1,4 @@
-import csv, sys, os, json #: PMI
+import csv, sys, os, json, glob, time #: PMI
 from datetime import datetime #: PMI
 from inspect import currentframe #: PMI
 while True: #: Other libs
@@ -7,6 +7,7 @@ while True: #: Other libs
         import requests
         from bs4 import BeautifulSoup
         from termcolor import colored
+        import pandas as pd
         # from libs.termcolor110.termcolor import colored
         break
     except ImportError as e: #: Trying import
@@ -14,7 +15,6 @@ while True: #: Other libs
         os.system('pipreqs --encoding utf-8 --force')
         os.system('pip install -r requirements.txt & pip list')
         
-
 def dirCheck(dirs): # List
     for dir in dirs:
         if dir: 
@@ -274,6 +274,20 @@ def cmdPre(m,c): #: Mesaj ön ekleri için kalıp.
 def cmdBlink(m,c):
     return colored(m,c,attrs=["blink"])
 
+def combineCsv():
+    if len(urlList) > 1:
+        combineDir = f'{exportDirName}/Combined/'
+        dirCheck([combineDir])
+        txtLog('Birden fazla liste üzerinde çalışıldığından listeler kombine edilecek.',logFilePath)
+        try:
+            allCsvFiles = [i for i in glob.glob(exportsPath+'*.{}'.format('csv'))]
+            combinedCsvFiles = pd.concat([pd.read_csv(f) for f in allCsvFiles])
+            combinedCsvFiles.to_csv(f"{combineDir}{currenSessionHash}_Combined.csv", index=False, encoding='utf-8-sig')
+        except Exception as e:
+            txtLog(f'Listeler kombine edilemedi. Hata: {e}',logFilePath)
+    else: 
+        txtLog('Tek liste üzerinde çalışıldığı için işlem kombine edilmeyecek.',logFilePath)
+
 # INITIAL ASSIGNMENTS
 if True:
     os.system(f'color & cls & title Welcome %USERNAME%.')
@@ -298,8 +312,8 @@ if True:
     settingsFileName = 'settings'+'.json'
 
     ## Açılıp kapanabilen özellikler..
-    cmdPrintFilms = True #: Cmd ekran bildirmeleri
-    cmdLogOnOff = True #: Cmd ekran bildirmeleri
+    cmdPrintFilms = False #: Filmler ekrana yazılsın mı
+    cmdLogOnOff = False #: Cmd ekran bildirmeleri
 
     if cmdPrintFilms:
         supLineFilms,subLineFilms = f'{supLine}\n{preCmdInfo}{colored("Movies on the list;", color="yellow")}\n', f'{subLine}\n'
@@ -340,7 +354,15 @@ while True:
                 searchList = f'https://letterboxd.com/search/lists/{urlListItem}/'
                 ## Getting
                 searchListPreviewDom = doReadPage(searchList)
-                searchMetaTitle = getMetaContent(searchListPreviewDom,'og:title')
+                while True:
+                    try:
+                        searchMetaTitle = getMetaContent(searchListPreviewDom,'og:title')
+                        break
+                    except AttributeError:
+                        print('Başlığı almaya çalışıyoruz..')
+                        time.sleep(2.1)
+                        txtLog(f'Başlık alınamadı {AttributeError}', logFilePath)
+
                 searchLMetaUrl = getMetaContent(searchListPreviewDom,'og:url')
                 searchListsQCountMsg = searchListPreviewDom.find('h2', attrs={'class':'section-heading'}).text #: Kaç liste bulunduğu hakkında bilgi veren mesajı çekiyoruz.
                 try:
@@ -415,7 +437,7 @@ while True:
                 print(f'{preCmdInfo}Listeler otomatik olarak onaylanacak şekilde ayarlandı.')
             else:
                 listEnter = False
-                print(preCmdInfo,f"The {colored('session was canceled','red')} because you did not verify the information.")
+                print(f"{preCmdInfo}The {colored('session was canceled','red')} because you did not verify the information.")
                 txtLog(f'{preLogInfo}The session was canceled because you did not verify the information.',logFilePath)
     
         print(subLine)
@@ -443,7 +465,8 @@ while True:
             print(f"{preCmdInfo}{colored(f'{processState} completed!', color='green')}")  
             txtLog(f'{preLogInfo}{processState} completed!',logFilePath)
             print(f'{preCmdInfo}{loopCount-1} film {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.') #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
-            
+
+    combineCsv()
     os.system(f'title Session: {currenSessionHash} ended!')
     print(f'{preCmdInfo}{colored(f"Session: {currenSessionHash} ended.", color="green")}')  
     txtLog(f'{preLogInfo}Session: {currenSessionHash} ended.',logFilePath)
