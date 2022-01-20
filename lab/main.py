@@ -150,10 +150,10 @@ def listSignature(): #: x: 0 start msg, 1 end msg
                 domSelectedGenre = cListDom.select(".smenu-subselected")[2].text + 'only movies.' #: Liste sayfasından tür filtre bilgisi alınıyor.
                 domSelectedSortBy = cListDom.select(".smenu-subselected")[0].text + '.' #: Liste sayfasından sıralama filtre bilgisi alınıyor.
             except Exception as e: ## Filtre bilgileri edinirken bir hata oluşursa..
-                domSelectedDecadeYear, domSelectedGenre, domSelectedSortBy = 3*'?' #: Filtre bilgileri edinemediğinde her filtreye ? eklenir.
-                if cmdLogOnOff:
-                    errorLine(e)                                              
-                    txtLog(f'{preLogErr}Film filtre bilgileri alınamadı..',logFilePath)
+                txtLog(f'{preLogErr}Filtre bilgileri elde bir sorun gerçekleşti.',logFilePath)
+                print('Filtre bilgileri elde bir sorun gerçekleşti.')
+                domSelectedDecadeYear, domSelectedGenre, domSelectedSortBy = 3*'Unknown' #: Filtre bilgileri edinemediğinde her filtreye None eklenir.                                            
+
             try: ## Search list update time
                 listUpdateTime = cListDom.select(".updated time")[0].text #: Liste düzenlenme vakti çekiliyor.
                 listUT = arrow.get(listUpdateTime).humanize() #: Çekilen liste düzenlenme vakti okunmaya uygun hale getiriliyor.
@@ -199,7 +199,7 @@ def userListCheck(_urlListItemDom): #: Kullanıcının girilen şekilde bir list
             if metaOgType == "letterboxd:list": # Meta etiketindeki bilgi sorgulanır. Sayfanın liste olup olmadığı anlaşılır.
                 txtLog(f'{preLogInfo}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {metaOgType}',logFilePath)
                 metaOgUrl = getMetaContent(_urlListItemDom,'og:url') #: Liste yönlendirmesi var mı bakıyoruz
-                metaOgTitle = getMetaContent(_urlListItemDom, 'og:title')  #: Liste ismini alıyoruz.
+                metaOgTitle = getMetaContent(_urlListItemDom, 'og:title')  #: Liste ismini alıyoruz. Örnek: 'Search results for best comedy'
                 bodyDataOwner = getBodyContent(_urlListItemDom,'data-owner') #: Liste sahibinin kullanıcı ismi.
                 print(f'{preCmdCheck}{colored("Found it: ", color="green")}@{colored(bodyDataOwner,"yellow")} "{colored(metaOgTitle,"yellow")}"') #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
                 if urlListItem == metaOgUrl or urlListItem+'/' == metaOgUrl: #: Girilen URL Meta ile aynıysa..
@@ -276,17 +276,30 @@ def cmdBlink(m,c):
 
 def combineCsv():
     if len(urlList) > 1:
-        combineDir = f'{exportDirName}/Combined/'
-        dirCheck([combineDir])
-        txtLog('Birden fazla liste üzerinde çalışıldığından listeler kombine edilecek.',logFilePath)
+        combineDir = exportDirName + '/Combined/' #: Kombine edilen listelerin barındığı klasör
+        combineCsvFile = currenSessionHash + '_Normal-Combined.csv' #: Kombine dosyasının ismi.
+        noDuplicateCsvFile = currenSessionHash + '_NoDuplicate-Combined.csv' #: NoDuplicate file name
+        combineCsvPath = combineDir + combineCsvFile #: Kombine dosyasının yolu.
+        noDuplicateCsvPath = combineDir + noDuplicateCsvFile #: NoDuplciate file path
+        dirCheck([combineDir]) #: Combine dir check
+        txtLog('Birden fazla liste üzerinde çalışıldığından listeler kombine edilecek.',logFilePath) #: Process logger
         try:
-            allCsvFiles = [i for i in glob.glob(exportsPath+'*.{}'.format('csv'))]
-            combinedCsvFiles = pd.concat([pd.read_csv(f) for f in allCsvFiles])
-            combinedCsvFiles.to_csv(f"{combineDir}{currenSessionHash}_Combined.csv", index=False, encoding='utf-8-sig')
+            allCsvFiles = [i for i in glob.glob(exportsPath+'*.{}'.format('csv'))] #: Belirtilmiş dizindeki tüm csv dosyalarının bir değişkene aktarılması.
+            combinedCsvFiles = pd.concat([pd.read_csv(f) for f in allCsvFiles]) #: Csv dosyalarının tümü birleştirilir.
+            combinedCsvFiles.to_csv(combineCsvPath, index=False, encoding='utf-8-sig') #: Csv dosyasının encod ayarı.
+            with open(combineCsvPath,'r', encoding="utf8") as in_file, open(noDuplicateCsvPath,'w', encoding="utf8") as out_file: ## Tekrarlayan bilgileri silmek için..
+                seen = set() # set for fast O(1) amortized lookup
+                for line in in_file:
+                    if line in seen: continue # skip duplicate
+                    seen.add(line)
+                    out_file.write(line)
+            
+            print(f'\n{preCmdInfo}Listelerdeki tüm filmler {combineCsvPath} dosyasına kaydedildi.')
+            print(f'{preCmdInfo}Yalnızca farklı fimlerin olduğu dosya {noDuplicateCsvPath} olarak ayarlandı.')
         except Exception as e:
-            txtLog(f'Listeler kombine edilemedi. Hata: {e}',logFilePath)
+            txtLog(f'Listeler kombine edilemedi. Hata: {e}',logFilePath) #: Process logger
     else: 
-        txtLog('Tek liste üzerinde çalışıldığı için işlem kombine edilmeyecek.',logFilePath)
+        txtLog('Tek liste üzerinde çalışıldığı için işlem kombine edilmeyecek.',logFilePath) #: Process logger
 
 # INITIAL ASSIGNMENTS
 if True:
@@ -351,20 +364,32 @@ while True:
             elif urlListItem[0] == '?': ## Giriş başlangıcında soru işareti varsa.. (Liste arama moduna geçilir.)
                 print(f'{preCmdInfo}Parameter recognized, searching list.')
                 urlListItem = urlListItem[1:] #: Başlangıçdaki soru işaret kaldırıldı.
+
+                if "!" in urlListItem: #: Son liste belirleyicisi
+                    x = -1
+                    for i in range(3): #: Sona en fazla 3 rakam girilebilir. letterboxd'da max bulubilen liste sayısı 250
+                        if urlListItem[x-1] == "!":
+                            endList = int(urlListItem[x:])
+                            urlListItem = urlListItem[:x-1]
+                        x += -1
+                else:
+                    endList = 'Not specified.'
+                print('Girdi:',urlListItem,'\nLast list:',endList)
+                
                 searchList = f'https://letterboxd.com/search/lists/{urlListItem}/'
                 ## Getting
                 searchListPreviewDom = doReadPage(searchList)
-                while True:
-                    try:
-                        searchMetaTitle = getMetaContent(searchListPreviewDom,'og:title')
-                        break
-                    except AttributeError:
-                        print('Başlığı almaya çalışıyoruz..')
-                        time.sleep(2.1)
-                        txtLog(f'Başlık alınamadı {AttributeError}', logFilePath)
-
+                try:
+                    searchMetaTitle = getMetaContent(searchListPreviewDom,'og:title')
+                except AttributeError:
+                    print('Letterboxd Hatalı bağlantı gönderdi')
+                    txtLog(f'Başlık alınamadı {AttributeError}', logFilePath)
+                    searchMetaTitle = ''                    
+                
+                print(searchListPreviewDom)
                 searchLMetaUrl = getMetaContent(searchListPreviewDom,'og:url')
                 searchListsQCountMsg = searchListPreviewDom.find('h2', attrs={'class':'section-heading'}).text #: Kaç liste bulunduğu hakkında bilgi veren mesajı çekiyoruz.
+                
                 try:
                     searchListsQLastsPage = searchListPreviewDom.find_all('li',attrs={'class':'paginate-page'})[-1].text #: Son sayfayı alıyoruz.
                 except:
@@ -384,6 +409,9 @@ while True:
                     listsUrls = searchListDom.find_all('a', attrs={'class':'list-link'}) #: Okunmuş sayfadaki tüm listelerin adresleri.
                     print(f'{preCmdInfo}Current Page: {sayfa}, Current page lists: {len(listsUrls)}')
                     for listsUrl in listsUrls:
+                        if liste == endList:
+                            print('Liste sayısı:',liste,'ulaşıldı.')
+                            break
                         liste += 1
                         print(f'{preCmdInfo}P{sayfa}:L{liste}')
                         urlListItem = siteDomain+listsUrl.get('href') #: https://letterboxd.com + /user_name/list/list_name
@@ -395,7 +423,11 @@ while True:
                         else:
                             print(f'{preCmdUnCheck}Bu listeyi daha önce eklemişiz.')
                             liste -= 1
+                    else:
+                        continue
+                    break
                 break
+            
             urlListItemDom = doReadPage(urlListItem) #: Sayfa dom'u alınır.
             userListAvailable, approvedListUrl = userListCheck(urlListItemDom) #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
             if userListAvailable: ## Liste kullanıma uygunsa..
@@ -421,7 +453,12 @@ while True:
         currentUrListItemDetail = f'{currentUrListItem}detail/' # Url'e detail eklendi.
         currentUrListItemDetailPage = f'{currentUrListItemDetail}page/' #: Detaylı url'e sayfa gezintisi için parametre eklendi.
         cListDom = doReadPage(currentUrListItemDetail) #: Şu anki liste sayfasını oku.
-        cListOwner = getBodyContent(cListDom,'data-owner') #: Liste sahibini al.
+        try:
+            cListOwner = getBodyContent(cListDom,'data-owner') #: Liste sahibini al.
+        except Exception as e:
+            print(f'{preCmdErr}Liste sahibi bilgisi alınamadı')
+            txtLog(f'Liste sahibi bilgisi alınamadı Hata: {e}',logFilePath)
+            cListOwner = 'Unknown'
         cListDomainName = currentListDomainName(currentUrListItem) #: Liste domain ismini düzenleyerek alır.
         cListRunTime = getRunTime() #: Liste işlem vaktini al. 
         
