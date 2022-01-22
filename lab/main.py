@@ -26,7 +26,7 @@ def dirCheck(dirs): # List
             else:   
                 os.makedirs(dir)
                 txtLog(f'{preLogInfo}{dir} folder created.',logFilePath) #: Oluşturulamaz ise bir izin hatası olabilir.
-    print(f'{preCmdInfo}Directory checked: {cmdBlink(dir, "yellow")}')
+        print(f'{preCmdInfo}Directory checked: {cmdBlink(dir, "yellow")}')
 
 def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
     try:
@@ -44,25 +44,44 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
                 movieYear = "Yok"
             # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
             if cmdPrintFilms:
-                print(f'{tempLoopCount}) {movieName} ({movieYear})')
+                print(f" {tempLoopCount}: {movieName}, {movieYear}")
             writer.writerow([str(movieName), str(movieYear)])
             tempLoopCount += 1
         return tempLoopCount
     except Exception as e:
-        if cmdLogOnOff:
-            errorLine(e)  
-            txtLog('An error was encountered while obtaining movie information.', logFilePath)
+        errorLine(e)  
+        txtLog('An error was encountered while obtaining movie information.', logFilePath)
 
 def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
     try:
-        txtLog(f'{preLogInfo}Trying connect to [{tempUrl}]',logFilePath)                            #: Log dosyasına bağlantı başlangıcında bilgi veriliyor.
-        urlResponseCode = requests.get(tempUrl)                                         #: Get response code.
-        urlDom = BeautifulSoup(urlResponseCode.content.decode('utf-8'), 'html.parser')  #: Get page dom.               
-        return urlDom                                                                #: Return page dom.
+        txtLog(f'{preLogInfo}Trying connect to [{tempUrl}]',logFilePath)                            #: Log dosyasına bağlantı başlangıcında bilgi veriliyor.        
+        while True:
+            #: https://stackoverflow.com/questions/23013220/max-retries-exceeded-with-url-in-requests
+            try:
+                urlResponseCode = requests.get(tempUrl,timeout=30)
+                urlDom = BeautifulSoup(urlResponseCode.content.decode('utf-8'), 'html.parser')
+                if urlDom != None:
+                    return urlDom #: Return page dom
+            except requests.ConnectionError as e:
+                print("OOPS!! Connection Error. Make sure you are connected to Internet. Technical Details given below.")
+                print(str(e))            
+                continue
+            except requests.Timeout as e:
+                print("OOPS!! Timeout Error")
+                print(str(e))
+                continue
+            except requests.RequestException as e:
+                print("OOPS!! General Error")
+                print(str(e))
+                continue
+            except KeyboardInterrupt:
+                print("Someone closed the program")
+            except Exception as e:
+                print('Hata:',e)
+          #: Get page dom.
     except Exception as e:
-        if cmdLogOnOff:
-            errorLine(e)                                                                #: Dom edinirken hata gerçekleşirse..
-            txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]',logFilePath)
+        errorLine(e)                                                                #: Dom edinirken hata gerçekleşirse..
+        txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]',logFilePath)
 
 def doReset():  # Porgramı yeniden başlat
     try:
@@ -70,9 +89,8 @@ def doReset():  # Porgramı yeniden başlat
         os.system('echo Confirm reboot press any key again & pause >nul')
         os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
     except Exception as e:
-        if cmdLogOnOff:
-            errorLine(e)  
-            txtLog(preLogErr + 'Attempting to restart the program failed.',logFilePath)
+        errorLine(e)
+        txtLog(preLogErr + 'Attempting to restart the program failed.',logFilePath)
 
 def getListLastPageNo():  # Listenin son sayfasını öğren
     try:
@@ -87,25 +105,34 @@ def getListLastPageNo():  # Listenin son sayfasını öğren
         lastPageNo = 1                                                                          #: Sayfa sayısı bilgisi alınamadığında sayfa sayısı 1 olarak işaretlenir.
         getMovieCount(lastPageNo)                                                               #: Sayfa bilgisi gönderiliyor.
     except Exception as e:
-        if cmdLogOnOff:
-            errorLine(e)                                                             
+        errorLine(e)
     finally:
         txtLog(f'{preLogInfo}Sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPageNo} olduğu öğrenildi.',logFilePath)
         return lastPageNo
 
 def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
-    try:                                                                                                                                ## Listenin son sayfa işlemleri.
-        lastPageDom = doReadPage(f'{currentUrListItemDetailPage}{tempLastPageNo}')                                                                              #: Getting lastpage dom.
-        lastPageArticles = lastPageDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li") #: Sayfa kodları çekildi.
-        lastPageMoviesCount =  len(lastPageArticles)                                                                                    #: Film sayısı öğrenildi.
-        movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount                                                                  #: Toplam film sayısını belirlemek.
-        txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.",logFilePath)                                                   #: Film sayısı hesaplandıktan sonra ekrana yazdırılır.
+    try:              
+        try: # Son sayfaya bağlanıp, son sayfadaki film sayısını almak bir get isteği üretir ve programı yavaşlatır bu nedenle bir alternatif
+            metaDescription = cListDom.find('meta', attrs={'name':'description'}).attrs['content']
+            metaDescription = metaDescription[10:] #: açıklama kısmındaki 'A list of ' sonrası
+            for i in range(6):
+                try:
+                    int(metaDescription[i]) 
+                    ii = i+1
+                except:
+                    pass
+            movieCount = metaDescription[:ii]
+        except Exception as e: ## Listenin son sayfa işlemleri.
+            lastPageDom = doReadPage(f'{currentUrListItemDetailPage}{tempLastPageNo}')                                                                              #: Getting lastpage dom.
+            lastPageArticles = lastPageDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li") #: Sayfa kodları çekildi.
+            lastPageMoviesCount =  len(lastPageArticles)                                                                                    #: Film sayısı öğrenildi.
+            movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount                                                                  #: Toplam film sayısını belirlemek.
+            txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.",logFilePath)                                                   #: Film sayısı hesaplandıktan sonra ekrana yazdırılır.
         return movieCount                                                                                                               #: Film sayısı çağrıya gönderilir.
     except Exception as e:
-        if cmdLogOnOff:
-            errorLine(e)          
-            txtLog(f'Error getting movie count.',logFilePath)                                                      #: Dom edinirken hata gerçekleşirse..                                                                                                                        ## Olası hata durumunda.
-            txtLog(f'{preLogErr}An error occurred while obtaining the number of movies.',logFilePath)
+        errorLine(e)          
+        txtLog(f'Error getting movie count.',logFilePath)                                                      #: Dom edinirken hata gerçekleşirse..                                                                                                                        ## Olası hata durumunda.
+        txtLog(f'{preLogErr}An error occurred while obtaining the number of movies.',logFilePath)
 
 def settingsFileSet(): #: Ayar dosyası kurulumu.
     if os.path.exists(settingsFileName):
@@ -117,9 +144,8 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
                     exportDirName = jsonObject['export_dir']
                     break
             except Exception as e:
-                if cmdLogOnOff:
-                    errorLine(e)  
-                    txtLog(f'Ayarlarınız {e} nedeniyle alınamadı.',logFilePath)
+                errorLine(e)  
+                txtLog(f'Ayarlarınız {e} nedeniyle alınamadı.',logFilePath)
     else:
         while True:
             try:
@@ -134,9 +160,8 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
                     json.dump(settings_dict, json_file)
                 break
             except Exception as e:
-                if cmdLogOnOff:
-                    errorLine(e)   
-                    txtLog(f'Your settings could not be saved due to {e}.',logFilePath)
+                errorLine(e)   
+                txtLog(f'Your settings could not be saved due to {e}.',logFilePath)
     return logDirName, exportDirName
 
 def listSignature(): #: x: 0 start msg, 1 end msg
@@ -161,8 +186,7 @@ def listSignature(): #: x: 0 start msg, 1 end msg
                 listUpdateTime = cListDom.select(".updated time")[0].text #: Liste düzenlenme vakti çekiliyor.
                 listUT = arrow.get(listUpdateTime).humanize() #: Çekilen liste düzenlenme vakti okunmaya uygun hale getiriliyor.
             except Exception as e: #: Düzenleme vakti edinemezse..
-                if cmdLogOnOff:
-                    errorLine(e)
+                errorLine(e)
                 listUT = 'No editing.' #: Hata alınırsa liste düzenlenmemiş varsayılır.
             finally: ## Kontrol sonu işlemleri.
                 os.system(f'title {processState} Process: @{cListOwner}.')
@@ -185,12 +209,10 @@ def listSignature(): #: x: 0 start msg, 1 end msg
                 print(f"{preCmdMiddleDot}Process URL: {colored(currentUrListItemDetail,'grey', attrs=['bold'])}")
             txtLog(f'{preLogInfo}İmza yazdırma sonu.',logFilePath)
         except Exception as e:
-            if cmdLogOnOff:
-                errorLine(e)
-                txtLog(f'{preLogErr}Liste bilgileri çekilirken hata.',logFilePath)
-    except Exception as e: #: İmza seçimi başarısız.
-        if cmdLogOnOff:
             errorLine(e)
+            txtLog(f'{preLogErr}Liste bilgileri çekilirken hata.',logFilePath)
+    except Exception as e: #: İmza seçimi başarısız.
+        errorLine(e)
         txtLog(f'{preLogErr}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.',logFilePath)
 
 def userListCheck(_urlListItemDom): #: Kullanıcının girilen şekilde bir listesinin var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
@@ -221,13 +243,11 @@ def userListCheck(_urlListItemDom): #: Kullanıcının girilen şekilde bir list
                 txtLog(f'{preLogInfo}{urlListItem} listesi bulundu: {metaOgTitle}',logFilePath)
                 currentListAvaliable = True
         except Exception as e:
-            if cmdLogOnOff:
-                errorLine(e)
+            errorLine(e)
             metaOgUrl = ''
             currentListAvaliable = False
     except Exception as e:
-        if cmdLogOnOff:
-            errorLine(e)
+        errorLine(e)
         currentListAvaliable = False
     finally:
         return currentListAvaliable, metaOgUrl
@@ -310,6 +330,17 @@ def combineCsv():
     else: 
         txtLog('Tek liste üzerinde çalışıldığı için işlem kombine edilmeyecek.',logFilePath) #: Process logger
 
+def splitCsv(csvPath):
+    csvfile = open(csvPath, 'r', encoding="utf8").readlines() #: lines list
+    if len(csvfile) > 5000: 
+        filename = 1
+        split = 1500
+        for i in range(len(csvfile)):
+            if i % split == 0:
+                csvfile.insert(i+split,csvfile[0]) #: keep header
+                open(str(filename) + '.csv', 'w+', encoding="utf8").writelines(csvfile[i:i+split])
+                filename += 1
+
 # INITIAL ASSIGNMENTS
 if True:
     os.system(f'color & cls & title Welcome %USERNAME%.')
@@ -326,14 +357,13 @@ if True:
     preBlankCount = 4*' ' #: Cmd msg pre blank calc
     # Log Pre
     preLogInfo = "Info: " #: Log file ingo msg pre
-    preLogErr = "Error: " #: Log file err msg pre
+    preLogErr = "Error: " #: Log file err msg pre  
     # Cmd Lines
     supLine = '_'*80 #: sup line lenght
     subLine = '¯'*80 #: sub line lenght
     ## Kullanıcı tarafından değiştirilebilir..
     settingsFileName = 'settings'+'.json'
     cmdPrintFilms = True #: Filmler ekrana yazılsın mı
-    cmdLogOnOff = False #: Cmd ekran bildirmeleri
 
     if cmdPrintFilms:
         supLineFilms = f'{supLine}\n{preCmdInfo}{colored("Movies on the list;", color="yellow")}\n'
@@ -343,15 +373,15 @@ if True:
 # STARTUP
 sessionLoop = 0 #: While döngüne ait 
 sessionStartHash =  getRunTime() #: Generate start hash
-logDirName, exportDirName = settingsFileSet() #: Set Export dir and Log dir
 while True:
+    logDirName, exportDirName = settingsFileSet() #: Set Export dir and Log dir
     os.system('cls') #: İlk başlangıç ve yeni başlangıçlara temiz bir başlangıç.
     currenSessionHash = getRunTime() #: sessionHashes = {'Startup':sessionStartHash,'Current':currenSessionHash}
     hashChanges = getChanges(len(sessionStartHash),sessionStartHash,currenSessionHash)
     logFilePath = f'{logDirName}/{currenSessionHash}.txt' #: Set log file dir
     exportsPath = f'{exportDirName}/{currenSessionHash}/'
     print(f"{preCmdInfo}Session Hash: {sessionStartHash}{'' if sessionStartHash == currenSessionHash else ' -> ' + hashChanges}") #: Her oturum başlangıcı için farklı bir isim üretildi.
-    dirCheck([logDirName]) #: Log file check     
+    dirCheck([logDirName,exportDirName]) #: Log file check     
     inputLoopNo, urlList, breakLoop = 0, [], False #: While döngüne ait 
     while True:
         inputLoopNo += 1 #: Başlangıçta döngü değerini artırıyoruz.
@@ -383,11 +413,13 @@ while True:
                     endList = 'Not specified.'
                     
                 searchList = f'https://letterboxd.com/search/lists/{urlListItem}/'
+
                 searchListPreviewDom = doReadPage(searchList)
 
                 try: #: Getting og:title
                     searchMetaTitle = getMetaContent(searchListPreviewDom,'og:title')
                 except AttributeError:
+                    print(searchListPreviewDom)
                     print(f"{preCmdErr}Meta etiketinden 'og:title' alınamadı.")
                     txtLog(f"Meta etiketinden 'og:title' alınamadı. Hata Mesajı: {AttributeError}", logFilePath)
                     searchMetaTitle = ''                    
@@ -399,7 +431,12 @@ while True:
                     txtLog(f"Meta etiketinden 'og:url' alınamadı. Hata Mesajı: {AttributeError}", logFilePath)
                     searchLMetaUrl = ''  
 
-                searchListsQCountMsg = searchListPreviewDom.find('h2', attrs={'class':'section-heading'}).text #: Kaç liste bulunduğu hakkında bilgi veren mesajı çekiyoruz.
+                try: #: Getting query msg
+                    searchListsQCountMsg = searchListPreviewDom.find('h2', attrs={'class':'section-heading'}).text #: Kaç liste bulunduğu hakkında bilgi veren mesajı çekiyoruz.
+                except AttributeError:
+                    print(f"{preCmdErr}Bir etiketten 'arama karşılama mesajı' alınamadı.")
+                    txtLog(f"Bir etiketten 'arama karşılama mesajı' alınamadı. Hata Mesajı: {AttributeError}", logFilePath)
+                    searchListsQCountMsg = ''  
                 
                 try:
                     searchListsQLastsPage = searchListPreviewDom.find_all('li',attrs={'class':'paginate-page'})[-1].text #: Son sayfayı alıyoruz.
@@ -497,11 +534,10 @@ while True:
         if listEnter:
             txtLog(f'{preLogInfo}Şimdiki listeye erişim başlatılıyor.',logFilePath)
             print(f"{preCmdInfo}{colored(f'List confirmed. {autoEnterMsg}', color='green')}")
-            dirCheck([exportsPath]) #: Export klasörünün kontrolü.
-            openCsv = f'{exportsPath}{cListOwner}_{cListDomainName}_{cListRunTime}.csv' 
             
             lastPageNo = getListLastPageNo()
-            
+            openCsv = f'{exportsPath}{cListOwner}_{cListDomainName}_{cListRunTime}.csv' 
+            dirCheck([exportsPath]) #: Export klasörünün kontrolü.
             with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
                 writer = csv.writer(csvFile)
                 writer.writerow(["Title", "Year"]) #: Csv açıldıktan sonra en üste yazılacak başlıklar.
@@ -520,8 +556,6 @@ while True:
             print(subLine)
             print(f"{preCmdInfo}{colored(f'{processState} completed!', color='green')}")
             
-    
-  
     combineCsv()
     os.system(f'title Session: {currenSessionHash} ended!')
     print(f"{preCmdInfo}Process State: {cmdBlink(processState +' Finish.','green')}")
