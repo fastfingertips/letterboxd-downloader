@@ -331,6 +331,7 @@ def combineCsv():
         txtLog('Tek liste üzerinde çalışıldığı için işlem kombine edilmeyecek.',logFilePath) #: Process logger
 
 def splitCsv(csvPath):
+    dirCheck(['splits'])
     csvfile = open(csvPath, 'r', encoding="utf8").readlines() #: lines list
     if len(csvfile) > 5000: 
         filename = 1
@@ -338,7 +339,7 @@ def splitCsv(csvPath):
         for i in range(len(csvfile)):
             if i % split == 0:
                 csvfile.insert(i+split,csvfile[0]) #: keep header
-                open(str(filename) + '.csv', 'w+', encoding="utf8").writelines(csvfile[i:i+split])
+                open(f'splits/{filename}.csv', 'w+', encoding="utf8").writelines(csvfile[i:i+split])
                 filename += 1
 
 # INITIAL ASSIGNMENTS
@@ -398,6 +399,10 @@ while True:
                 breakLoop = True #: Url alımını sonlandıracak bilgi.
                 while urlListItem[-1] == ".": ## Url sonunda nokta olduğu sürece..
                     urlListItem = urlListItem[:len(urlListItem)-1] #: Her defasında Url sonundan nokta siler.
+            elif urlListItem[0:6] == 'split:':
+                splitCsv(urlListItem[6:])
+                inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
+                continue
             elif urlListItem[0] == '?': ## Giriş başlangıcında soru işareti varsa.. (Liste arama moduna geçilir.)
                 print(f'{preCmdInfo}Parameter recognized, searching list.')
                 urlListItem = urlListItem[1:] #: Başlangıçdaki soru işaret kaldırıldı.
