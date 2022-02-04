@@ -2,7 +2,6 @@ import csv, sys, os, json, glob, time #: PMI
 from datetime import datetime #: PMI
 from inspect import currentframe
 from tkinter import N
-from xml.dom import xmlbuilder
 
 from attr import attr #: PMI
 while True: #: Other libs
@@ -324,13 +323,14 @@ def combineCsv():
                     out_file.write(line)
             
             print(f'{preCmdInfo}Listelerdeki tüm filmler {combineCsvPath} dosyasına kaydedildi.')
-            print(f'{preCmdInfo}Yalnızca farklı fimlerin olduğu dosya aynı dizinde {noDuplicateCsvPath} olarak ayarlandı.')
-            splitCsv(noDuplicateCsvPath) # Ayıklama sonrası, aktarma ayırması gerekliyse gerçekleştiriyoruz.
+            print(f'{preCmdInfo}Yalnızca farklı fimlerin olduğu dosya {noDuplicateCsvPath} olarak ayarlandı.')
         except Exception as e:
             txtLog(f'Listeler kombine edilemedi. Hata: {e}',logFilePath) #: Process logger
         print(subLine)
     else: 
         txtLog('Tek liste üzerinde çalışıldığı için işlem kombine edilmeyecek.',logFilePath) #: Process logger
+
+    splitCsv(noDuplicateCsvPath) # Ayırma gerekliyse ayırır.
 
 def splitCsv(splitCsvPath):
     splitCsvLines = open(splitCsvPath, 'r', encoding="utf8").readlines() #: lines list
@@ -360,21 +360,7 @@ def splitCsv(splitCsvPath):
     else:
         print(f'{preCmdInfo}Dosyanız içerisinde {splitLimit} altında satır/film({csvMovies}) var, ayrım işlemi uygulanmayacak.')
 
-def extractObj(job,obj):
-    try:
-        while job[-1] == obj: ## Url sonunda nokta olduğu sürece..
-            job = job[:len(job)-1] #: Her defasında Url sonundan nokta siler.
-    except:
-        pass
-    return job
 
-def urlFix(x):
-        urlListItemDom = doReadPage(x) #: Sayfa dom'u alınır.
-        userListAvailable, approvedListUrl = userListCheck(urlListItemDom) #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
-        if userListAvailable: ## Liste kullanıma uygunsa..
-            if approvedListUrl not in urlList: ## Doğrulanmış URL daha önce URL Listesine eklenmediyse..
-                urlList.append(approvedListUrl) #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
-        return urlList
 # INITIAL ASSIGNMENTS
 if True:
     os.system(f'color & cls & title Welcome %USERNAME%.')
@@ -399,7 +385,6 @@ if True:
     settingsFileName = 'settings'+'.json'
     cmdPrintFilms = True #: Filmler ekrana yazılsın mı
     splitLimit = 1500
-    splitParameter = "split:"
     if cmdPrintFilms:
         supLineFilms = f'{supLine}\n{preCmdInfo}{colored("Movies on the list;", color="yellow")}\n'
     else:
@@ -422,40 +407,31 @@ while True:
         inputLoopNo += 1 #: Başlangıçta döngü değerini artırıyoruz.
         urlListItem = str(input(f'{preCmdInput}List URL[{inputLoopNo}]: ')).lower() #: Kullanıcıdan liste url'i alınması ve düzenlenmesi.
         if len(urlListItem) > 0: ## Giriş boş değilse..
-            
-            if urlListItem[0:len(splitParameter)] == splitParameter: # Split görevi.
-                splitCsv(urlListItem[len(splitParameter):])
+            if urlListItem[0:6] == 'split:':
+                splitCsv(urlListItem[6:])
                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                 continue
             
             if "." in urlListItem:
-                if urlListItem[-1] == "." or urlListItem == ".":
-                    if not urlListItem[0] == '?':
-                        print(f'{preCmdInfo}Parametre tanındı, liste alım işlemi sonlandırıldı.')
-                    breakLoop = True #: Url alımını sonlandıracak bilgi.
-
-                    if urlListItem[0] == '?' or urlListItem == ".." or urlListItem[-2:] == "..": 
-                        print(f'{preCmdInfo}Ek parametre tanındı, liste arama sonrası tüm listeler otomatik onaylanacak.')
-                        listEnterPassOn, listEnter, autoEnterMsg = False , True, '[Auto]' # Otomatik onaylama yapacak bilgi.
-
+                if urlListItem == ".": ## Sadece nokta girildiyse..
                     if len(urlList) > 0: ## Url listesinde liste varsa..
+                        print('Parametre tanındıi, liste alım işlemi sonlandırıldı.')
                         break
-                    else:
-                        if not urlListItem[0] == '?':
-                            try:
-                                urlListItem = urlListItem.replace('?','')
-                                urlListItem = extractObj(urlListItem,'.')
-                                urlList = urlFix(urlListItem)
-                                break
-                            except:
-                                print(f"{preCmdInfo}To finish, you must first specify a list.") #: Liste belirtmeden işlemi sonlandırmaya çalışan kullanıcılar bilgilendiriliyor.
-                                inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
-                                continue
-
-                urlListItem = extractObj(urlListItem,'.')
-
-            if urlListItem[0] == '?': 
-                print(f'{preCmdInfo}Paremetre tanındı: Liste arama modu.')
+                    else: ## Url listesinde liste yoksa..
+                        print(f"{preCmdInfo}To finish, you must first specify a list.") #: Liste belirtmeden işlemi sonlandırmaya çalışan kullanıcılar bilgilendiriliyor.
+                        inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
+                        continue
+                elif urlListItem[-1] == ".": ## Girilen url sonunda nokta varsa..
+                    print(f'{preCmdInfo}Parametre tanındı, liste bilgisi alımı sonlandırılıyor.')
+                    breakLoop = True #: Url alımını sonlandıracak bilgi.
+                    if urlListItem[0] == '?': # Eğer başta soru işareti varsa bu kullanıcın arama çıktıları otomatik onaylanır.
+                        print(f'{preCmdInfo}Ek parametre tanındı, liste arama sonrası tüm listeler otomatik onaylanacak.')
+                        listEnterPassOn, listEnter, autoEnterMsg = False , True, '[Auto]'
+                    while urlListItem[-1] == ".": ## Url sonunda nokta olduğu sürece..
+                        urlListItem = urlListItem[:len(urlListItem)-1] #: Her defasında Url sonundan nokta siler.
+                       
+            if urlListItem[0] == '?': ## Giriş başlangıcında soru işareti varsa.. (Liste arama moduna geçilir.)
+                print(f'{preCmdInfo}Paremetre modu tanındı: Liste arama modu.')
                 urlListItem = urlListItem[1:] #: Başlangıçdaki soru işaret kaldırıldı.
                 if "!" in urlListItem: #: Son liste belirleyicisi
                     x = -1
@@ -537,7 +513,7 @@ while True:
                     print(subLine)
                     break
                 break
-
+            
             urlListItemDom = doReadPage(urlListItem) #: Sayfa dom'u alınır.
             userListAvailable, approvedListUrl = userListCheck(urlListItemDom) #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
             if userListAvailable: ## Liste kullanıma uygunsa..
@@ -618,4 +594,3 @@ while True:
     print(f'{preCmdInfo}{colored(f"Session: {currenSessionHash} ended.", color="green")}')  
     txtLog(f'{preLogInfo}Session: {currenSessionHash} ended.',logFilePath)
     test_pause()
-    
