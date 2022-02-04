@@ -97,20 +97,20 @@ def getListLastPageNo():  # Listenin son sayfasını öğren
         # > Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al.
         # > Son'linin içindeki bağlantının metnini çektik. Bu bize kaç sayfalı bir listemiz olduğunuz verecek.
         txtLog(f'{preLogInfo}Listedeki sayfa sayısı denetleniyor..',logFilePath)
-        lastPageNo = cListDom.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text    # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
+        lastPageNo = cListDom.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
         txtLog(f'{preLogInfo}Liste birden çok sayfaya ({lastPageNo}) sahiptir.',logFilePath)
         getMovieCount(lastPageNo)
-    except AttributeError:                                                                            ## Kontrolümüzde..
+    except AttributeError: ## Kontrolümüzde..
         txtLog(f'{preLogInfo}Birden fazla sayfa yok, bu liste tek sayfadır. {AttributeError}',logFilePath)                   
-        lastPageNo = 1                                                                          #: Sayfa sayısı bilgisi alınamadığında sayfa sayısı 1 olarak işaretlenir.
-        getMovieCount(lastPageNo)                                                               #: Sayfa bilgisi gönderiliyor.
+        lastPageNo = 1 #: Sayfa sayısı bilgisi alınamadığında sayfa sayısı 1 olarak işaretlenir.
+        getMovieCount(lastPageNo) #: Sayfa bilgisi gönderiliyor.
     except Exception as e:
         errorLine(e)
     finally:
         txtLog(f'{preLogInfo}Sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPageNo} olduğu öğrenildi.',logFilePath)
         return lastPageNo
 
-def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
+def getMovieCount(tempLastPageNo): # Film sayısını öğreniyoruz
     try:              
         try: # Son sayfaya bağlanıp, son sayfadaki film sayısını almak bir get isteği üretir ve programı yavaşlatır bu nedenle bir alternatif
             metaDescription = cListDom.find('meta', attrs={'name':'description'}).attrs['content']
@@ -128,10 +128,10 @@ def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
             lastPageMoviesCount =  len(lastPageArticles)                                                                                    #: Film sayısı öğrenildi.
             movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount                                                                  #: Toplam film sayısını belirlemek.
             txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.",logFilePath)                                                   #: Film sayısı hesaplandıktan sonra ekrana yazdırılır.
-        return movieCount                                                                                                               #: Film sayısı çağrıya gönderilir.
-    except Exception as e:
+        return movieCount #: Film sayısı çağrıya gönderilir.
+    except Exception as e: ## Olası hata durumunda.
         errorLine(e)          
-        txtLog(f'Error getting movie count.',logFilePath)                                                      #: Dom edinirken hata gerçekleşirse..                                                                                                                        ## Olası hata durumunda.
+        txtLog(f'Error getting movie count.',logFilePath) #: Dom edinirken hata gerçekleşirse.. 
         txtLog(f'{preLogErr}An error occurred while obtaining the number of movies.',logFilePath)
 
 def settingsFileSet(): #: Ayar dosyası kurulumu.
@@ -330,17 +330,36 @@ def combineCsv():
     else: 
         txtLog('Tek liste üzerinde çalışıldığı için işlem kombine edilmeyecek.',logFilePath) #: Process logger
 
-def splitCsv(csvPath):
-    dirCheck(['splits'])
-    csvfile = open(csvPath, 'r', encoding="utf8").readlines() #: lines list
-    if len(csvfile) > 5000: 
-        filename = 1
-        split = 1500
-        for i in range(len(csvfile)):
-            if i % split == 0:
-                csvfile.insert(i+split,csvfile[0]) #: keep header
-                open(f'splits/{filename}.csv', 'w+', encoding="utf8").writelines(csvfile[i:i+split])
-                filename += 1
+    splitCsv(noDuplicateCsvPath) # Ayırma gerekliyse ayırır.
+
+def splitCsv(splitCsvPath):
+    splitCsvLines = open(splitCsvPath, 'r', encoding="utf8").readlines() #: lines list
+    csvMovies = len(splitCsvLines)
+    if  csvMovies > splitLimit:
+        splitsPath = f'{exportDirName}/Splits'
+        splitCsvName = f'{splitsPath}/{currenSessionHash}'
+        dirCheck([splitsPath]) # Yolu kontrol ediyoruz.
+        defaultCsvCount = 1000 # En ideal aktarma sayısı
+        defaultPartition = 2 # Bölüm 2'den başlar.
+        splitFileNo = 1
+        print(f'{preCmdInfo}Dosya içinde {splitLimit} üzeri film({csvMovies}) olduğu için ayrım uygulanacak.')
+        while True:
+            linesPerCsv = csvMovies/defaultPartition
+            if linesPerCsv <= defaultCsvCount:
+                if csvMovies % defaultPartition == 0: # float check
+                    linesPerCsv = int(linesPerCsv) # kalan sıfırsa int'e çeviririz.
+                    print(f'{preCmdInfo}{csvMovies} film, {int(csvMovies/linesPerCsv)} parçaya bölünüyor.')
+                    break
+            defaultPartition += 1
+        for lineNo in range(csvMovies):
+            if lineNo % linesPerCsv == 0:
+                splitCsvLines.insert(lineNo+linesPerCsv,splitCsvLines[0]) #: keep header
+                open(f'{splitCsvName}-{splitFileNo}.csv', 'w+', encoding="utf8").writelines(splitCsvLines[lineNo:lineNo+linesPerCsv])
+                splitFileNo += 1
+        print(f'{preCmdInfo}Ayrım işlemi {splitCsvName} adresinde sona erdi. Bölüm: [{defaultPartition}][{linesPerCsv}]')
+    else:
+        print(f'{preCmdInfo}Dosyanız içerisinde {splitLimit} altında satır/film({csvMovies}) var, ayrım işlemi uygulanmayacak.')
+
 
 # INITIAL ASSIGNMENTS
 if True:
@@ -365,7 +384,7 @@ if True:
     ## Kullanıcı tarafından değiştirilebilir..
     settingsFileName = 'settings'+'.json'
     cmdPrintFilms = True #: Filmler ekrana yazılsın mı
-
+    splitLimit = 1500
     if cmdPrintFilms:
         supLineFilms = f'{supLine}\n{preCmdInfo}{colored("Movies on the list;", color="yellow")}\n'
     else:
@@ -375,7 +394,7 @@ if True:
 sessionLoop = 0 #: While döngüne ait 
 sessionStartHash =  getRunTime() #: Generate start hash
 while True:
-    logDirName, exportDirName = settingsFileSet() #: Set Export dir and Log dir
+    logDirName, exportDirName = settingsFileSet() #: Set Export dir and Log dirs
     os.system('cls') #: İlk başlangıç ve yeni başlangıçlara temiz bir başlangıç.
     currenSessionHash = getRunTime() #: sessionHashes = {'Startup':sessionStartHash,'Current':currenSessionHash}
     hashChanges = getChanges(len(sessionStartHash),sessionStartHash,currenSessionHash)
@@ -383,30 +402,37 @@ while True:
     exportsPath = f'{exportDirName}/{currenSessionHash}/'
     print(f"{preCmdInfo}Session Hash: {sessionStartHash}{'' if sessionStartHash == currenSessionHash else ' -> ' + hashChanges}") #: Her oturum başlangıcı için farklı bir isim üretildi.
     dirCheck([logDirName,exportDirName]) #: Log file check     
-    inputLoopNo, urlList, breakLoop = 0, [], False #: While döngüne ait 
+    inputLoopNo, urlList, breakLoop, listEnterPassOn = 0, [], False, True #: While döngüne ait 
     while True:
         inputLoopNo += 1 #: Başlangıçta döngü değerini artırıyoruz.
         urlListItem = str(input(f'{preCmdInput}List URL[{inputLoopNo}]: ')).lower() #: Kullanıcıdan liste url'i alınması ve düzenlenmesi.
         if len(urlListItem) > 0: ## Giriş boş değilse..
-            if urlListItem == ".": ## Sadece nokta girildiyse..
-                if len(urlList) > 0: ## Url listesinde liste varsa..
-                    break
-                else: ## Url listesinde liste yoksa..
-                    print(f"{preCmdInfo}To finish, you must first specify a list.") #: Liste belirtmeden işlemi sonlandırmaya çalışan kullanıcılar bilgilendiriliyor.
-                    inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
-                    continue
-            elif urlListItem[-1] == ".": ## Girilen url sonunda nokta varsa..
-                breakLoop = True #: Url alımını sonlandıracak bilgi.
-                while urlListItem[-1] == ".": ## Url sonunda nokta olduğu sürece..
-                    urlListItem = urlListItem[:len(urlListItem)-1] #: Her defasında Url sonundan nokta siler.
-            elif urlListItem[0:6] == 'split:':
+            if urlListItem[0:6] == 'split:':
                 splitCsv(urlListItem[6:])
                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                 continue
-            elif urlListItem[0] == '?': ## Giriş başlangıcında soru işareti varsa.. (Liste arama moduna geçilir.)
-                print(f'{preCmdInfo}Parameter recognized, searching list.')
+            
+            if "." in urlListItem:
+                if urlListItem == ".": ## Sadece nokta girildiyse..
+                    if len(urlList) > 0: ## Url listesinde liste varsa..
+                        print('Parametre tanındıi, liste alım işlemi sonlandırıldı.')
+                        break
+                    else: ## Url listesinde liste yoksa..
+                        print(f"{preCmdInfo}To finish, you must first specify a list.") #: Liste belirtmeden işlemi sonlandırmaya çalışan kullanıcılar bilgilendiriliyor.
+                        inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
+                        continue
+                elif urlListItem[-1] == ".": ## Girilen url sonunda nokta varsa..
+                    print(f'{preCmdInfo}Parametre tanındı, liste bilgisi alımı sonlandırılıyor.')
+                    breakLoop = True #: Url alımını sonlandıracak bilgi.
+                    if urlListItem[0] == '?': # Eğer başta soru işareti varsa bu kullanıcın arama çıktıları otomatik onaylanır.
+                        print(f'{preCmdInfo}Ek parametre tanındı, liste arama sonrası tüm listeler otomatik onaylanacak.')
+                        listEnterPassOn, listEnter, autoEnterMsg = False , True, '[Auto]'
+                    while urlListItem[-1] == ".": ## Url sonunda nokta olduğu sürece..
+                        urlListItem = urlListItem[:len(urlListItem)-1] #: Her defasında Url sonundan nokta siler.
+                       
+            if urlListItem[0] == '?': ## Giriş başlangıcında soru işareti varsa.. (Liste arama moduna geçilir.)
+                print(f'{preCmdInfo}Paremetre modu tanındı: Liste arama modu.')
                 urlListItem = urlListItem[1:] #: Başlangıçdaki soru işaret kaldırıldı.
-
                 if "!" in urlListItem: #: Son liste belirleyicisi
                     x = -1
                     for i in range(3): #: Sona en fazla 3 rakam girilebilir. letterboxd'da max bulubilen liste sayısı 250
@@ -415,10 +441,9 @@ while True:
                             urlListItem = urlListItem[:x-1]
                         x += -1
                 else:
-                    endList = 'Not specified.'
+                    endList = 'Not specified.' # Son liste için bir parametre belirtilmezse.
                     
                 searchList = f'https://letterboxd.com/search/lists/{urlListItem}/'
-
                 searchListPreviewDom = doReadPage(searchList)
 
                 try: #: Getting og:title
@@ -449,13 +474,15 @@ while True:
                     searchListsQLastsPage = 1 #: Alınamazsa sayfada tek sayfa olduğu varsayılır.
                 finally:
                     print(supLine)
-                    print(f"{preCmdInfo}{colored('Entry info;', color='yellow')}")
-                    print(f"{preCmdInfo}Query: {colored(urlListItem,'grey',attrs=['bold'])}")
-                    print(f"{preCmdInfo}Last list: {colored(endList,'grey',attrs=['bold'])}")
-                    print(f'{preCmdInfo}{searchMetaTitle}')
-                    print(f'{preCmdInfo}{searchListsQCountMsg}')
-                    print(f"{preCmdInfo}Page URL: {colored(searchLMetaUrl,'grey',attrs=['bold'])}")   
-                    print(f"{preCmdInfo}Last Page: {colored(searchListsQLastsPage,'grey',attrs=['bold'])}")
+                    print(f"{preCmdInfo}{colored('Process info;', color='yellow')}")
+                    print(f"{preCmdMiddleDot}{colored('Request;', color='yellow')}")
+                    print(f"{preCmdMiddleDotList}Query: {colored(urlListItem,'grey',attrs=['bold'])}")
+                    print(f"{preCmdMiddleDot}{colored('Request response;', color='yellow')}")
+                    print(f"{preCmdMiddleDotList}Last list: {colored(endList,'grey',attrs=['bold'])}")
+                    print(f'{preCmdMiddleDotList}{searchMetaTitle}')
+                    print(f'{preCmdMiddleDotList}{searchListsQCountMsg}')
+                    print(f"{preCmdMiddleDotList}Page URL: {colored(searchLMetaUrl,'grey',attrs=['bold'])}")   
+                    print(f"{preCmdMiddleDotList}Last Page: {colored(searchListsQLastsPage,'grey',attrs=['bold'])}")
                     print(subLine)
                 sayfa, liste = 0, 0
                 for i in range(int(searchListsQLastsPage)):
@@ -505,7 +532,7 @@ while True:
             inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
     print(f"{preCmdInfo}List address acquisition terminated.") #: Liste url alımı sona erdğinde mesaj bastırılır.
     
-    listEnterPassOff, processLoopNo = True, 0 #: For döngüne ait 
+    processLoopNo = 0 #: For döngüne ait 
     for currentUrListItem in urlList:
         processLoopNo += 1
         processState = f'[{processLoopNo}/{len(urlList)}]'
@@ -522,14 +549,14 @@ while True:
         cListRunTime = getRunTime() #: Liste işlem vaktini al. 
         
         listSignature() #: Liste hakkında bilgiler bastırılır.
-        if listEnterPassOff:
+        if listEnterPassOn:
             listEnter = input(f"{preCmdInput}Press enter to confirm the entered information. ({cmdBlink('Enter', 'green')})")
             
             if listEnter == "":
                 listEnter, autoEnterMsg = True, '[Manual]'
             elif listEnter == ".":
                 listEnter, autoEnterMsg = True, '[Auto]'
-                listEnterPassOff = False
+                listEnterPassOn = False
                 print(f'{preCmdInfo}Listeler otomatik olarak onaylanacak şekilde ayarlandı.')
             else:
                 listEnter = False
