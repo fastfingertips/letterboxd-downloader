@@ -115,10 +115,7 @@ def colored(text, color=None, on_color=None, attrs=None):
 
 
 def cprint(text, color=None, on_color=None, attrs=None, **kwargs):
-    """Print colorize text.
-
-    It accepts arguments of print function.
-    """
+    """Print colorize text. It accepts arguments of print function."""
 
     print((colored(text, color, on_color, attrs)), **kwargs)
 
@@ -148,14 +145,6 @@ if __name__ == '__main__':
     print('-' * 78)
 
     print('Test attributes:')
-    cprint('Grey color', 'grey')
-    cprint('Red color', 'red')
-    cprint('Green color', 'green')
-    cprint('Yellow color', 'yellow')
-    cprint('Blue color', 'blue')
-    cprint('Magenta color', 'magenta')
-    cprint('Cyan color', 'cyan')
-    cprint('White color', 'white')
     cprint('Bold grey color', 'grey', attrs=['bold'])
     cprint('Dark red color', 'red', attrs=['dark'])
     cprint('Underline green color', 'green', attrs=['underline'])
