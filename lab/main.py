@@ -1,17 +1,13 @@
 import csv, sys, os, json, glob, time #: PMI
 from datetime import datetime #: PMI
-from inspect import currentframe
-from tkinter import N
-from xml.dom import xmlbuilder
+from inspect import currentframe #: PMI
 
 from attr import attr #: PMI
 while True: #: Other libs
     try:
-        import arrow
-        import requests
-        from bs4 import BeautifulSoup
-        from termcolor import colored, cprint
-        import pandas as pd
+        import arrow, requests, pandas as pd
+        from bs4 import BeautifulSoup as bs
+        from termcolor import colored as ced #: [colored, cprint]
         # from libs.termcolor110.termcolor import colored
         break
     except ImportError as e: #: Trying import
@@ -60,7 +56,7 @@ def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
             #: https://stackoverflow.com/questions/23013220/max-retries-exceeded-with-url-in-requests
             try:
                 urlResponseCode = requests.get(tempUrl,timeout=30)
-                urlDom = BeautifulSoup(urlResponseCode.content.decode('utf-8'), 'html.parser')
+                urlDom = bs(urlResponseCode.content.decode('utf-8'), 'html.parser')
                 if urlDom != None:
                     return urlDom #: Return page dom
             except requests.ConnectionError as e:
@@ -193,21 +189,21 @@ def listSignature(): #: x: 0 start msg, 1 end msg
                 os.system(f'title {processState} Process: @{cListOwner}.')
                 print(f"\n{preCmdInfo}Process State: {cmdBlink(processState,'green')}")
                 print(supLine)
-                print(f"{preCmdInfo}{colored('List info;', color='yellow')}")
-                print(f"{preCmdMiddleDot}List by {colored(listBy,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Updated: {colored(listUT,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Published: {colored(listPT,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}List title: {colored(listTitle, 'grey', attrs=['bold'])}")
+                print(f"{preCmdInfo}{ced('List info;', color='yellow')}")
+                print(f"{preCmdMiddleDot}List by {ced(listBy,'grey', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}Updated: {ced(listUT,'grey', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}Published: {ced(listPT,'grey', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}List title: {ced(listTitle, 'grey', attrs=['bold'])}")
                 print(f"{preCmdMiddleDot}Filters;")
-                print(f"{preCmdMiddleDotList}Filtered as {colored(domSelectedDecadeYear,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDotList}Filtered as {colored(domSelectedGenre,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDotList}Movies sorted by {colored(domSelectedSortBy,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}List hash: {colored(cListRunTime,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Sayfa sayısı: {colored(listLastPage,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Number of movies: {colored(listMovieCount,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}List domain name: {colored(cListDomainName,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}List URL: {colored(currentUrListItem,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Process URL: {colored(currentUrListItemDetail,'grey', attrs=['bold'])}")
+                print(f"{preCmdMiddleDotList}Filtered as {ced(domSelectedDecadeYear,'grey', attrs=['bold'])}")
+                print(f"{preCmdMiddleDotList}Filtered as {ced(domSelectedGenre,'grey', attrs=['bold'])}")
+                print(f"{preCmdMiddleDotList}Movies sorted by {ced(domSelectedSortBy,'grey', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}List hash: {ced(cListRunTime,'grey', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}Sayfa sayısı: {ced(listLastPage,'grey', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}Number of movies: {ced(listMovieCount,'grey', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}List domain name: {ced(cListDomainName,'grey', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}List URL: {ced(currentUrListItem,'grey', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}Process URL: {ced(currentUrListItemDetail,'grey', attrs=['bold'])}")
             txtLog(f'{preLogInfo}İmza yazdırma sonu.',logFilePath)
         except Exception as e:
             errorLine(e)
@@ -226,21 +222,21 @@ def userListCheck(_urlListItemDom): #: Kullanıcının girilen şekilde bir list
                 metaOgUrl = getMetaContent(_urlListItemDom,'og:url') #: Liste yönlendirmesi var mı bakıyoruz
                 metaOgTitle = getMetaContent(_urlListItemDom, 'og:title')  #: Liste ismini alıyoruz. Örnek: 'Search results for best comedy'
                 bodyDataOwner = getBodyContent(_urlListItemDom,'data-owner') #: Liste sahibinin kullanıcı ismi.
-                print(f'{preCmdCheck}{colored("Found it: ", color="green")}@{colored(bodyDataOwner,"yellow")} "{colored(metaOgTitle,"yellow")}"') #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
+                print(f'{preCmdCheck}{ced("Found it: ", color="green")}@{ced(bodyDataOwner,"yellow")} "{ced(metaOgTitle,"yellow")}"') #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
                 if urlListItem == metaOgUrl or urlListItem+'/' == metaOgUrl: #: Girilen URL Meta ile aynıysa..
                     txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.',logFilePath)
                 else: ## Girilen URL Meta ile uyuşmuyorsa..
                     print(f'{preCmdInfo}Girdiğiniz liste linki yönlendirme içeriyor.')
                     print(f'{preBlankCount}Muhtemelen liste ismi yakın bir zamanda değişildi veya hatalı girdiniz.')
-                    print(f'{preBlankCount}({colored("+","red")}): {colored(urlListItem, color="yellow")} adresini')
+                    print(f'{preBlankCount}({ced("+","red")}): {ced(urlListItem, color="yellow")} adresini')
                     if urlListItem in metaOgUrl:
-                        msgInputUrl = colored(urlListItem, color="yellow")
-                        msgMetaOgUrlChange = colored(metaOgUrl.replace(urlListItem,""), color="green")
+                        msgInputUrl = ced(urlListItem, color="yellow")
+                        msgMetaOgUrlChange = ced(metaOgUrl.replace(urlListItem,""), color="green")
                     else:
                         metaLoop = len(metaOgUrl)
                         msgInputUrl = ''
                         msgMetaOgUrlChange = getChanges(metaLoop,urlListItem,metaOgUrl)
-                    print(f'{preBlankCount}({colored("+","green")}): {msgInputUrl}{msgMetaOgUrlChange} şeklinde değiştirdik.')
+                    print(f'{preBlankCount}({ced("+","green")}): {msgInputUrl}{msgMetaOgUrlChange} şeklinde değiştirdik.')
                 txtLog(f'{preLogInfo}{urlListItem} listesi bulundu: {metaOgTitle}',logFilePath)
                 currentListAvaliable = True
         except Exception as e:
@@ -273,7 +269,7 @@ def getChanges(loop,key1,key2):
     for i in range(loop):
             # print(key1[i], key2[i], key1[i]==key2[i]) #: Dev test
             if key1[i] == key2[i]:
-                change += colored(key2[i], color="yellow")
+                change += ced(key2[i], color="yellow")
             else:
                 change += cmdBlink(key2[i],'green')
     return change
@@ -293,17 +289,17 @@ def currentListDomainName(currentUrListItem):
 
 def cmdPre(m,c): #: Mesaj ön ekleri için kalıp.
     if m[0] == " ":
-        return f' {colored(m[1:],color=c)}  '
+        return f' {ced(m[1:],color=c)}  '
     elif m[0] == "[":
-        return f'[{colored(m[1:],color=c)}] '
+        return f'[{ced(m[1:],color=c)}] '
 
 def cmdBlink(m,c):
-    return colored(m,c,attrs=["blink"])
+    return ced(m,c,attrs=["blink"])
 
 def combineCsv():
     if len(urlList) > 1:
         print(supLine)
-        print(f"{preCmdInfo}{colored('Merge process info;', color='yellow')}")
+        print(f"{preCmdInfo}{ced('Merge process info;', color='yellow')}")
         combineDir = exportDirName + '/Combined/' #: Kombine edilen listelerin barındığı klasör
         combineCsvFile = currenSessionHash + '_Normal-Combined.csv' #: Kombine dosyasının ismi.
         noDuplicateCsvFile = currenSessionHash + '_NoDuplicate-Combined.csv' #: NoDuplicate file name
@@ -401,7 +397,7 @@ if True:
     splitLimit = 1500
     splitParameter = "split:"
     if cmdPrintFilms:
-        supLineFilms = f'{supLine}\n{preCmdInfo}{colored("Movies on the list;", color="yellow")}\n'
+        supLineFilms = f'{supLine}\n{preCmdInfo}{ced("Movies on the list;", color="yellow")}\n'
     else:
         supLineFilms = ''
 
@@ -498,15 +494,15 @@ while True:
                     searchListsQLastsPage = 1 #: Alınamazsa sayfada tek sayfa olduğu varsayılır.
                 finally:
                     print(supLine)
-                    print(f"{preCmdInfo}{colored('Process info;', color='yellow')}")
-                    print(f"{preCmdMiddleDot}{colored('Request;', color='yellow')}")
-                    print(f"{preCmdMiddleDotList}Query: {colored(urlListItem,'grey',attrs=['bold'])}")
-                    print(f"{preCmdMiddleDot}{colored('Request response;', color='yellow')}")
-                    print(f"{preCmdMiddleDotList}Last list: {colored(endList,'grey',attrs=['bold'])}")
+                    print(f"{preCmdInfo}{ced('Process info;', color='yellow')}")
+                    print(f"{preCmdMiddleDot}{ced('Request;', color='yellow')}")
+                    print(f"{preCmdMiddleDotList}Query: {ced(urlListItem,'grey',attrs=['bold'])}")
+                    print(f"{preCmdMiddleDot}{ced('Request response;', color='yellow')}")
+                    print(f"{preCmdMiddleDotList}Last list: {ced(endList,'grey',attrs=['bold'])}")
                     print(f'{preCmdMiddleDotList}{searchMetaTitle}')
                     print(f'{preCmdMiddleDotList}{searchListsQCountMsg}')
-                    print(f"{preCmdMiddleDotList}Page URL: {colored(searchLMetaUrl,'grey',attrs=['bold'])}")   
-                    print(f"{preCmdMiddleDotList}Last Page: {colored(searchListsQLastsPage,'grey',attrs=['bold'])}")
+                    print(f"{preCmdMiddleDotList}Page URL: {ced(searchLMetaUrl,'grey',attrs=['bold'])}")   
+                    print(f"{preCmdMiddleDotList}Last Page: {ced(searchListsQLastsPage,'grey',attrs=['bold'])}")
                     print(subLine)
                 sayfa, liste = 0, 0
                 for i in range(int(searchListsQLastsPage)):
@@ -515,11 +511,11 @@ while True:
                     searchListDom = doReadPage(connectionPage)
                     listsUrls = searchListDom.find_all('a', attrs={'class':'list-link'}) #: Okunmuş sayfadaki tüm listelerin adresleri.
                     print(supLine)
-                    print(f"{preCmdInfo}{colored('Process info;', color='yellow')}") #: Process Title
-                    print(f"{preCmdInfo}CP: {colored(sayfa,'grey',attrs=['bold'])}, PL: {colored(len(listsUrls),'grey',attrs=['bold'])}, CPURL: {colored(connectionPage,'grey',attrs=['bold'])}") #: CP: Current Page, PL: Page list, CPURL: Current Page Url
+                    print(f"{preCmdInfo}{ced('Process info;', color='yellow')}") #: Process Title
+                    print(f"{preCmdInfo}CP: {ced(sayfa,'grey',attrs=['bold'])}, PL: {ced(len(listsUrls),'grey',attrs=['bold'])}, CPURL: {ced(connectionPage,'grey',attrs=['bold'])}") #: CP: Current Page, PL: Page list, CPURL: Current Page Url
                     for listsUrl in listsUrls:
                         if liste == endList:
-                            print(f"{preCmdInfo}Liste sayısı belirlenen sayıya ({colored(liste,'grey',attrs=['bold'])}) ulaştı.")
+                            print(f"{preCmdInfo}Liste sayısı belirlenen sayıya ({ced(liste,'grey',attrs=['bold'])}) ulaştı.")
                             break
                         liste += 1
                         print(f'{preCmdInfo}P{sayfa}:L{liste}')
@@ -528,7 +524,7 @@ while True:
                         if approvedListUrl not in urlList:
                             if userListAvailable:
                                 urlList.append(approvedListUrl)
-                                print(f"{preCmdCheck}{colored('Eklendi.','green')}")
+                                print(f"{preCmdCheck}{ced('Eklendi.','green')}")
                         else:
                             print(f'{preCmdUnCheck}Bu listeyi daha önce eklemişiz.')
                             liste -= 1
@@ -584,12 +580,12 @@ while True:
                 print(f'{preCmdInfo}Listeler otomatik olarak onaylanacak şekilde ayarlandı.')
             else:
                 listEnter = False
-                print(f"{preCmdInfo}The {colored('session was canceled','red', attrs=['dark'])} because you did not verify the information.")
+                print(f"{preCmdInfo}The {ced('session was canceled','red', attrs=['dark'])} because you did not verify the information.")
                 txtLog(f'{preLogInfo}The session was canceled because you did not verify the information.',logFilePath)
     
         if listEnter:
             txtLog(f'{preLogInfo}Şimdiki listeye erişim başlatılıyor.',logFilePath)
-            print(f"{preCmdInfo}{colored(f'List confirmed. {autoEnterMsg}', color='green')}")
+            print(f"{preCmdInfo}{ced(f'List confirmed. {autoEnterMsg}', color='green')}")
             
             lastPageNo = getListLastPageNo()
             openCsv = f'{exportsPath}{cListOwner}_{cListDomainName}_{cListRunTime}.csv' 
@@ -610,12 +606,12 @@ while True:
             txtLog(f'{preLogInfo}{processState} completed!',logFilePath)
             print(f'{preCmdInfo}{loopCount-1} film {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.') #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
             print(subLine)
-            print(f"{preCmdInfo}{colored(f'{processState} completed!', color='green')}")
+            print(f"{preCmdInfo}{ced(f'{processState} completed!', color='green')}")
             
     combineCsv()
     os.system(f'title Session: {currenSessionHash} ended!')
     print(f"{preCmdInfo}Process State: {cmdBlink(processState +' Finish.','green')}")
-    print(f'{preCmdInfo}{colored(f"Session: {currenSessionHash} ended.", color="green")}')  
+    print(f'{preCmdInfo}{ced(f"Session: {currenSessionHash} ended.", color="green")}')  
     txtLog(f'{preLogInfo}Session: {currenSessionHash} ended.',logFilePath)
     test_pause()
     
