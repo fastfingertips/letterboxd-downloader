@@ -1,8 +1,8 @@
 import csv, sys, os, json, glob, time #: PMI
 from datetime import datetime #: PMI
 from inspect import currentframe #: PMI
-
-from attr import attr #: PMI
+from attr import attr
+from numpy import partition #: PMI
 while True: #: Other libs
     try:
         import arrow, requests, pandas as pd
@@ -11,7 +11,7 @@ while True: #: Other libs
         # from libs.termcolor110.termcolor import colored
         break
     except ImportError as e: #: Trying import
-        print('Impor Error: ', e)
+        print('Import Error: ', e)
         os.system('pipreqs --encoding utf-8 --force')
         os.system('pip install -r requirements.txt & pip list')
         
@@ -330,36 +330,40 @@ def combineCsv():
 
 def splitCsv(splitCsvPath):
     splitCsvLines = open(splitCsvPath, 'r', encoding="utf8").readlines() #: lines list
-    csvMovies = len(splitCsvLines)
-    if  csvMovies > splitLimit:
+    csvMovies = len(splitCsvLines) #: Dosyadaki satırların toplamı
+    if  csvMovies > splitLimit: #: Dosyadaki satırların toplamı belirlenen limitten büyükse..
         splitsPath = f'{exportDirName}/Splits'
         splitCsvName = f'{splitsPath}/{currenSessionHash}'
         dirCheck([splitsPath]) # Yolu kontrol ediyoruz.
         defaultCsvCount = 1000 # En ideal aktarma sayısı
         defaultPartition = 2 # Bölüm 2'den başlar.
-        splitFileNo = 1
+        splitFileNo = defaultPartition-1
         print(f'{preCmdInfo}Dosya içinde {splitLimit} üzeri film({csvMovies}) olduğu için ayrım uygulanacak.')
-        while True:
+        while True: #: Dosyanın kaça bölüneceği hesaplanır.
             linesPerCsv = csvMovies/defaultPartition
             if linesPerCsv <= defaultCsvCount:
                 if csvMovies % defaultPartition == 0: # float check
                     linesPerCsv = int(linesPerCsv) # kalan sıfırsa int'e çeviririz.
-                    print(f'{preCmdInfo}{csvMovies} film, {int(csvMovies/linesPerCsv)} parçaya bölünüyor.')
+                    print(f'{preCmdInfo}{csvMovies} film, {defaultPartition} parçaya bölünüyor.')
                     break
             defaultPartition += 1
-        for lineNo in range(csvMovies):
-            if lineNo % linesPerCsv == 0:
-                splitCsvLines.insert(lineNo+linesPerCsv,splitCsvLines[0]) #: keep header
-                open(f'{splitCsvName}-{splitFileNo}.csv', 'w+', encoding="utf8").writelines(splitCsvLines[lineNo:lineNo+linesPerCsv])
-                splitFileNo += 1
-        print(f'{preCmdInfo}Ayrım işlemi {splitCsvName} adresinde sona erdi. Bölüm: [{defaultPartition}][{linesPerCsv}]')
+
+        if defaultPartition <= partitionLimit: #: Default partition limit: 10
+            for lineNo in range(csvMovies): #: Dosyanın bölünmesi
+                if lineNo % linesPerCsv == 0:
+                    splitCsvLines.insert(lineNo+linesPerCsv,splitCsvLines[0]) #: keep header
+                    open(f'{splitCsvName}-{splitFileNo}.csv', 'w+', encoding="utf8").writelines(splitCsvLines[lineNo:lineNo+linesPerCsv])
+                    splitFileNo += 1
+            print(f'{preCmdInfo}Ayrım işlemi {splitCsvName} adresinde sona erdi. Bölüm: [{defaultPartition}][{linesPerCsv}]')
+        else: # Ayrım limiti aşılırsa
+            print(f'{preCmdInfo}Ayrım işlemi gerçekleşmedi. Ayrım limiti [{defaultPartition}/{partitionLimit}] aşıldı.')
     else:
         print(f'{preCmdInfo}Dosyanız içerisinde {splitLimit} altında satır/film({csvMovies}) var, ayrım işlemi uygulanmayacak.')
 
 def extractObj(job,obj):
     try:
-        while job[-1] == obj: ## Url sonunda nokta olduğu sürece..
-            job = job[:len(job)-1] #: Her defasında Url sonundan nokta siler.
+        while job[-1] == obj: ## $job sonunda $obj olduğu sürece..
+            job = job[:len(job)-1] #: Her defasında $job sonundan $obj siler.
     except:
         pass
     return job
@@ -371,6 +375,7 @@ def urlFix(x):
             if approvedListUrl not in urlList: ## Doğrulanmış URL daha önce URL Listesine eklenmediyse..
                 urlList.append(approvedListUrl) #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
         return urlList
+
 # INITIAL ASSIGNMENTS
 if True:
     os.system(f'color & cls & title Welcome %USERNAME%.')
@@ -395,6 +400,7 @@ if True:
     settingsFileName = 'settings'+'.json'
     cmdPrintFilms = True #: Filmler ekrana yazılsın mı
     splitLimit = 1500
+    partitionLimit = 10
     splitParameter = "split:"
     if cmdPrintFilms:
         supLineFilms = f'{supLine}\n{preCmdInfo}{ced("Movies on the list;", color="yellow")}\n'
