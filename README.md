@@ -21,5 +21,5 @@ Liste arama modunu kullanabilmek için girişiniz "?" soru işaretiyle başlamal
 <br>Örnek bir sorgu:
 <br><code>[>]: ?crime movies</code> Tüm crime movies içeren listeleri bulacak ve çekim listesine eklemeyece devam edecektir.
 <br><code>[>]: ?crime movies!10</code> Burada çekim listesine eklenecek sınırı belirliyoruz. Burada ilk 10 liste olarak ayarladım.
-<br><code>[>]: ?crime movies!10.</code> Eğer bir sorgu sonunda "." nokta kullanacak olursanız eklenen listelerin tümünü otomatik onaylacaktır.
+<br><code>[>]: ?crime movies!10.</code> Eğer bir sorgu sonunda "." nokta kullanacak olursanız eklenen listelerin tümünü otomatik onaylayacaktır.
 </details
