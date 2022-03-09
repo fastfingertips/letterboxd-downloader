@@ -42,15 +42,14 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
             # Oda ismini çektik
             movie = currentFilm.find('h2', attrs={'class': 'headline-2 prettify'})
             movieName = movie.find('a').text
-            # Film yılı bazen boş olabiliyor. Önlem alıyoruz"
-            try:
+            
+            try: # Film yılı bazen boş olabiliyor. Önlem alıyoruz"
                 movieYear = movie.find('small').text
             except:
                 movieYear = "Yok"
-            # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
-            if cmdPrintFilms:
+            if cmdPrintFilms: # Kullanıcı eğer isterse çekilen filmler ekrana da yansıtılır.
                 print(f"{tempLoopCount}: {movieName}, {movieYear}")
-            writer.writerow([str(movieName), str(movieYear)])
+            writer.writerow([str(movieName), str(movieYear)]) # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
             tempLoopCount += 1
         return tempLoopCount
     except Exception as e:
@@ -59,7 +58,7 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
 
 def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
     try:
-        txtLog(f'{preLogInfo}Trying connect to [{tempUrl}]',logFilePath)                            #: Log dosyasına bağlantı başlangıcında bilgi veriliyor.        
+        txtLog(f'{preLogInfo}Trying connect to [{tempUrl}]',logFilePath) #: Log dosyasına bağlantı başlangıcında bilgi veriliyor.        
         while True:
             #: https://stackoverflow.com/questions/23013220/max-retries-exceeded-with-url-in-requests
             try:
@@ -84,11 +83,11 @@ def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
             except Exception as e:
                 print('Hata:',e)
           #: Get page dom.
-    except Exception as e:
-        errorLine(e)                                                                #: Dom edinirken hata gerçekleşirse..
+    except Exception as e: #: Dom edinirken hata gerçekleşirse..
+        errorLine(e)  
         txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]',logFilePath)
 
-def doReset():  # Porgramı yeniden başlat
+def doReset(): # Porgramı yeniden başlat
     try:
         os.system('echo Press and any key to reboot & pause >nul')
         os.system('echo Confirm reboot press any key again & pause >nul')
@@ -97,10 +96,9 @@ def doReset():  # Porgramı yeniden başlat
         errorLine(e)
         txtLog(preLogErr + 'Attempting to restart the program failed.',logFilePath)
 
-def getListLastPageNo():  # Listenin son sayfasını öğren
+def getListLastPageNo(): # Listenin son sayfasını öğren
     try:
-        # > Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al.
-        # > Son'linin içindeki bağlantının metnini çektik. Bu bize kaç sayfalı bir listemiz olduğunuz verecek.
+        # Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al. Son'linin içindeki bağlantının metni bize kaç sayfalı bir listemiz olduğunuz verecek.
         txtLog(f'{preLogInfo}Listedeki sayfa sayısı denetleniyor..',logFilePath)
         lastPageNo = cListDom.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
         txtLog(f'{preLogInfo}Liste birden çok sayfaya ({lastPageNo}) sahiptir.',logFilePath)
@@ -128,11 +126,11 @@ def getMovieCount(tempLastPageNo): # Film sayısını öğreniyoruz
                     pass
             movieCount = metaDescription[:ii]
         except Exception as e: ## Listenin son sayfa işlemleri.
-            lastPageDom = doReadPage(f'{currentUrListItemDetailPage}{tempLastPageNo}')                                                                              #: Getting lastpage dom.
+            lastPageDom = doReadPage(f'{currentUrListItemDetailPage}{tempLastPageNo}') #: Getting lastpage dom.
             lastPageArticles = lastPageDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li") #: Sayfa kodları çekildi.
-            lastPageMoviesCount =  len(lastPageArticles)                                                                                    #: Film sayısı öğrenildi.
-            movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount                                                                  #: Toplam film sayısını belirlemek.
-            txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.",logFilePath)                                                   #: Film sayısı hesaplandıktan sonra ekrana yazdırılır.
+            lastPageMoviesCount =  len(lastPageArticles) #: Film sayısı öğrenildi.
+            movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount #: Toplam film sayısını belirlemek.
+            txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.",logFilePath) #: Film sayısı hesaplandıktan sonra ekrana yazdırılır.
         return movieCount #: Film sayısı çağrıya gönderilir.
     except Exception as e: ## Olası hata durumunda.
         errorLine(e)          
@@ -159,8 +157,7 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
                 exportDirName = input(f'{preCmdInput}Export directory Name: ')
                 settings_dict = {
                     'log_dir': logDirName,
-                    'export_dir': exportDirName,
-                }
+                    'export_dir': exportDirName,}
                 with open(settingsFileName, 'w') as json_file:
                     json.dump(settings_dict, json_file)
                 break
