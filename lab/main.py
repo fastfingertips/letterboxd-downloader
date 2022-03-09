@@ -29,7 +29,14 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
     try:
         # > Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
         list_entries = tempCurrentDom.find('ul', attrs={'class': 'js-list-entries poster-list -p70 film-list clear film-details-list'})
+        if list_entries is None:
+            list_entries = tempCurrentDom.select_one('ul.film-list')
+            if list_entries is None:
+                 list_entries = tempCurrentDom.select_one('ul.poster-list')
+                 if list_entries is None:
+                    list_entries = tempCurrentDom.select_one('ul.film-details-list')            
         film_details = list_entries.find_all("li")
+
         # > Filmleri ekrana ve dosyaya yazdırma işlemleri
         for currentFilm in film_details:
             # Oda ismini çektik
