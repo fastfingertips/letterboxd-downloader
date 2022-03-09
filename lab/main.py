@@ -28,11 +28,12 @@ def dirCheck(dirs): # List
 def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
     try:
         # > Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
-        articles = tempCurrentDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
+        list_entries = tempCurrentDom.find('ul', attrs={'class': 'js-list-entries poster-list -p70 film-list clear film-details-list'})
+        film_details = list_entries.find_all("li")
         # > Filmleri ekrana ve dosyaya yazdırma işlemleri
-        for currentArticle in articles:
+        for currentFilm in film_details:
             # Oda ismini çektik
-            movie = currentArticle.find('h2', attrs={'class': 'headline-2 prettify'})
+            movie = currentFilm.find('h2', attrs={'class': 'headline-2 prettify'})
             movieName = movie.find('a').text
             # Film yılı bazen boş olabiliyor. Önlem alıyoruz"
             try:
@@ -41,7 +42,7 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
                 movieYear = "Yok"
             # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
             if cmdPrintFilms:
-                print(f" {tempLoopCount}: {movieName}, {movieYear}")
+                print(f"{tempLoopCount}: {movieName}, {movieYear}")
             writer.writerow([str(movieName), str(movieYear)])
             tempLoopCount += 1
         return tempLoopCount
