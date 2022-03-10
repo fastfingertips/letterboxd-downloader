@@ -473,7 +473,6 @@ while True:
                         x += -1
                 else:
                     endList = 'Not specified.' # Son liste için bir parametre belirtilmezse.
-                    
                 searchList = f'https://letterboxd.com/search/lists/{urlListItem}/'
                 searchListPreviewDom = doReadPage(searchList)
 
@@ -544,6 +543,9 @@ while True:
                     print(subLine)
                     break
                 break
+
+            if '/detail' in urlListItem: # detail remove
+                urlListItem = urlListItem.replace('/detail','')
 
             urlListItemDom = doReadPage(urlListItem) #: Sayfa dom'u alınır.
             userListAvailable, approvedListUrl = userListCheck(urlListItemDom) #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
