@@ -1,5 +1,5 @@
-## bs4-boxd
-Attempts to extract data from letterboxd with bs4
+### ![commits](https://img.shields.io/github/last-commit/FastFingertips/letterboxd-list) ![visitors](https://visitor-badge.laobi.icu/badge?page_id=FastFingertips.letterboxd-list) 
+Attempts to extract data from letterboxd with bs4<br>
 
 ## Türkçe - Basit Kullanım
 <details><summary>Liste adresi belirterek tekli/toplu çekim</summary>
