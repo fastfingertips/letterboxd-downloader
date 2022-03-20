@@ -1,7 +1,6 @@
 import csv, sys, os, json, glob, time #: PMI
 from datetime import datetime #: PMI
 from inspect import currentframe #: PMI
-from attr import attr
 from numpy import partition #: PMI
 while True: #: Other libs
     try:
