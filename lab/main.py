@@ -4,15 +4,15 @@ from inspect import currentframe #: PMI
 from numpy import partition #: PMI
 while True: #: Other libs
     try:
-        import arrow, requests, pandas as pd
-        from bs4 import BeautifulSoup as bs
+        import arrow, requests, pandas as pd #: PMI
+        from bs4 import BeautifulSoup as bs #: BeautifulSoup
         from termcolor import colored as ced #: [colored, cprint]
         # from libs.termcolor110.termcolor import colored
         break
     except ImportError as e: #: Trying import
         print('Import Error: ', e)
-        os.system('pipreqs --encoding utf-8 --force')
-        os.system('pip install -r requirements.txt & pip list')
+        os.system('pipreqs --encoding utf-8 --force') #: pipreqs kullanarak kurulmasını sağlıyoruz.
+        os.system('pip install -r requirements.txt & pip list') #: pip list kullanarak kurulmuş modülleri listeliyoruz.
         
 def dirCheck(dirs): # List
     for dir in dirs:
@@ -28,8 +28,8 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
     try:
         # > Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
         list_entries = tempCurrentDom.find('ul', attrs={'class': 'js-list-entries poster-list -p70 film-list clear film-details-list'})
-        if list_entries is None:
-            list_entries = tempCurrentDom.select_one('ul.film-list')
+        if list_entries is None: #: Eğer film listesi boş ise
+            list_entries = tempCurrentDom.select_one('ul.film-list') 
             if list_entries is None:
                  list_entries = tempCurrentDom.select_one('ul.poster-list')
                  if list_entries is None:
@@ -608,22 +608,22 @@ while True:
                 
                 loopCount = 1
                 print(supLineFilms,end='')
-                for x in range(int(lastPageNo)):
-                    txtLog(f'Connecting to: {currentUrListItemDetailPage}{str(x+1)}',logFilePath)
-                    currentDom = doReadPage(f'{currentUrListItemDetailPage}{str(x+1)}')
-                    loopCount = doPullFilms(loopCount, currentDom)
+                for x in range(int(lastPageNo)): #: Sayfa sayısı kadar döngü oluştur.
+                    txtLog(f'Connecting to: {currentUrListItemDetailPage}{str(x+1)}',logFilePath) #: Sayfa numarasını log dosyasına yaz.
+                    currentDom = doReadPage(f'{currentUrListItemDetailPage}{str(x+1)}') #: Sayfa dom'u alınır.
+                    loopCount = doPullFilms(loopCount, currentDom) #: Filmleri al.
                 csvFile.close() #: Açtığımız dosyayı manuel kapattık
             
-            os.system(f'title {processState} completed!')
-            txtLog(f'{preLogInfo}{processState} completed!',logFilePath)
+            os.system(f'title {processState} completed!') #: Dosya oluşturulduğunda ekrana yazı yazılır.
+            txtLog(f'{preLogInfo}{processState} completed!',logFilePath) #: Dosya oluşturulduğunda log dosyasına yazı yazılır.
             print(f'{preCmdInfo}{loopCount-1} film {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.') #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
-            print(subLine)
-            print(f"{preCmdInfo}{ced(f'{processState} completed!', color='green')}")
+            print(subLine) #: Alt satır ekrana yazdırılır.
+            print(f"{preCmdInfo}{ced(f'{processState} completed!', color='green')}") #: İşlem tamamlandığında mesajı ekrana yazdırıyoruz.
             
-    combineCsv()
-    os.system(f'title Session: {currenSessionHash} ended!')
-    print(f"{preCmdInfo}Process State: {cmdBlink(processState +' Finish.','green')}")
-    print(f'{preCmdInfo}{ced(f"Session: {currenSessionHash} ended.", color="green")}')  
-    txtLog(f'{preLogInfo}Session: {currenSessionHash} ended.',logFilePath)
-    test_pause()
+    combineCsv() #: Csv dosyalarını birleştir.
+    os.system(f'title Session: {currenSessionHash} ended!') #: Session sonlandırıldığında ekrana yazdırılır.
+    print(f"{preCmdInfo}Process State: {cmdBlink(processState +' Finish.','green')}") # Process durumunu ekrana yazdırıyoruz.
+    print(f'{preCmdInfo}{ced(f"Session: {currenSessionHash} ended.", color="green")}') # Session sonlandırıldığında mesaj bastırılır.
+    txtLog(f'{preLogInfo}Session: {currenSessionHash} ended.',logFilePath) # Session sonlandırıldığında log dosyasına yazılır.
+    test_pause() #: Test için beklemeye yarar.
     
