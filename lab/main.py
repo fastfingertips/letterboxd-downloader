@@ -29,11 +29,11 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
         # > Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
         list_entries = tempCurrentDom.find('ul', attrs={'class': 'js-list-entries poster-list -p70 film-list clear film-details-list'})
         if list_entries is None: #: Eğer film listesi boş ise
-            list_entries = tempCurrentDom.select_one('ul.film-list') 
-            if list_entries is None:
-                 list_entries = tempCurrentDom.select_one('ul.poster-list')
-                 if list_entries is None:
-                    list_entries = tempCurrentDom.select_one('ul.film-details-list')            
+            list_entries = tempCurrentDom.select_one('ul.film-list')
+        if list_entries is None:
+            list_entries = tempCurrentDom.select_one('ul.poster-list')
+        if list_entries is None:
+           list_entries = tempCurrentDom.select_one('ul.film-details-list')
         film_details = list_entries.find_all("li")
 
         # > Filmleri ekrana ve dosyaya yazdırma işlemleri
@@ -41,14 +41,14 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
             # Oda ismini çektik
             movie = currentFilm.find('h2', attrs={'class': 'headline-2 prettify'})
             movieName = movie.find('a').text
-            
+
             try: # Film yılı bazen boş olabiliyor. Önlem alıyoruz"
                 movieYear = movie.find('small').text
             except:
                 movieYear = "Yok"
             if cmdPrintFilms: # Kullanıcı eğer isterse çekilen filmler ekrana da yansıtılır.
                 print(f"{tempLoopCount}: {movieName}, {movieYear}")
-            writer.writerow([str(movieName), str(movieYear)]) # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
+            writer.writerow([str(movieName), movieYear])
             tempLoopCount += 1
         return tempLoopCount
     except Exception as e:
@@ -67,21 +67,21 @@ def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
                     return urlDom #: Return page dom
             except requests.ConnectionError as e:
                 print("OOPS!! Connection Error. Make sure you are connected to Internet. Technical Details given below.")
-                print(str(e))            
+                print(e)
                 continue
             except requests.Timeout as e:
                 print("OOPS!! Timeout Error")
-                print(str(e))
+                print(e)
                 continue
             except requests.RequestException as e:
                 print("OOPS!! General Error")
-                print(str(e))
+                print(e)
                 continue
             except KeyboardInterrupt:
                 print("Someone closed the program")
             except Exception as e:
                 print('Hata:',e)
-          #: Get page dom.
+              #: Get page dom.
     except Exception as e: #: Dom edinirken hata gerçekleşirse..
         errorLine(e)  
         txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]',logFilePath)
@@ -93,7 +93,7 @@ def doReset(): # Porgramı yeniden başlat
         os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
     except Exception as e:
         errorLine(e)
-        txtLog(preLogErr + 'Attempting to restart the program failed.',logFilePath)
+        txtLog(f'{preLogErr}Attempting to restart the program failed.', logFilePath)
 
 def getListLastPageNo(): # Listenin son sayfasını öğren
     try:
@@ -132,8 +132,8 @@ def getMovieCount(tempLastPageNo): # Film sayısını öğreniyoruz
             txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.",logFilePath) #: Film sayısı hesaplandıktan sonra ekrana yazdırılır.
         return movieCount #: Film sayısı çağrıya gönderilir.
     except Exception as e: ## Olası hata durumunda.
-        errorLine(e)          
-        txtLog(f'Error getting movie count.',logFilePath) #: Dom edinirken hata gerçekleşirse.. 
+        errorLine(e)
+        txtLog('Error getting movie count.', logFilePath)
         txtLog(f'{preLogErr}An error occurred while obtaining the number of movies.',logFilePath)
 
 def settingsFileSet(): #: Ayar dosyası kurulumu.
@@ -227,7 +227,7 @@ def userListCheck(_urlListItemDom): #: Kullanıcının girilen şekilde bir list
                 metaOgTitle = getMetaContent(_urlListItemDom, 'og:title')  #: Liste ismini alıyoruz. Örnek: 'Search results for best comedy'
                 bodyDataOwner = getBodyContent(_urlListItemDom,'data-owner') #: Liste sahibinin kullanıcı ismi.
                 print(f'{preCmdCheck}{ced("Found it: ", color="green")}@{ced(bodyDataOwner,"yellow")} "{ced(metaOgTitle,"yellow")}"') #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
-                if urlListItem == metaOgUrl or urlListItem+'/' == metaOgUrl: #: Girilen URL Meta ile aynıysa..
+                if urlListItem == metaOgUrl or f'{urlListItem}/' == metaOgUrl: #: Girilen URL Meta ile aynıysa..
                     txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.',logFilePath)
                 else: ## Girilen URL Meta ile uyuşmuyorsa..
                     print(f'{preCmdInfo}Girdiğiniz liste linki yönlendirme içeriyor.')
@@ -262,21 +262,18 @@ def errorLine(e): #: Error Code generator
 
 def txtLog(r_message, logFilePath): #: None: Kullanıcı log lokasyonunu belirtmese de olur.
     try: ## Denenecek işlemler..
-        f = open(logFilePath, "a", encoding="utf-8")#: Eklemek üzere bir dosya açar, mevcut değilse dosyayı oluşturur
-        f.writelines(f'{r_message}\n')
-        f.close()
+        with open(logFilePath, "a", encoding="utf-8") as f:
+            f.writelines(f'{r_message}\n')
     except Exception as e:
             print(f'Loglama işlemi {e} nedeniyle başarısız.')
 
 def getChanges(loop,key1,key2):
-    change = ''
-    for i in range(loop):
-            # print(key1[i], key2[i], key1[i]==key2[i]) #: Dev test
-            if key1[i] == key2[i]:
-                change += ced(key2[i], color="yellow")
-            else:
-                change += cmdBlink(key2[i],'green')
-    return change
+    return ''.join(
+        ced(key2[i], color="yellow")
+        if key1[i] == key2[i]
+        else cmdBlink(key2[i], 'green')
+        for i in range(loop)
+    )
 
 def getMetaContent(dom,obj):
     return dom.find('meta', property=obj).attrs['content']
@@ -304,15 +301,15 @@ def combineCsv():
     if len(urlList) > 1:
         print(supLine)
         print(f"{preCmdInfo}{ced('Merge process info;', color='yellow')}")
-        combineDir = exportDirName + '/Combined/' #: Kombine edilen listelerin barındığı klasör
-        combineCsvFile = currenSessionHash + '_Normal-Combined.csv' #: Kombine dosyasının ismi.
-        noDuplicateCsvFile = currenSessionHash + '_NoDuplicate-Combined.csv' #: NoDuplicate file name
+        combineDir = f'{exportDirName}/Combined/'
+        combineCsvFile = f'{currenSessionHash}_Normal-Combined.csv'
+        noDuplicateCsvFile = f'{currenSessionHash}_NoDuplicate-Combined.csv'
         combineCsvPath = combineDir + combineCsvFile #: Kombine dosyasının yolu.
         noDuplicateCsvPath = combineDir + noDuplicateCsvFile #: NoDuplciate file path
         dirCheck([combineDir]) #: Combine dir check
         txtLog('Birden fazla liste üzerinde çalışıldığından listeler kombine edilecek.',logFilePath) #: Process logger
         try:
-            allCsvFiles = [i for i in glob.glob(exportsPath+'*.{}'.format('csv'))] #: Belirtilmiş dizindeki tüm csv dosyalarının bir değişkene aktarılması.
+            allCsvFiles = list(glob.glob(exportsPath + '*.csv'))
             combinedCsvFiles = pd.concat([pd.read_csv(f) for f in allCsvFiles]) #: Csv dosyalarının tümü birleştirilir.
             combinedCsvFiles.to_csv(combineCsvPath, index=False, encoding='utf-8-sig') #: Csv dosyasının encod ayarı.
             ## https://stackoverflow.com/questions/15741564/removing-duplicate-rows-from-a-csv-file-using-a-python-script/15741627#15741627
@@ -322,7 +319,7 @@ def combineCsv():
                     if line in seen: continue # skip duplicate
                     seen.add(line)
                     out_file.write(line)
-            
+
             print(f'{preCmdInfo}Listelerdeki tüm filmler {combineCsvPath} dosyasına kaydedildi.')
             print(f'{preCmdInfo}Yalnızca farklı fimlerin olduğu dosya aynı dizinde {noDuplicateCsvPath} olarak ayarlandı.')
             splitCsv(noDuplicateCsvPath) # Ayıklama sonrası, aktarma ayırması gerekliyse gerçekleştiriyoruz.
@@ -335,7 +332,7 @@ def combineCsv():
 def splitCsv(splitCsvPath):
     splitCsvLines = open(splitCsvPath, 'r', encoding="utf8").readlines() #: lines list
     csvMovies = len(splitCsvLines) #: Dosyadaki satırların toplamı
-    if  csvMovies > splitLimit: #: Dosyadaki satırların toplamı belirlenen limitten büyükse..
+    if csvMovies > splitLimit: #: Dosyadaki satırların toplamı belirlenen limitten büyükse..
         splitsPath = f'{exportDirName}/Splits'
         splitCsvName = f'{splitsPath}/{currenSessionHash}'
         dirCheck([splitsPath]) # Yolu kontrol ediyoruz.
@@ -345,11 +342,13 @@ def splitCsv(splitCsvPath):
         print(f'{preCmdInfo}Dosya içinde {splitLimit} üzeri film({csvMovies}) olduğu için ayrım uygulanacak.')
         while True: #: Dosyanın kaça bölüneceği hesaplanır.
             linesPerCsv = csvMovies/defaultPartition
-            if linesPerCsv <= defaultCsvCount:
-                if csvMovies % defaultPartition == 0: # float check
-                    linesPerCsv = int(linesPerCsv) # kalan sıfırsa int'e çeviririz.
-                    print(f'{preCmdInfo}{csvMovies} film, {defaultPartition} parçaya bölünüyor.')
-                    break
+            if (
+                linesPerCsv <= defaultCsvCount
+                and csvMovies % defaultPartition == 0
+            ):
+                linesPerCsv = int(linesPerCsv) # kalan sıfırsa int'e çeviririz.
+                print(f'{preCmdInfo}{csvMovies} film, {defaultPartition} parçaya bölünüyor.')
+                break
             defaultPartition += 1
 
         if defaultPartition <= partitionLimit: #: Default partition limit: 10
@@ -367,18 +366,17 @@ def splitCsv(splitCsvPath):
 def extractObj(job,obj):
     try:
         while job[-1] == obj: ## $job sonunda $obj olduğu sürece..
-            job = job[:len(job)-1] #: Her defasında $job sonundan $obj siler.
+            job = job[:-1]
     except:
         pass
     return job
 
 def urlFix(x):
-        urlListItemDom = doReadPage(x) #: Sayfa dom'u alınır.
-        userListAvailable, approvedListUrl = userListCheck(urlListItemDom) #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
-        if userListAvailable: ## Liste kullanıma uygunsa..
-            if approvedListUrl not in urlList: ## Doğrulanmış URL daha önce URL Listesine eklenmediyse..
-                urlList.append(approvedListUrl) #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
-        return urlList
+    urlListItemDom = doReadPage(x) #: Sayfa dom'u alınır.
+    userListAvailable, approvedListUrl = userListCheck(urlListItemDom) #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
+    if userListAvailable and approvedListUrl not in urlList:
+        urlList.append(approvedListUrl) #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
+    return urlList
 
 # INITIAL ASSIGNMENTS
 if True:

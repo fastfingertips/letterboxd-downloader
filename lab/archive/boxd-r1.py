@@ -8,8 +8,7 @@ page = requests.get(f'https://letterboxd.com/{_user}/list/{_list}/detail')
 soup = BeautifulSoup(page.content.decode('utf-8'), 'html.parser')
 all_li = soup.find(
     'ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
-film_no = 1
-for current_li in all_li:
+for film_no, current_li in enumerate(all_li, start=1):
     # Oda ismini çektik
     film = current_li.find(
         'h2', attrs={'class': 'headline-2 prettify'})
@@ -21,4 +20,3 @@ for current_li in all_li:
         film_year = "Blank"
     finally:
         print(f'{film_no}) {film_name} ({film_year})')
-    film_no += 1

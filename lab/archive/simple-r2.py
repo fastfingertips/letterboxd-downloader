@@ -42,7 +42,7 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
                 movieYear = "Yok"
             # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
             print(f'{loopCount}) {movieName} ({movieYear})')
-            writer.writerow([str(movieName), str(movieYear)])
+            writer.writerow([str(movieName), movieYear])
             loopCount += 1
         return loopCount
     except:
@@ -52,8 +52,7 @@ def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
     try:
         txtLog(f'{preLogInfo}Trying connect to [{tempUrl}]')                            #: Log dosyasına bağlantı başlangıcında bilgi veriliyor.
         urlResponseCode = requests.get(tempUrl)                                         #: Get response code.
-        urlDom = BeautifulSoup(urlResponseCode.content.decode('utf-8'), 'html.parser')  #: Get page dom.               
-        return urlDom                                                                   #: Return page dom.
+        return BeautifulSoup(urlResponseCode.content.decode('utf-8'), 'html.parser')
     except:                                                                             #: Dom edinirken hata gerçekleşirse..
         print(f'{preBlankCount}Connection to address failed.')
         txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]')
@@ -93,8 +92,8 @@ def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
         movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount                                                                  #: Toplam film sayısını belirlemek.
         txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.")                                                   #: Film sayısı hesaplandıktan sonra ekrana yazdırılır.
         return movieCount                                                                                                               #: Film sayısı çağrıya gönderilir.
-    except:                                                                                                                             ## Olası hata durumunda.
-        print(f'Error getting movie count.')
+    except:                                                                                                                     ## Olası hata durumunda.
+        print('Error getting movie count.')
         txtLog(f'{preLogErr}An error occurred while obtaining the number of movies.')
 
 def settingsFileSet(): #: Ayar dosyası kurulumu.
@@ -174,9 +173,8 @@ def signature(x): #: x: 0 start msg, 1 end msg
 
 def txtLog(r_message, r_loglocation=None): #: None: Kullanıcı log lokasyonunu belirtmese de olur.
     try:
-        f = open(logFilePath, "a")
-        f.writelines(f'{r_message}\n')
-        f.close()
+        with open(logFilePath, "a") as f:
+            f.writelines(f'{r_message}\n')
     except Exception as e:
         if r_loglocation is not None:
             print(f'Loglama işlemi {r_loglocation} konumunda {e} nedeniyle başarısız.')
@@ -226,7 +224,7 @@ def cmdBlink(m,c):
 # > cprint ASCII Okuyabilmesi için program başlarken bir kere color kullanıyoruz: https://stackoverflow.com/a/61684844
 # > Sonrasında hem temiz bir başlangıç hem de yeniden başlatmalarda Press any key.. mesajını kaldırmak için cls.
 cmdRunTime = datetime.now().strftime('%d%m%Y%H%M%S') #: Run time check - Generate session hash
-os.system(f'color & cls & title Welcome %USERNAME%.')
+os.system('color & cls & title Welcome %USERNAME%.')
 # siteProtocol, siteUrl = "https://", "letterboxd.com/"     #: Saf domain'in parçalanarak birleştirilmesi
 # siteDomain = siteProtocol + siteUrl                       #: Saf domain'in parçalanarak birleştirilmesi
 
@@ -280,9 +278,8 @@ while True:
                 file.close()
             txtLog(f'{preLogInfo}Success!')
             signature(0)
-            doReset()
         else:
             print(msgCancel)
             txtLog(preLogInfo + msgCancel)
-            doReset()
+        doReset()
         break

@@ -57,7 +57,7 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
                 movieYear = "Yok"
             # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
             print(f'{loopCount})  {movieName} ({movieYear})')
-            writer.writerow([str(movieName), str(movieYear)])
+            writer.writerow([str(movieName), movieYear])
             loopCount += 1
         return loopCount
     except:
@@ -98,14 +98,12 @@ def filterPreferences(): #: Filtre seçenekleri.
                     max_multiply = 16 #: 16*10 + 1870
                     decade_years = []
                     decade_nums = []
-                    decade_num = 0
-                    for i in range(max_multiply):
+                    for decade_num, i in enumerate(range(max_multiply)):
                         filterBlanks = ' ' if i < 10 else '' #: filterBlanks = ' ' if i in range(10) else ''
                         print(f'[{colored(decade_num, color="cyan")}] {filterBlanks}{decade_year}s')
                         decade_years.append(int(decade_year))
                         decade_year += 10
                         decade_nums.append(int(decade_num))
-                        decade_num += 1
                     while True:
                         i_decadeyear = int(input(f'{preCmdInput} Decade [{colored("Num", color="cyan")}]: '))
                         if i_decadeyear >= min(decade_nums) and i_decadeyear <= max(decade_nums):
@@ -117,11 +115,11 @@ def filterPreferences(): #: Filtre seçenekleri.
                         else:
                             print(f'{preBlankCount}{colored("Belirtilen onyıllardan satır numarasını girmelisiniz.", color="red")}')
                 elif decadeyear_dory == "y":
+                    decadeyear_confirm = True
                     while True:
                         i_decadeyear = int(input(f'{preCmdInput} Year [{colored("1870", color="cyan")}-{colored("2029", color="blue")}]: '))
                         msgDecadeYear = f'Year: {i_decadeyear}\n'
                         w_decadeyear = f"/year/{i_decadeyear}"
-                        decadeyear_confirm = True
                         # Linkler 1870 ve 2029'a kadar çalışıyor.
                         if i_decadeyear >= 1870 and i_decadeyear <= 2029:
                             print(f'{preBlankCount}{colored("Selected:", color="green")} {i_decadeyear}\n')
@@ -225,7 +223,7 @@ def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
         txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.")
         return movieCount
     except:
-        print(f'Film sayısını elde ederken hata.')
+        print('Film sayısını elde ederken hata.')
         txtLog(f'{preLogErr}Film sayısı elde edilirkren hata oluştu.s')
 def getUlFilters(tempUlNum): #: Sıralama yöntemlerini çekmek. Genre: 3, Sortby: 1
     # Filtre yöntemlerinden listenin sıralama yöntemleri olan ul etiketini yani 2.sıradaki ul'u seçtik.
@@ -340,9 +338,8 @@ def signature(x): #: x: 0 ilk, 1 son
         txtLog(log)
 def txtLog(r_message, r_loglocation=None): #: None: Kullanıcı log lokasyonunu belirtmese de olur.
     try:
-        f = open(logFilePath, "a")
-        f.writelines(f'{r_message}\n')
-        f.close()
+        with open(logFilePath, "a") as f:
+            f.writelines(f'{r_message}\n')
     except Exception as e:
         if r_loglocation is not None:
             print(f'Loglama işlemi {r_loglocation} konumunda {e} nedeniyle başarısız.')
@@ -478,8 +475,7 @@ if ent == "":
         file.close()
     txtLog(f'{preLogInfo}Success!')
     signature(0)
-    doReset()
 else:
     print(msgCancel)
     txtLog(preLogInfo + msgCancel)
-    doReset()
+doReset()

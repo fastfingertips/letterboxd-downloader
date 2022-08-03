@@ -62,8 +62,7 @@ def filtre_sor():
                     max_multiply = 16  # 16*10 + 1870
                     decade_years = []
                     decade_nums = []
-                    decade_num = 0
-                    for i in range(max_multiply):
+                    for decade_num, i in enumerate(range(max_multiply)):
                         # blank = ' ' if i in range(10) else ''
                         blank = ' ' if i < 10 else ''
                         print(
@@ -71,7 +70,6 @@ def filtre_sor():
                         decade_years.append(int(decade_year))
                         decade_year += 10
                         decade_nums.append(int(decade_num))
-                        decade_num += 1
                     while True:
                         i_decadeyear = int(input(
                             f'{user_input_green} Decade [{colored("Num", color="blue")}]: '))
@@ -86,12 +84,12 @@ def filtre_sor():
                             print(
                                 f'{colored("    Belirtilen onyıllardan satır numarasını girmelisiniz.", color="red")}')
                 elif decadeyear_dory == "y":
+                    decadeyear_confirm = True
                     while True:
                         i_decadeyear = int(
                             input(f'{user_input_green} Year [{colored("1870", color="blue")}-{colored("2029", color="blue")}]: '))
                         msg_decadeyear = f'Year: {i_decadeyear}\n'
                         w_decadeyear = f"/year/{i_decadeyear}"
-                        decadeyear_confirm = True
                         # Linkler 1870 ve 2029'a kadar çalışıyor.
                         if i_decadeyear >= 1870 and i_decadeyear <= 2029:
                             print(
@@ -164,7 +162,6 @@ def filtre_sor():
                     break
             # Filtre elemanları bittikten sonra while için filtre onayı
             filter_confirm = True
-        # Filtre istemezse
         elif filter_yn == "n":
             w_filter = False
             w_decadeyear, w_genre, w_sortby = '', '', ''
@@ -172,7 +169,6 @@ def filtre_sor():
             filter_empty_items = 3
             filter_confirm = True
             logging('{info_suf}Listeye filtre uygulanmayacak.')
-        # Filtre isteyip istemediği anlaşılmayınca
         else:
             filter_confirm = False
             print("Tam anlayamadık? Tekrar deneyin.")
@@ -335,19 +331,15 @@ def dir_check(l, e):
 
 def countrooms(r_article):
     try:
-        data_count = 0
-        for rooms in r_article:
-            data_count += 1
-        return data_count
+        return sum(1 for _ in r_article)
     except:
         print('Sayım işlemi başarısız.')
 
 
 def logging(r_message):
     try:
-        f = open(open_log, "a")
-        f.writelines(f'{r_message}\n')
-        f.close()
+        with open(open_log, "a") as f:
+            f.writelines(f'{r_message}\n')
     except:
         print('Loglama işlemi başarısız.')
 
@@ -384,8 +376,7 @@ def pullfilms(r_count, r_soup):
                 film_yili = "Yok"
             # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
             print(f'{dongu_no})  {film_adi} ({film_yili})')
-            writer.writerow(
-                [str(film_adi), str(film_yili)])
+            writer.writerow([str(film_adi), film_yili])
             dongu_no += 1
         return dongu_no
     except:
@@ -484,7 +475,7 @@ def f_filmsayisi(r_lastPage_No):  # Film sayısını öğreniyoruz
             f"{info_suf}Listedeki film sayısı {film_sayisi} olarak bulunmuştur.")
         return film_sayisi
     except:
-        print(f'Film sayısını elde ederken hata.')
+        print('Film sayısını elde ederken hata.')
         logging(f'{info_err_suf}Film sayısı elde edilirkren hata oluştu.s')
 
 
@@ -583,11 +574,11 @@ if ent == "":
         file.close()
     logging(f'{info_suf}Success!')
     signature(0)
-    rst()
 else:
     print(cancel_log)
     logging(info_suf + cancel_log)
-    rst()
+
+rst()
 
 
 # to:do

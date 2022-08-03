@@ -45,7 +45,7 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
                 movieYear = "Yok"
             # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
             print(f'{loopCount})  {movieName} ({movieYear})')
-            writer.writerow([str(movieName), str(movieYear)])
+            writer.writerow([str(movieName), movieYear])
             loopCount += 1
         return loopCount
     except:
@@ -99,7 +99,7 @@ def getMovieCount(tempLastPageNo):  # Film sayısını öğreniyoruz
         txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.")
         return movieCount
     except:
-        print(f'Film sayısını elde ederken hata.')
+        print('Film sayısını elde ederken hata.')
         txtLog(f'{preLogErr}Film sayısı elde edilirkren hata oluştu.s')
 def getUlFilters(tempUlNum): #: Sıralama yöntemlerini çekmek. Genre: 3, Sortby: 1
     # Filtre yöntemlerinden listenin sıralama yöntemleri olan ul etiketini yani 2.sıradaki ul'u seçtik.
@@ -209,9 +209,8 @@ def signature(x): #: x: 0 ilk, 1 son
         txtLog(log)
 def txtLog(r_message, r_loglocation=None): #: None: Kullanıcı log lokasyonunu belirtmese de olur.
     try:
-        f = open(logFilePath, "a")
-        f.writelines(f'{r_message}\n')
-        f.close()
+        with open(logFilePath, "a") as f:
+            f.writelines(f'{r_message}\n')
     except Exception as e:
         if r_loglocation is not None:
             print(f'Loglama işlemi {r_loglocation} konumunda {e} nedeniyle başarısız.')
@@ -326,8 +325,7 @@ if ent == "":
         file.close()
     txtLog(f'{preLogInfo}Success!')
     signature(0)
-    doReset()
 else:
     print(msgCancel)
     txtLog(preLogInfo + msgCancel)
-    doReset()
+doReset()
