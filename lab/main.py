@@ -368,7 +368,8 @@ def splitCsv(splitCsvPath):
 def extractObj(job,obj):
     try:
         while job[-1] == obj: ## $job sonunda $obj olduğu sürece..
-            job = job[:len(job)-1] #: Her defasında $job sonundan $obj siler.
+            job = job[:-1] #: Her defasında $job sonundan $obj siler.
+            
     except:
         pass
     return job
