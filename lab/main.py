@@ -93,7 +93,7 @@ def doReset(): # Porgramı yeniden başlat
         os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
     except Exception as e:
         errorLine(e)
-        txtLog(preLogErr + 'Attempting to restart the program failed.',logFilePath)
+        txtLog(f'{preLogErr}Attempting to restart the program failed.', logFilePath)
 
 def getListLastPageNo(): # Listenin son sayfasını öğren
     try:
