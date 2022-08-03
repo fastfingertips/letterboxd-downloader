@@ -29,11 +29,11 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
         # > Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
         list_entries = tempCurrentDom.find('ul', attrs={'class': 'js-list-entries poster-list -p70 film-list clear film-details-list'})
         if list_entries is None: #: Eğer film listesi boş ise
-            list_entries = tempCurrentDom.select_one('ul.film-list') 
+            list_entries = tempCurrentDom.select_one('ul.film-list')
             if list_entries is None:
                  list_entries = tempCurrentDom.select_one('ul.poster-list')
                  if list_entries is None:
-                    list_entries = tempCurrentDom.select_one('ul.film-details-list')            
+                    list_entries = tempCurrentDom.select_one('ul.film-details-list')
         film_details = list_entries.find_all("li")
 
         # > Filmleri ekrana ve dosyaya yazdırma işlemleri
@@ -41,7 +41,7 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
             # Oda ismini çektik
             movie = currentFilm.find('h2', attrs={'class': 'headline-2 prettify'})
             movieName = movie.find('a').text
-            
+
             try: # Film yılı bazen boş olabiliyor. Önlem alıyoruz"
                 movieYear = movie.find('small').text
             except:
@@ -49,6 +49,7 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
             if cmdPrintFilms: # Kullanıcı eğer isterse çekilen filmler ekrana da yansıtılır.
                 print(f"{tempLoopCount}: {movieName}, {movieYear}")
             writer.writerow([str(movieName), str(movieYear)]) # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
+            writer.writerow([str(movieName), movieYear])
             tempLoopCount += 1
         return tempLoopCount
     except Exception as e:
@@ -67,7 +68,7 @@ def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
                     return urlDom #: Return page dom
             except requests.ConnectionError as e:
                 print("OOPS!! Connection Error. Make sure you are connected to Internet. Technical Details given below.")
-                print(str(e))            
+                print(str(e))
                 continue
             except requests.Timeout as e:
                 print("OOPS!! Timeout Error")
@@ -81,7 +82,7 @@ def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
                 print("Someone closed the program")
             except Exception as e:
                 print('Hata:',e)
-          #: Get page dom.
+            #: Get page dom.
     except Exception as e: #: Dom edinirken hata gerçekleşirse..
         errorLine(e)  
         txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]',logFilePath)
@@ -227,7 +228,7 @@ def userListCheck(_urlListItemDom): #: Kullanıcının girilen şekilde bir list
                 metaOgTitle = getMetaContent(_urlListItemDom, 'og:title')  #: Liste ismini alıyoruz. Örnek: 'Search results for best comedy'
                 bodyDataOwner = getBodyContent(_urlListItemDom,'data-owner') #: Liste sahibinin kullanıcı ismi.
                 print(f'{preCmdCheck}{ced("Found it: ", color="green")}@{ced(bodyDataOwner,"yellow")} "{ced(metaOgTitle,"yellow")}"') #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
-                if urlListItem == metaOgUrl or urlListItem+'/' == metaOgUrl: #: Girilen URL Meta ile aynıysa..
+                if urlListItem == metaOgUrl or f'{urlListItem}/' == metaOgUrl: #: Girilen URL Meta ile aynıysa..
                     txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.',logFilePath)
                 else: ## Girilen URL Meta ile uyuşmuyorsa..
                     print(f'{preCmdInfo}Girdiğiniz liste linki yönlendirme içeriyor.')
@@ -262,21 +263,18 @@ def errorLine(e): #: Error Code generator
 
 def txtLog(r_message, logFilePath): #: None: Kullanıcı log lokasyonunu belirtmese de olur.
     try: ## Denenecek işlemler..
-        f = open(logFilePath, "a", encoding="utf-8")#: Eklemek üzere bir dosya açar, mevcut değilse dosyayı oluşturur
-        f.writelines(f'{r_message}\n')
-        f.close()
+        with open(logFilePath, "a", encoding="utf-8") as f: #: Eklemek üzere bir dosya açar, mevcut değilse dosyayı oluşturur
+            f.writelines(f'{r_message}\n')
     except Exception as e:
             print(f'Loglama işlemi {e} nedeniyle başarısız.')
 
 def getChanges(loop,key1,key2):
-    change = ''
-    for i in range(loop):
-            # print(key1[i], key2[i], key1[i]==key2[i]) #: Dev test
-            if key1[i] == key2[i]:
-                change += ced(key2[i], color="yellow")
-            else:
-                change += cmdBlink(key2[i],'green')
-    return change
+    return ''.join(
+        ced(key2[i], color="yellow")
+        if key1[i] == key2[i]
+        else cmdBlink(key2[i], 'green')
+        for i in range(loop)
+    )
 
 def getMetaContent(dom,obj):
     return dom.find('meta', property=obj).attrs['content']
@@ -312,7 +310,10 @@ def combineCsv():
         dirCheck([combineDir]) #: Combine dir check
         txtLog('Birden fazla liste üzerinde çalışıldığından listeler kombine edilecek.',logFilePath) #: Process logger
         try:
-            allCsvFiles = [i for i in glob.glob(exportsPath+'*.{}'.format('csv'))] #: Belirtilmiş dizindeki tüm csv dosyalarının bir değişkene aktarılması.
+            try: #: Belirtilmiş dizindeki tüm csv dosyalarının bir değişkene aktarılması.
+                allCsvFiles = list(glob.glob(f'{exportsPath}*.csv'))
+            except: #: Farklı bir alternatif
+                allCsvFiles = [i for i in glob.glob(f'{exportsPath}*.csv')] 
             combinedCsvFiles = pd.concat([pd.read_csv(f) for f in allCsvFiles]) #: Csv dosyalarının tümü birleştirilir.
             combinedCsvFiles.to_csv(combineCsvPath, index=False, encoding='utf-8-sig') #: Csv dosyasının encod ayarı.
             ## https://stackoverflow.com/questions/15741564/removing-duplicate-rows-from-a-csv-file-using-a-python-script/15741627#15741627
