@@ -131,9 +131,9 @@ def getMovieCount(tempLastPageNo): # Film sayısını öğreniyoruz
             movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount #: Toplam film sayısını belirlemek.
             txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.",logFilePath) #: Film sayısı hesaplandıktan sonra ekrana yazdırılır.
         return movieCount #: Film sayısı çağrıya gönderilir.
-    except Exception as e: ## Olası hata durumunda.
-        errorLine(e)          
-        txtLog(f'Error getting movie count.',logFilePath) #: Dom edinirken hata gerçekleşirse.. 
+    except Exception as e: ## Olası hata durumunda. (Dom edinirken)
+        errorLine(e)
+        txtLog('Error getting movie count.', logFilePath)
         txtLog(f'{preLogErr}An error occurred while obtaining the number of movies.',logFilePath)
 
 def settingsFileSet(): #: Ayar dosyası kurulumu.
