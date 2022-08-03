@@ -373,12 +373,11 @@ def extractObj(job,obj):
     return job
 
 def urlFix(x):
-        urlListItemDom = doReadPage(x) #: Sayfa dom'u alınır.
-        userListAvailable, approvedListUrl = userListCheck(urlListItemDom) #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
-        if userListAvailable: ## Liste kullanıma uygunsa..
-            if approvedListUrl not in urlList: ## Doğrulanmış URL daha önce URL Listesine eklenmediyse..
-                urlList.append(approvedListUrl) #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
-        return urlList
+    urlListItemDom = doReadPage(x) #: Sayfa dom'u alınır.
+    userListAvailable, approvedListUrl = userListCheck(urlListItemDom) #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
+    if userListAvailable and approvedListUrl not in urlList: ## Liste kullanıma uygunsa ve doğrulanmış URL daha önce URL Listesine eklenmediyse..
+        urlList.append(approvedListUrl) #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
+    return urlList
 
 # INITIAL ASSIGNMENTS
 if True:
