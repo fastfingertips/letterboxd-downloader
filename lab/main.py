@@ -304,9 +304,9 @@ def combineCsv():
     if len(urlList) > 1:
         print(supLine)
         print(f"{preCmdInfo}{ced('Merge process info;', color='yellow')}")
-        combineDir = exportDirName + '/Combined/' #: Kombine edilen listelerin barındığı klasör
-        combineCsvFile = currenSessionHash + '_Normal-Combined.csv' #: Kombine dosyasının ismi.
-        noDuplicateCsvFile = currenSessionHash + '_NoDuplicate-Combined.csv' #: NoDuplicate file name
+        combineDir = f'{exportDirName}/Combined/' #: Kombine edilen listelerin barındığı klasör
+        combineCsvFile = f'{currenSessionHash}_Normal-Combined.csv' #: Kombine dosyasının ismi.
+        noDuplicateCsvFile = f'{currenSessionHash}_NoDuplicate-Combined.csv' #: NoDuplicate file name
         combineCsvPath = combineDir + combineCsvFile #: Kombine dosyasının yolu.
         noDuplicateCsvPath = combineDir + noDuplicateCsvFile #: NoDuplciate file path
         dirCheck([combineDir]) #: Combine dir check
