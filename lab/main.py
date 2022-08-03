@@ -82,9 +82,8 @@ def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
                 print("Someone closed the program")
             except Exception as e:
                 print('Hata:',e)
-            #: Get page dom.
     except Exception as e: #: Dom edinirken hata gerçekleşirse..
-        errorLine(e)  
+        errorLine(e)
         txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]',logFilePath)
 
 def doReset(): # Porgramı yeniden başlat
@@ -104,7 +103,7 @@ def getListLastPageNo(): # Listenin son sayfasını öğren
         txtLog(f'{preLogInfo}Liste birden çok sayfaya ({lastPageNo}) sahiptir.',logFilePath)
         getMovieCount(lastPageNo)
     except AttributeError: ## Kontrolümüzde..
-        txtLog(f'{preLogInfo}Birden fazla sayfa yok, bu liste tek sayfadır. {AttributeError}',logFilePath)                   
+        txtLog(f'{preLogInfo}Birden fazla sayfa yok, bu liste tek sayfadır. {AttributeError}',logFilePath)
         lastPageNo = 1 #: Sayfa sayısı bilgisi alınamadığında sayfa sayısı 1 olarak işaretlenir.
         getMovieCount(lastPageNo) #: Sayfa bilgisi gönderiliyor.
     except Exception as e:
@@ -114,13 +113,13 @@ def getListLastPageNo(): # Listenin son sayfasını öğren
         return lastPageNo
 
 def getMovieCount(tempLastPageNo): # Film sayısını öğreniyoruz
-    try:              
+    try:
         try: # Son sayfaya bağlanıp, son sayfadaki film sayısını almak bir get isteği üretir ve programı yavaşlatır bu nedenle bir alternatif
             metaDescription = cListDom.find('meta', attrs={'name':'description'}).attrs['content']
             metaDescription = metaDescription[10:] #: açıklama kısmındaki 'A list of ' sonrası
             for i in range(6):
                 try:
-                    int(metaDescription[i]) 
+                    int(metaDescription[i])
                     ii = i+1
                 except:
                     pass
@@ -155,14 +154,12 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
                 print(f'{preCmdErr}The settings file could not be found. Please enter the required information.')
                 logDirName = input(f'{preCmdInput}Log directory Name: ')
                 exportDirName = input(f'{preCmdInput}Export directory Name: ')
-                settings_dict = {
-                    'log_dir': logDirName,
-                    'export_dir': exportDirName,}
+                settings_dict = {'log_dir': logDirName,'export_dir': exportDirName,}
                 with open(settingsFileName, 'w') as json_file:
                     json.dump(settings_dict, json_file)
                 break
             except Exception as e:
-                errorLine(e)   
+                errorLine(e)
                 txtLog(f'Your settings could not be saved due to {e}.',logFilePath)
     return logDirName, exportDirName
 
@@ -172,9 +169,9 @@ def listSignature(): #: x: 0 start msg, 1 end msg
             listBy = cListDom.select("[itemprop=name]")[0].text #: Liste sahibi ismi çekiliyor.
             listTitle = cListDom.select("[itemprop=title]")[0].text.strip() #: Liste başlığının ismini çekiliyor.
             listPublicationTime = cListDom.select(".published time")[0].text #: Liste oluşturulma tarihi çekiliyor.
-            listPT = arrow.get(listPublicationTime).humanize() #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/      
+            listPT = arrow.get(listPublicationTime).humanize() #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/
             listLastPage = getListLastPageNo() #: Liste son sayfası öğreniliyor.
-            listMovieCount =  getMovieCount(listLastPage) #: Listedeki film sayısı hesaplanıyor.  
+            listMovieCount =  getMovieCount(listLastPage) #: Listedeki film sayısı hesaplanıyor.
             try: ## Filtre bilgilerini liste sayfasından edinmeyi denemek.
                 domSelectedDecadeYear = cListDom.select(".smenu-subselected")[3].text + 'movies only was done by.' #: Liste sayfasından yıl aralık filtre bilgisi alınıyor.
                 domSelectedGenre = cListDom.select(".smenu-subselected")[2].text + 'only movies.' #: Liste sayfasından tür filtre bilgisi alınıyor.
@@ -182,12 +179,12 @@ def listSignature(): #: x: 0 start msg, 1 end msg
             except Exception as e: ## Filtre bilgileri edinirken bir hata oluşursa..
                 txtLog(f'{preLogErr}Filtre bilgileri elde bir sorun gerçekleşti.',logFilePath)
                 print('Filtre bilgileri elde bir sorun gerçekleşti.')
-                domSelectedDecadeYear, domSelectedGenre, domSelectedSortBy = 3*'Unknown' #: Filtre bilgileri edinemediğinde her filtreye None eklenir.                                            
+                domSelectedDecadeYear, domSelectedGenre, domSelectedSortBy = 3*'Unknown' #: Filtre bilgileri edinemediğinde her filtreye None eklenir.
 
             try: ## Search list update time
                 listUpdateTime = cListDom.select(".updated time")[0].text #: Liste düzenlenme vakti çekiliyor.
                 listUT = arrow.get(listUpdateTime).humanize() #: Çekilen liste düzenlenme vakti okunmaya uygun hale getiriliyor.
-            except Exception as e: #: Düzenleme vakti edinemezse..
+            except Exception as e: #: Düzenleme vakti edinemezse.
                 errorLine(e)
                 listUT = 'No editing.' #: Hata alınırsa liste düzenlenmemiş varsayılır.
             finally: ## Kontrol sonu işlemleri.
@@ -336,7 +333,7 @@ def combineCsv():
 def splitCsv(splitCsvPath):
     splitCsvLines = open(splitCsvPath, 'r', encoding="utf8").readlines() #: lines list
     csvMovies = len(splitCsvLines) #: Dosyadaki satırların toplamı
-    if  csvMovies > splitLimit: #: Dosyadaki satırların toplamı belirlenen limitten büyükse..
+    if csvMovies > splitLimit: #: Dosyadaki satırların toplamı belirlenen limitten büyükse..
         splitsPath = f'{exportDirName}/Splits'
         splitCsvName = f'{splitsPath}/{currenSessionHash}'
         dirCheck([splitsPath]) # Yolu kontrol ediyoruz.
@@ -346,11 +343,10 @@ def splitCsv(splitCsvPath):
         print(f'{preCmdInfo}Dosya içinde {splitLimit} üzeri film({csvMovies}) olduğu için ayrım uygulanacak.')
         while True: #: Dosyanın kaça bölüneceği hesaplanır.
             linesPerCsv = csvMovies/defaultPartition
-            if linesPerCsv <= defaultCsvCount:
-                if csvMovies % defaultPartition == 0: # float check
-                    linesPerCsv = int(linesPerCsv) # kalan sıfırsa int'e çeviririz.
-                    print(f'{preCmdInfo}{csvMovies} film, {defaultPartition} parçaya bölünüyor.')
-                    break
+            if (linesPerCsv <= defaultCsvCount and csvMovies % defaultPartition == 0):
+                linesPerCsv = int(linesPerCsv) # kalan sıfırsa int'e çeviririz.
+                print(f'{preCmdInfo}{csvMovies} film, {defaultPartition} parçaya bölünüyor.')
+                break
             defaultPartition += 1
 
         if defaultPartition <= partitionLimit: #: Default partition limit: 10
