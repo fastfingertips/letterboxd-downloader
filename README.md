@@ -23,5 +23,3 @@ Liste arama modunu kullanabilmek için girişiniz "?" soru işaretiyle başlamal
 <br><code>[>]: ?crime movies!10</code> Burada "!" ünlem belirterek çekim sınırını belirledik. İlk 10 liste olarak ayarlandı.
 <br><code>[>]: ?crime movies!10.</code> Eğer bir sorgu sonunda "." nokta kullanacak olursanız eklenen listelerin tümünü otomatik onaylayacaktır.
 </details
-
-https://user-images.githubusercontent.com/46646991/183557703-50d5329e-14bf-40d8-a0af-f81f0fff2d05.mp4
