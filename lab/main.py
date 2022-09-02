@@ -13,13 +13,13 @@ while True: #: Other libs
         print('Import Error: ', e)
         os.system('pipreqs --encoding utf-8 --force') #: pipreqs kullanarak kurulmasını sağlıyoruz.
         os.system('pip install -r requirements.txt & pip list') #: pip list kullanarak kurulmuş modülleri listeliyoruz.
-        
+
 def dirCheck(dirs): # List
     for dir in dirs:
-        if dir: 
+        if dir:
             if os.path.exists(dir):
                 txtLog(f'{preLogInfo}{dir} folder already exists.',logFilePath)
-            else:   
+            else:
                 os.makedirs(dir)
                 txtLog(f'{preLogInfo}{dir} folder created.',logFilePath) #: Oluşturulamaz ise bir izin hatası olabilir.
         print(f'{preCmdInfo}Directory checked: {cmdBlink(dir, "yellow")}')
@@ -379,7 +379,7 @@ def urlFix(x):
 
 # INITIAL ASSIGNMENTS
 if True:
-    os.system(f'color & cls & title Welcome %USERNAME%.')
+    os.system(f'color & title Welcome %USERNAME%. & cls')
     # Domain
     siteProtocol, siteUrl = "https://", "letterboxd.com" #: Saf domain'in parçalanarak birleştirilmesi
     siteDomain = siteProtocol + siteUrl #: Saf domain'in parçalanarak birleştirilmesi
@@ -403,13 +403,10 @@ if True:
     splitLimit = 1500
     partitionLimit = 10
     splitParameter = "split:"
-    if cmdPrintFilms:
-        supLineFilms = f'{supLine}\n{preCmdInfo}{ced("Movies on the list;", color="yellow")}\n'
-    else:
-        supLineFilms = ''
+    supLineFilms = f'{supLine}\n{preCmdInfo}{ced("Movies on the list;", color="yellow")}\n' if cmdPrintFilms else ''
 
 # STARTUP
-sessionLoop = 0 #: While döngüne ait 
+sessionLoop = 0 #: while loop sayacı
 sessionStartHash =  getRunTime() #: Generate start hash
 while True:
     logDirName, exportDirName = settingsFileSet() #: Set Export dir and Log dirs
@@ -419,18 +416,19 @@ while True:
     logFilePath = f'{logDirName}/{currenSessionHash}.txt' #: Set log file dir
     exportsPath = f'{exportDirName}/{currenSessionHash}/'
     print(f"{preCmdInfo}Session Hash: {sessionStartHash}{'' if sessionStartHash == currenSessionHash else ' -> ' + hashChanges}") #: Her oturum başlangıcı için farklı bir isim üretildi.
-    dirCheck([logDirName,exportDirName]) #: Log file check     
+    dirCheck([logDirName,exportDirName]) #: Log file check
+
     inputLoopNo, urlList, breakLoop, listEnterPassOn = 0, [], False, True #: While döngüne ait 
     while True:
         inputLoopNo += 1 #: Başlangıçta döngü değerini artırıyoruz.
         urlListItem = str(input(f'{preCmdInput}List URL[{inputLoopNo}]: ')).lower() #: Kullanıcıdan liste url'i alınması ve düzenlenmesi.
         if len(urlListItem) > 0: ## Giriş boş değilse..
-            
+
             if urlListItem[0:len(splitParameter)] == splitParameter: # Split görevi.
                 splitCsv(urlListItem[len(splitParameter):])
                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                 continue
-            
+
             if "." in urlListItem:
                 if urlListItem[-1] == "." or urlListItem == ".":
                     if not urlListItem[0] == '?':
@@ -441,7 +439,8 @@ while True:
                         print(f'{preCmdInfo}Ek parametre tanındı, liste arama sonrası tüm listeler otomatik onaylanacak.')
                         listEnterPassOn, listEnter, autoEnterMsg = False , True, '[Auto]' # Otomatik onaylama yapacak bilgi.
 
-                    if len(urlList) > 0: ## Url listesinde liste varsa..
+                    if len(urlList) > 0: #: URL listesi boş değilse
+                        print(f'{preCmdInfo}Liste arama işlemi sonlandırıldı, Toplam {len(urlList)} liste girişi yapıldı.')
                         break
                     else:
                         if not urlListItem[0] == '?':
@@ -451,15 +450,16 @@ while True:
                                 urlList = urlFix(urlListItem)
                                 break
                             except:
-                                print(f"{preCmdInfo}To finish, you must first specify a list.") #: Liste belirtmeden işlemi sonlandırmaya çalışan kullanıcılar bilgilendiriliyor.
+                                print(f"{preCmdInfo}To finish, you must first specify a list.") 
                                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                                 continue
 
-                urlListItem = extractObj(urlListItem,'.')
+                urlListItem = extractObj(urlListItem,'.') #: Liste url'i parçalama.
 
             if urlListItem[0] == '?': 
                 print(f'{preCmdInfo}Paremetre tanındı: Liste arama modu.')
                 urlListItem = urlListItem[1:] #: Başlangıçdaki soru işaret kaldırıldı.
+
                 if "!" in urlListItem: #: Son liste belirleyicisi
                     x = -1
                     for i in range(3): #: Sona en fazla 3 rakam girilebilir. letterboxd'da max bulubilen liste sayısı 250
@@ -467,37 +467,31 @@ while True:
                             endList = int(urlListItem[x:])
                             urlListItem = urlListItem[:x-1]
                         x += -1
-                else:
-                    endList = 'Not specified.' # Son liste için bir parametre belirtilmezse.
+                else: endList = 'Not specified.' # Son liste için bir parametre belirtilmezse.
                 searchList = f'https://letterboxd.com/search/lists/{urlListItem}/'
                 searchListPreviewDom = doReadPage(searchList)
 
-                try: #: Getting og:title
-                    searchMetaTitle = getMetaContent(searchListPreviewDom,'og:title')
+                try: searchMetaTitle = getMetaContent(searchListPreviewDom,'og:title') # getting og:title
                 except AttributeError:
                     print(searchListPreviewDom)
                     print(f"{preCmdErr}Meta etiketinden 'og:title' alınamadı.")
                     txtLog(f"Meta etiketinden 'og:title' alınamadı. Hata Mesajı: {AttributeError}", logFilePath)
-                    searchMetaTitle = ''                    
-                
-                try: #: Getting og:url
-                    searchLMetaUrl = getMetaContent(searchListPreviewDom,'og:url')
+                    searchMetaTitle = ''
+
+                try: searchLMetaUrl = getMetaContent(searchListPreviewDom,'og:url') #: Getting og:url
                 except AttributeError:
                     print(f"{preCmdErr}Meta etiketinden 'og:url' alınamadı.")
                     txtLog(f"Meta etiketinden 'og:url' alınamadı. Hata Mesajı: {AttributeError}", logFilePath)
-                    searchLMetaUrl = ''  
+                    searchLMetaUrl = ''
 
-                try: #: Getting query msg
-                    searchListsQCountMsg = searchListPreviewDom.find('h2', attrs={'class':'section-heading'}).text #: Kaç liste bulunduğu hakkında bilgi veren mesajı çekiyoruz.
+                try: searchListsQCountMsg = searchListPreviewDom.find('h2', attrs={'class':'section-heading'}).text #: Kaç liste bulunduğu hakkında bilgi veren mesaj.
                 except AttributeError:
                     print(f"{preCmdErr}Bir etiketten 'arama karşılama mesajı' alınamadı.")
                     txtLog(f"Bir etiketten 'arama karşılama mesajı' alınamadı. Hata Mesajı: {AttributeError}", logFilePath)
-                    searchListsQCountMsg = ''  
-                
-                try:
-                    searchListsQLastsPage = searchListPreviewDom.find_all('li',attrs={'class':'paginate-page'})[-1].text #: Son sayfayı alıyoruz.
-                except:
-                    searchListsQLastsPage = 1 #: Alınamazsa sayfada tek sayfa olduğu varsayılır.
+                    searchListsQCountMsg = ''
+
+                try:    searchListsQLastsPage = searchListPreviewDom.find_all('li',attrs={'class':'paginate-page'})[-1].text #: Son sayfayı alıyoruz.
+                except: searchListsQLastsPage = 1 #: Alınamazsa sayfada tek sayfa olduğu varsayılır.
                 finally:
                     print(supLine)
                     print(f"{preCmdInfo}{ced('Process info;', color='yellow')}")
@@ -507,9 +501,10 @@ while True:
                     print(f"{preCmdMiddleDotList}Last list: {ced(endList,'grey',attrs=['bold'])}")
                     print(f'{preCmdMiddleDotList}{searchMetaTitle}')
                     print(f'{preCmdMiddleDotList}{searchListsQCountMsg}')
-                    print(f"{preCmdMiddleDotList}Page URL: {ced(searchLMetaUrl,'grey',attrs=['bold'])}")   
+                    print(f"{preCmdMiddleDotList}Page URL: {ced(searchLMetaUrl,'grey',attrs=['bold'])}")
                     print(f"{preCmdMiddleDotList}Last Page: {ced(searchListsQLastsPage,'grey',attrs=['bold'])}")
                     print(subLine)
+
                 sayfa, liste = 0, 0
                 for i in range(int(searchListsQLastsPage)):
                     sayfa += 1
@@ -560,7 +555,7 @@ while True:
             print(f"{preCmdInfo}Just enter a period to move on to the next steps. You can also add it at the end of the URL.")
             inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
     print(f"{preCmdInfo}List address acquisition terminated.") #: Liste url alımı sona erdğinde mesaj bastırılır.
-    
+
     processLoopNo = 0 #: For döngüne ait 
     for currentUrListItem in urlList:
         processLoopNo += 1
@@ -568,6 +563,7 @@ while True:
         currentUrListItemDetail = f'{currentUrListItem}detail/' # Url'e detail eklendi.
         currentUrListItemDetailPage = f'{currentUrListItemDetail}page/' #: Detaylı url'e sayfa gezintisi için parametre eklendi.
         cListDom = doReadPage(currentUrListItemDetail) #: Şu anki liste sayfasını oku.
+
         try:
             cListOwner = getBodyContent(cListDom,'data-owner') #: Liste sahibini al.
         except Exception as e:
@@ -576,11 +572,11 @@ while True:
             cListOwner = 'Unknown'
         cListDomainName = currentListDomainName(currentUrListItem) #: Liste domain ismini düzenleyerek alır.
         cListRunTime = getRunTime() #: Liste işlem vaktini al. 
-        
+
         listSignature() #: Liste hakkında bilgiler bastırılır.
         if listEnterPassOn:
             listEnter = input(f"{preCmdInput}Press enter to confirm the entered information. ({cmdBlink('Enter', 'green')})")
-            
+
             if listEnter == "":
                 listEnter, autoEnterMsg = True, '[Manual]'
             elif listEnter == ".":
@@ -591,36 +587,36 @@ while True:
                 listEnter = False
                 print(f"{preCmdInfo}The {ced('session was canceled','red', attrs=['dark'])} because you did not verify the information.")
                 txtLog(f'{preLogInfo}The session was canceled because you did not verify the information.',logFilePath)
-    
+
         if listEnter:
             txtLog(f'{preLogInfo}Şimdiki listeye erişim başlatılıyor.',logFilePath)
             print(f"{preCmdInfo}{ced(f'List confirmed. {autoEnterMsg}', color='green')}")
-            
+
             lastPageNo = getListLastPageNo()
             openCsv = f'{exportsPath}{cListOwner}_{cListDomainName}_{cListRunTime}.csv' 
             dirCheck([exportsPath]) #: Export klasörünün kontrolü.
             with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
                 writer = csv.writer(csvFile)
                 writer.writerow(["Title", "Year"]) #: Csv açıldıktan sonra en üste yazılacak başlıklar.
-                
+
                 loopCount = 1
                 print(supLineFilms,end='')
                 for x in range(int(lastPageNo)): #: Sayfa sayısı kadar döngü oluştur.
-                    txtLog(f'Connecting to: {currentUrListItemDetailPage}{str(x+1)}',logFilePath) #: Sayfa numarasını log dosyasına yaz.
+                    txtLog(f'Connecting to: {currentUrListItemDetailPage}{str(x+1)}', logFilePath) #: Sayfa numarasını log dosyasına yaz.
                     currentDom = doReadPage(f'{currentUrListItemDetailPage}{str(x+1)}') #: Sayfa dom'u alınır.
                     loopCount = doPullFilms(loopCount, currentDom) #: Filmleri al.
                 csvFile.close() #: Açtığımız dosyayı manuel kapattık
-            
+
             os.system(f'title {processState} completed!') #: Dosya oluşturulduğunda ekrana yazı yazılır.
-            txtLog(f'{preLogInfo}{processState} completed!',logFilePath) #: Dosya oluşturulduğunda log dosyasına yazı yazılır.
+            txtLog(f'{preLogInfo}{processState} completed!', logFilePath) #: Dosya oluşturulduğunda log dosyasına yazı yazılır.
             print(f'{preCmdInfo}{loopCount-1} film {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.') #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
             print(subLine) #: Alt satır ekrana yazdırılır.
-            print(f"{preCmdInfo}{ced(f'{processState} completed!', color='green')}") #: İşlem tamamlandığında mesajı ekrana yazdırıyoruz.
-            
+            print(f"{preCmdInfo}{ced(f'{processState} completed!', 'green')}") #: İşlem tamamlandığında mesajı ekrana yazdırıyoruz.
+
     combineCsv() #: Csv dosyalarını birleştir.
-    os.system(f'title Session: {currenSessionHash} ended!') #: Session sonlandırıldığında ekrana yazdırılır.
-    print(f"{preCmdInfo}Process State: {cmdBlink(processState +' Finish.','green')}") # Process durumunu ekrana yazdırıyoruz.
-    print(f'{preCmdInfo}{ced(f"Session: {currenSessionHash} ended.", color="green")}') # Session sonlandırıldığında mesaj bastırılır.
-    txtLog(f'{preLogInfo}Session: {currenSessionHash} ended.',logFilePath) # Session sonlandırıldığında log dosyasına yazılır.
-    test_pause() #: Test için beklemeye yarar.
-    
+
+    os.system(f'title Session: {currenSessionHash} ended!') #: terminal tab
+    print(f"{preCmdInfo}Process State: {cmdBlink(processState +' Finish.','green')}") # terminal
+    print(f'{preCmdInfo}{ced(f"Session: {currenSessionHash} ended.", "green")}')
+    txtLog(f'{preLogInfo}Session: {currenSessionHash} ended.', logFilePath) # log file
+    test_pause() #: test
