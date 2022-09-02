@@ -17,37 +17,31 @@ while True: #: Other libs
 def dirCheck(dirs): # List
     for dir in dirs:
         if dir:
-            if os.path.exists(dir):
-                txtLog(f'{preLogInfo}{dir} folder already exists.',logFilePath)
-            else:
-                os.makedirs(dir)
-                txtLog(f'{preLogInfo}{dir} folder created.',logFilePath) #: Oluşturulamaz ise bir izin hatası olabilir.
+            if os.path.exists(dir): txtLog(f'{preLogInfo}{dir} folder already exists.',logFilePath)
+            else: os.makedirs(dir); txtLog(f'{preLogInfo}{dir} folder created.',logFilePath) #: Oluşturulamaz ise bir izin hatası olabilir.
         print(f'{preCmdInfo}Directory checked: {cmdBlink(dir, "yellow")}')
 
 def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
     try:
-        # > Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
+        #> Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
         list_entries = tempCurrentDom.find('ul', attrs={'class': 'js-list-entries poster-list -p70 film-list clear film-details-list'})
-        if list_entries is None: #: Eğer film listesi boş ise
+        if list_entries is None: # Eğer film listesi boş ise
             list_entries = tempCurrentDom.select_one('ul.film-list')
             if list_entries is None:
                  list_entries = tempCurrentDom.select_one('ul.poster-list')
-                 if list_entries is None:
-                    list_entries = tempCurrentDom.select_one('ul.film-details-list')
+                 if list_entries is None: list_entries = tempCurrentDom.select_one('ul.film-details-list')
         film_details = list_entries.find_all("li")
 
-        # > Filmleri ekrana ve dosyaya yazdırma işlemleri
+        #> Filmleri ekrana ve dosyaya yazdırma işlemleri
         for currentFilm in film_details:
             # Oda ismini çektik
             movie = currentFilm.find('h2', attrs={'class': 'headline-2 prettify'})
             movieName = movie.find('a').text
 
-            try: # Film yılı bazen boş olabiliyor. Önlem alıyoruz"
-                movieYear = movie.find('small').text
-            except:
-                movieYear = "Yok"
-            if cmdPrintFilms: # Kullanıcı eğer isterse çekilen filmler ekrana da yansıtılır.
-                print(f"{tempLoopCount}: {movieName}, {movieYear}")
+            try: movieYear = movie.find('small').text # Film yılı bazen boş olabiliyor. Önlem alıyoruz
+            except: movieYear = "Yok"
+            if cmdPrintFilms: print(f"{tempLoopCount}: {movieName}, {movieYear}") # Kullanıcı eğer isterse çekilen filmler ekrana da yansıtılır.
+
             writer.writerow([str(movieName), str(movieYear)]) # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
             writer.writerow([str(movieName), movieYear])
             tempLoopCount += 1
@@ -58,14 +52,13 @@ def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
 
 def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
     try:
-        txtLog(f'{preLogInfo}Trying connect to [{tempUrl}]',logFilePath) #: Log dosyasına bağlantı başlangıcında bilgi veriliyor.        
+        txtLog(f'{preLogInfo}Trying connect to [{tempUrl}]',logFilePath) #: Log dosyasına bağlantı başlangıcında bilgi veriliyor.
         while True:
             #: https://stackoverflow.com/questions/23013220/max-retries-exceeded-with-url-in-requests
             try:
                 urlResponseCode = requests.get(tempUrl,timeout=30)
                 urlDom = bs(urlResponseCode.content.decode('utf-8'), 'html.parser')
-                if urlDom != None:
-                    return urlDom #: Return page dom
+                if urlDom != None: return urlDom #: Return page dom
             except requests.ConnectionError as e:
                 print("OOPS!! Connection Error. Make sure you are connected to Internet. Technical Details given below.")
                 print(str(e))
@@ -78,10 +71,8 @@ def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
                 print("OOPS!! General Error")
                 print(str(e))
                 continue
-            except KeyboardInterrupt:
-                print("Someone closed the program")
-            except Exception as e:
-                print('Hata:',e)
+            except KeyboardInterrupt: print("Someone closed the program")
+            except Exception as e: print('Hata:',e)
     except Exception as e: #: Dom edinirken hata gerçekleşirse..
         errorLine(e)
         txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]',logFilePath)
@@ -106,8 +97,7 @@ def getListLastPageNo(): # Listenin son sayfasını öğren
         txtLog(f'{preLogInfo}Birden fazla sayfa yok, bu liste tek sayfadır. {AttributeError}',logFilePath)
         lastPageNo = 1 #: Sayfa sayısı bilgisi alınamadığında sayfa sayısı 1 olarak işaretlenir.
         getMovieCount(lastPageNo) #: Sayfa bilgisi gönderiliyor.
-    except Exception as e:
-        errorLine(e)
+    except Exception as e: errorLine(e)
     finally:
         txtLog(f'{preLogInfo}Sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPageNo} olduğu öğrenildi.',logFilePath)
         return lastPageNo
@@ -121,8 +111,7 @@ def getMovieCount(tempLastPageNo): # Film sayısını öğreniyoruz
                 try:
                     int(metaDescription[i])
                     ii = i+1
-                except:
-                    pass
+                except: pass
             movieCount = metaDescription[:ii]
         except Exception as e: ## Listenin son sayfa işlemleri.
             lastPageDom = doReadPage(f'{currentUrListItemDetailPage}{tempLastPageNo}') #: Getting lastpage dom.
@@ -172,6 +161,7 @@ def listSignature(): #: x: 0 start msg, 1 end msg
             listPT = arrow.get(listPublicationTime).humanize() #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/
             listLastPage = getListLastPageNo() #: Liste son sayfası öğreniliyor.
             listMovieCount =  getMovieCount(listLastPage) #: Listedeki film sayısı hesaplanıyor.
+
             try: ## Filtre bilgilerini liste sayfasından edinmeyi denemek.
                 domSelectedDecadeYear = cListDom.select(".smenu-subselected")[3].text + 'movies only was done by.' #: Liste sayfasından yıl aralık filtre bilgisi alınıyor.
                 domSelectedGenre = cListDom.select(".smenu-subselected")[2].text + 'only movies.' #: Liste sayfasından tür filtre bilgisi alınıyor.
@@ -206,6 +196,7 @@ def listSignature(): #: x: 0 start msg, 1 end msg
                 print(f"{preCmdMiddleDot}List domain name: {ced(cListDomainName,'grey', attrs=['bold'])}")
                 print(f"{preCmdMiddleDot}List URL: {ced(currentUrListItem,'grey', attrs=['bold'])}")
                 print(f"{preCmdMiddleDot}Process URL: {ced(currentUrListItemDetail,'grey', attrs=['bold'])}")
+
             txtLog(f'{preLogInfo}İmza yazdırma sonu.',logFilePath)
         except Exception as e:
             errorLine(e)
@@ -225,12 +216,14 @@ def userListCheck(_urlListItemDom): #: Kullanıcının girilen şekilde bir list
                 metaOgTitle = getMetaContent(_urlListItemDom, 'og:title')  #: Liste ismini alıyoruz. Örnek: 'Search results for best comedy'
                 bodyDataOwner = getBodyContent(_urlListItemDom,'data-owner') #: Liste sahibinin kullanıcı ismi.
                 print(f'{preCmdCheck}{ced("Found it: ", color="green")}@{ced(bodyDataOwner,"yellow")} "{ced(metaOgTitle,"yellow")}"') #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
-                if urlListItem == metaOgUrl or f'{urlListItem}/' == metaOgUrl: #: Girilen URL Meta ile aynıysa..
-                    txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.',logFilePath)
-                else: ## Girilen URL Meta ile uyuşmuyorsa..
+
+                #> Girilen URL Meta ile aynıysa..
+                if urlListItem == metaOgUrl or f'{urlListItem}/' == metaOgUrl: txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.',logFilePath)
+                else: # Girilen URL Meta ile uyuşmuyorsa..
                     print(f'{preCmdInfo}Girdiğiniz liste linki yönlendirme içeriyor.')
                     print(f'{preBlankCount}Muhtemelen liste ismi yakın bir zamanda değişildi veya hatalı girdiniz.')
                     print(f'{preBlankCount}({ced("+","red")}): {ced(urlListItem, color="yellow")} adresini')
+                    
                     if urlListItem in metaOgUrl:
                         msgInputUrl = ced(urlListItem, color="yellow")
                         msgMetaOgUrlChange = ced(metaOgUrl.replace(urlListItem,""), color="green")
@@ -238,8 +231,10 @@ def userListCheck(_urlListItemDom): #: Kullanıcının girilen şekilde bir list
                         metaLoop = len(metaOgUrl)
                         msgInputUrl = ''
                         msgMetaOgUrlChange = getChanges(metaLoop,urlListItem,metaOgUrl)
+
                     print(f'{preBlankCount}({ced("+","green")}): {msgInputUrl}{msgMetaOgUrlChange} şeklinde değiştirdik.')
                 txtLog(f'{preLogInfo}{urlListItem} listesi bulundu: {metaOgTitle}',logFilePath)
+
                 currentListAvaliable = True
         except Exception as e:
             errorLine(e)
@@ -248,8 +243,7 @@ def userListCheck(_urlListItemDom): #: Kullanıcının girilen şekilde bir list
     except Exception as e:
         errorLine(e)
         currentListAvaliable = False
-    finally:
-        return currentListAvaliable, metaOgUrl
+    finally: return currentListAvaliable, metaOgUrl
 
 def test_pause(): #: Geliştirici duraklatmaları için kalıp.
     os.system(f"echo {preCmdInfo}{cmdBlink('Press enter to continue with the new session.','yellow')} & pause >nul")
@@ -262,8 +256,7 @@ def txtLog(r_message, logFilePath): #: None: Kullanıcı log lokasyonunu belirtm
     try: ## Denenecek işlemler..
         with open(logFilePath, "a", encoding="utf-8") as f: #: Eklemek üzere bir dosya açar, mevcut değilse dosyayı oluşturur
             f.writelines(f'{r_message}\n')
-    except Exception as e:
-            print(f'Loglama işlemi {e} nedeniyle başarısız.')
+    except Exception as e: print(f'Loglama işlemi {e} nedeniyle başarısız.')
 
 def getChanges(loop,key1,key2):
     return ''.join(
@@ -287,10 +280,8 @@ def currentListDomainName(currentUrListItem):
     return currentUrListItem[currentUrListItem.index(_f_)+len(_f_):].replace('/',"")
 
 def cmdPre(m,c): #: Mesaj ön ekleri için kalıp.
-    if m[0] == " ":
-        return f' {ced(m[1:],color=c)}  '
-    elif m[0] == "[":
-        return f'[{ced(m[1:],color=c)}] '
+    if m[0] == " ": return f' {ced(m[1:],color=c)}  '
+    elif m[0] == "[": return f'[{ced(m[1:],color=c)}] '
 
 def cmdBlink(m,c):
     return ced(m,c,attrs=["blink"])
@@ -306,29 +297,27 @@ def combineCsv():
         noDuplicateCsvPath = combineDir + noDuplicateCsvFile #: NoDuplciate file path
         dirCheck([combineDir]) #: Combine dir check
         txtLog('Birden fazla liste üzerinde çalışıldığından listeler kombine edilecek.',logFilePath) #: Process logger
+
         try:
-            try: #: Belirtilmiş dizindeki tüm csv dosyalarının bir değişkene aktarılması.
-                allCsvFiles = list(glob.glob(f'{exportsPath}*.csv'))
-            except: #: Farklı bir alternatif
-                allCsvFiles = [i for i in glob.glob(f'{exportsPath}*.csv')] 
+            try: allCsvFiles = list(glob.glob(f'{exportsPath}*.csv')) #: Belirtilmiş dizindeki tüm csv dosyalarının bir değişkene aktarılması.
+            except: allCsvFiles = [i for i in glob.glob(f'{exportsPath}*.csv')] #: Farklı bir alternatif
             combinedCsvFiles = pd.concat([pd.read_csv(f) for f in allCsvFiles]) #: Csv dosyalarının tümü birleştirilir.
             combinedCsvFiles.to_csv(combineCsvPath, index=False, encoding='utf-8-sig') #: Csv dosyasının encod ayarı.
             ## https://stackoverflow.com/questions/15741564/removing-duplicate-rows-from-a-csv-file-using-a-python-script/15741627#15741627
+
             with open(combineCsvPath,'r', encoding="utf8") as in_file, open(noDuplicateCsvPath,'w', encoding="utf8") as out_file: ## Tekrarlayan bilgileri silmek için..
                 seen = set() # set for fast O(1) amortized lookup
                 for line in in_file:
                     if line in seen: continue # skip duplicate
                     seen.add(line)
                     out_file.write(line)
-            
+
             print(f'{preCmdInfo}Listelerdeki tüm filmler {combineCsvPath} dosyasına kaydedildi.')
             print(f'{preCmdInfo}Yalnızca farklı fimlerin olduğu dosya aynı dizinde {noDuplicateCsvPath} olarak ayarlandı.')
             splitCsv(noDuplicateCsvPath) # Ayıklama sonrası, aktarma ayırması gerekliyse gerçekleştiriyoruz.
-        except Exception as e:
-            txtLog(f'Listeler kombine edilemedi. Hata: {e}',logFilePath) #: Process logger
+        except Exception as e: txtLog(f'Listeler kombine edilemedi. Hata: {e}',logFilePath) #: Process logger
         print(subLine)
-    else: 
-        txtLog('Tek liste üzerinde çalışıldığı için işlem kombine edilmeyecek.',logFilePath) #: Process logger
+    else: txtLog('Tek liste üzerinde çalışıldığı için işlem kombine edilmeyecek.',logFilePath) #: Process logger
 
 def splitCsv(splitCsvPath):
     splitCsvLines = open(splitCsvPath, 'r', encoding="utf8").readlines() #: lines list
@@ -356,16 +345,13 @@ def splitCsv(splitCsvPath):
                     open(f'{splitCsvName}-{splitFileNo}.csv', 'w+', encoding="utf8").writelines(splitCsvLines[lineNo:lineNo+linesPerCsv])
                     splitFileNo += 1
             print(f'{preCmdInfo}Ayrım işlemi {splitCsvName} adresinde sona erdi. Bölüm: [{defaultPartition}][{linesPerCsv}]')
-        else: # Ayrım limiti aşılırsa
-            print(f'{preCmdInfo}Ayrım işlemi gerçekleşmedi. Ayrım limiti [{defaultPartition}/{partitionLimit}] aşıldı.')
-    else:
-        print(f'{preCmdInfo}Dosyanız içerisinde {splitLimit} altında satır/film({csvMovies}) var, ayrım işlemi uygulanmayacak.')
+        else: print(f'{preCmdInfo}Ayrım işlemi gerçekleşmedi. Ayrım limiti [{defaultPartition}/{partitionLimit}] aşıldı.') # Ayrım limiti aşılırsa
+    else: print(f'{preCmdInfo}Dosyanız içerisinde {splitLimit} altında satır/film({csvMovies}) var, ayrım işlemi uygulanmayacak.')
 
 def extractObj(job,obj):
     try:
         while job[-1] == obj: ## $job sonunda $obj olduğu sürece..
             job = job[:-1] #: Her defasında $job sonundan $obj siler.
-            
     except:
         pass
     return job
@@ -508,7 +494,7 @@ while True:
                 sayfa, liste = 0, 0
                 for i in range(int(searchListsQLastsPage)):
                     sayfa += 1
-                    connectionPage = searchList+f'page/{sayfa}'
+                    connectionPage = f'{searchList}page/{sayfa}'
                     searchListDom = doReadPage(connectionPage)
                     listsUrls = searchListDom.find_all('a', attrs={'class':'list-link'}) #: Okunmuş sayfadaki tüm listelerin adresleri.
                     print(supLine)
@@ -529,8 +515,7 @@ while True:
                         else:
                             print(f'{preCmdUnCheck}Bu listeyi daha önce eklemişiz.')
                             liste -= 1
-                    else:
-                        continue
+                    else: continue
                     print(subLine)
                     break
                 break
@@ -564,8 +549,7 @@ while True:
         currentUrListItemDetailPage = f'{currentUrListItemDetail}page/' #: Detaylı url'e sayfa gezintisi için parametre eklendi.
         cListDom = doReadPage(currentUrListItemDetail) #: Şu anki liste sayfasını oku.
 
-        try:
-            cListOwner = getBodyContent(cListDom,'data-owner') #: Liste sahibini al.
+        try: cListOwner = getBodyContent(cListDom,'data-owner') #: Liste sahibini al.
         except Exception as e:
             print(f'{preCmdErr}Liste sahibi bilgisi alınamadı')
             txtLog(f'Liste sahibi bilgisi alınamadı Hata: {e}',logFilePath)
@@ -577,8 +561,7 @@ while True:
         if listEnterPassOn:
             listEnter = input(f"{preCmdInput}Press enter to confirm the entered information. ({cmdBlink('Enter', 'green')})")
 
-            if listEnter == "":
-                listEnter, autoEnterMsg = True, '[Manual]'
+            if listEnter == "": listEnter, autoEnterMsg = True, '[Manual]'
             elif listEnter == ".":
                 listEnter, autoEnterMsg = True, '[Auto]'
                 listEnterPassOn = False
