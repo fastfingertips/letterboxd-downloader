@@ -205,16 +205,16 @@ def listSignature(): #: x: 0 start msg, 1 end msg
         errorLine(e)
         txtLog(f'{preLogErr}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.',logFilePath)
 
-def userListCheck(_urlListItemDom): #: Kullanıcının girilen şekilde bir listesinin var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
+def userListCheck(_url_list_item_dom): #: Kullanıcının girilen şekilde bir listesinin var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
     try:
         try: #: meta etiketinden veri almayı dener eğer yoksa liste değil.
-            metaOgType = getMetaContent(_urlListItemDom,'og:type') 
+            metaOgType = getMetaContent(_url_list_item_dom,'og:type') 
 
             if metaOgType == "letterboxd:list": # Meta etiketindeki bilgi sorgulanır. Sayfanın liste olup olmadığı anlaşılır.
                 txtLog(f'{preLogInfo}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {metaOgType}',logFilePath)
-                metaOgUrl = getMetaContent(_urlListItemDom,'og:url') #: Liste yönlendirmesi var mı bakıyoruz
-                metaOgTitle = getMetaContent(_urlListItemDom, 'og:title')  #: Liste ismini alıyoruz. Örnek: 'Search results for best comedy'
-                bodyDataOwner = getBodyContent(_urlListItemDom,'data-owner') #: Liste sahibinin kullanıcı ismi.
+                metaOgUrl = getMetaContent(_url_list_item_dom,'og:url') #: Liste yönlendirmesi var mı bakıyoruz
+                metaOgTitle = getMetaContent(_url_list_item_dom, 'og:title')  #: Liste ismini alıyoruz. Örnek: 'Search results for best comedy'
+                bodyDataOwner = getBodyContent(_url_list_item_dom,'data-owner') #: Liste sahibinin kullanıcı ismi.
                 print(f'{preCmdCheck}{ced("Found it: ", color="green")}@{ced(bodyDataOwner,"yellow")} "{ced(metaOgTitle,"yellow")}"') #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
 
                 #> Girilen URL Meta ile aynıysa..
@@ -245,16 +245,13 @@ def userListCheck(_urlListItemDom): #: Kullanıcının girilen şekilde bir list
         currentListAvaliable = False
     finally: return currentListAvaliable, metaOgUrl
 
-def test_pause(): #: Geliştirici duraklatmaları için kalıp.
-    os.system(f"echo {preCmdInfo}{cmdBlink('Press enter to continue with the new session.','yellow')} & pause >nul")
-
 def errorLine(e): #: Error Code generator
     cl = currentframe()
     txtLog(f'{preLogErr} Error on line {cl.f_back.f_lineno} Exception Message: {e}',logFilePath)
 
-def txtLog(r_message, logFilePath): #: None: Kullanıcı log lokasyonunu belirtmese de olur.
+def txtLog(r_message, log_file_path): #: None: Kullanıcı log lokasyonunu belirtmese de olur.
     try: ## Denenecek işlemler..
-        with open(logFilePath, "a", encoding="utf-8") as f: #: Eklemek üzere bir dosya açar, mevcut değilse dosyayı oluşturur
+        with open(log_file_path, "a", encoding="utf-8") as f: #: Eklemek üzere bir dosya açar, mevcut değilse dosyayı oluşturur
             f.writelines(f'{r_message}\n')
     except Exception as e: print(f'Loglama işlemi {e} nedeniyle başarısız.')
 
@@ -266,14 +263,10 @@ def getChanges(loop,key1,key2):
         for i in range(loop)
     )
 
-def getMetaContent(dom,obj):
-    return dom.find('meta', property=obj).attrs['content']
-
-def getBodyContent(dom, obj):
-    return dom.find('body').attrs[obj]
-
-def getRunTime():
-    return datetime.now().strftime('%d%m%Y%H%M%S')
+def getMetaContent(dom, obj): return dom.find('meta', property=obj).attrs['content']
+def getBodyContent(dom, obj): return dom.find('body').attrs[obj]
+def getRunTime():             return datetime.now().strftime('%d%m%Y%H%M%S')
+def cmdBlink(m,c):            return ced(m,c,attrs=["blink"])
 
 def currentListDomainName(currentUrListItem):
     _f_ = '/list/'
@@ -282,9 +275,6 @@ def currentListDomainName(currentUrListItem):
 def cmdPre(m,c): #: Mesaj ön ekleri için kalıp.
     if m[0] == " ": return f' {ced(m[1:],color=c)}  '
     elif m[0] == "[": return f'[{ced(m[1:],color=c)}] '
-
-def cmdBlink(m,c):
-    return ced(m,c,attrs=["blink"])
 
 def combineCsv():
     if len(urlList) > 1:
@@ -319,8 +309,8 @@ def combineCsv():
         print(subLine)
     else: txtLog('Tek liste üzerinde çalışıldığı için işlem kombine edilmeyecek.',logFilePath) #: Process logger
 
-def splitCsv(splitCsvPath):
-    splitCsvLines = open(splitCsvPath, 'r', encoding="utf8").readlines() #: lines list
+def splitCsv(split_csv_path):
+    splitCsvLines = open(split_csv_path, 'r', encoding="utf8").readlines() #: lines list
     csvMovies = len(splitCsvLines) #: Dosyadaki satırların toplamı
     if csvMovies > splitLimit: #: Dosyadaki satırların toplamı belirlenen limitten büyükse..
         splitsPath = f'{exportDirName}/Splits'
@@ -352,8 +342,7 @@ def extractObj(job,obj):
     try:
         while job[-1] == obj: ## $job sonunda $obj olduğu sürece..
             job = job[:-1] #: Her defasında $job sonundan $obj siler.
-    except:
-        pass
+    except: pass
     return job
 
 def urlFix(x):
@@ -415,11 +404,11 @@ while True:
                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                 continue
 
-            if "." in urlListItem:
-                if urlListItem[-1] == "." or urlListItem == ".":
-                    if not urlListItem[0] == '?':
-                        print(f'{preCmdInfo}Parametre tanındı, liste alım işlemi sonlandırıldı.')
+            if '.' in urlListItem: # Girişte nokta varsa..
+                if urlListItem[-1] == '.' or urlListItem == '.': # Giriş nokta ile bitiyor veya tek nokta ise..
                     breakLoop = True #: Url alımını sonlandıracak bilgi.
+
+                    if not urlListItem[0] == '?': print(f'{preCmdInfo}Parametre tanındı, liste alım işlemi sonlandırıldı.')
 
                     if urlListItem[0] == '?' or urlListItem == ".." or urlListItem[-2:] == "..": 
                         print(f'{preCmdInfo}Ek parametre tanındı, liste arama sonrası tüm listeler otomatik onaylanacak.')
@@ -454,7 +443,7 @@ while True:
                             urlListItem = urlListItem[:x-1]
                         x += -1
                 else: endList = 'Not specified.' # Son liste için bir parametre belirtilmezse.
-                searchList = f'https://letterboxd.com/search/lists/{urlListItem}/'
+                searchList = f'{siteDomain}/search/lists/{urlListItem}/'
                 searchListPreviewDom = doReadPage(searchList)
 
                 try: searchMetaTitle = getMetaContent(searchListPreviewDom,'og:title') # getting og:title
@@ -520,16 +509,14 @@ while True:
                     break
                 break
 
-            if '/detail' in urlListItem: # detail remove
-                urlListItem = urlListItem.replace('/detail','')
+            if '/detail' in urlListItem: urlListItem = urlListItem.replace('/detail','') # if url is detail page, remove detail part.
 
             urlListItemDom = doReadPage(urlListItem) #: Sayfa dom'u alınır.
             userListAvailable, approvedListUrl = userListCheck(urlListItemDom) #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
             if userListAvailable: ## Liste kullanıma uygunsa..
                 if approvedListUrl not in urlList: ## Doğrulanmış URL daha önce URL Listesine eklenmediyse..
                     urlList.append(approvedListUrl) #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
-                    if breakLoop: ## Kullanıcı URL sonunda nokta belirttiyse..
-                        break #: URL alımını sonlandırıyoruz.
+                    if breakLoop: break # Kullanıcı URL sonunda nokta belirttiyse.. URL alımını sonlandırıyoruz.
                 else: ## Doğrulanmış URL daha önce işlem görecek URL listine eklenmiş ise..
                     print(f'{preCmdErr}You have already entered this address list.') #: URL'in daha önce girildiğini ekrana yazdırıyoruz.
                     inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
@@ -602,4 +589,4 @@ while True:
     print(f"{preCmdInfo}Process State: {cmdBlink(processState +' Finish.','green')}") # terminal
     print(f'{preCmdInfo}{ced(f"Session: {currenSessionHash} ended.", "green")}')
     txtLog(f'{preLogInfo}Session: {currenSessionHash} ended.', logFilePath) # log file
-    test_pause() #: test
+    os.system(f"echo {preCmdInfo}{cmdBlink('Press enter to continue with the new session.','yellow')} & pause >nul")
