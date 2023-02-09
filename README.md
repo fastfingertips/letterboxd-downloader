@@ -9,10 +9,10 @@ Define list addresses and press enter for each new address:
 <br><code>[>]: https://letterboxd.com/crew/list/drawn-into-2022-ten-animated-features-to/</code>
 <br>When your lists are depleted, use "." send. Or "." at the end of your previous listing address. use:
 <br><code> [>]: .</code>
-<br><code> [>]: https://letterboxd.com/crew/list/drawn-into-2022-ten-animated-features-to/.
-</code><br> You may use the umlaut ".." to automatically approve the lists you specify:
+<br><code> [>]: https://letterboxd.com/crew/list/drawn-into-2022-ten-animated-features-to/.</code>
+<br> You may use the umlaut ".." to automatically approve the lists you specify:</code>
 <br><code>[>]: ..</code>
-<br>code>[>]: https://letterboxd.com/crew/list/drawn-into-2022-ten-animated-features-to/..</code>
+<br><code>[>]: https://letterboxd.com/crew/list/drawn-into-2022-ten-animated-features-to/..</code>
 </details>
 
 <details><summary>Capture by giving the name of the list</summary>
