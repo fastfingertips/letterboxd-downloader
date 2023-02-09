@@ -21,31 +21,37 @@ def dirCheck(dirs): # List
             else: os.makedirs(dir); txtLog(f'{preLogInfo}{dir} folder created.',logFilePath) #: Oluşturulamaz ise bir izin hatası olabilir.
         print(f'{preCmdInfo}Directory checked: {cmdBlink(dir, "yellow")}')
 
-def doPullFilms(tempLoopCount,tempCurrentDom): #: Filmleri çekiyoruz yazıyoruz
+def doPullFilms(tempLoopCount,tempCurrentDom): # Filmleri çekiyoruz yazıyoruz
     try:
-        #> Çekilen sayfa kodları, bir filtre uygulanarak daraltıldı.
-        list_entries = tempCurrentDom.find('ul', attrs={'class': 'js-list-entries poster-list -p70 film-list clear film-details-list'})
-        if list_entries is None: # Eğer film listesi boş ise
-            list_entries = tempCurrentDom.select_one('ul.film-list')
-            if list_entries is None:
-                 list_entries = tempCurrentDom.select_one('ul.poster-list')
-                 if list_entries is None: list_entries = tempCurrentDom.select_one('ul.film-details-list')
-        film_details = list_entries.find_all("li")
-
+        #> Filmleri/Posterleri içeren kapsayıcının çekimi (<ul> elemanı)
+        filmDetailsList = tempCurrentDom.find('ul', attrs={'class': 'js-list-entries poster-list -p70 film-list clear film-details-list'})
+        #> Yukarıda edinmeye çalışılan kapsayıcının(<ul> elemanı) boş olması durumunda alternatif yollar denenmiş, eşleşememenin önüne geçilmeye çalışılmıştır.
+        for currentAlternative in ['ul.film-list', 'ul.poster-list', 'ul.film-details-list']:
+            if filmDetailsList is None: filmDetailsList = tempCurrentDom.select_one(currentAlternative)
+            else: 
+                print(f'{preCmdInfo}{tempLoopCount} ve sonrası için film/poster kapsayıcısı alternatif yardımı gerekmeksizin çekildi.')
+                break
+        else:
+            if filmDetailsList is None: print(f'{preCmdInfo}{tempLoopCount} ve sonrası için film/poster kapsayıcısı çekilemedi.')
+            else: print(f'{preCmdInfo}{tempLoopCount} ve sonrasi için film/poster kapsayıcısı alternatif yardımıyla çekildi.')
+        #> Kapsayıcıdan tüm filmlerin/posterlerin çekimi (<li> elemanları)
+        filmDetails = filmDetailsList.find_all("li")
         #> Filmleri ekrana ve dosyaya yazdırma işlemleri
-        for currentFilm in film_details:
-            # Oda ismini çektik
-            movie = currentFilm.find('h2', attrs={'class': 'headline-2 prettify'})
-            movieName = movie.find('a').text
-
-            try: movieYear = movie.find('small').text # Film yılı bazen boş olabiliyor. Önlem alıyoruz
-            except: movieYear = "Yok"
-            if cmdPrintFilms: print(f"{tempLoopCount}: {movieName}, {movieYear}") # Kullanıcı eğer isterse çekilen filmler ekrana da yansıtılır.
-
-            writer.writerow([str(movieName), str(movieYear)]) # Her seferinde Csv dosyasına çektiğimiz bilgileri yazıyoruz.
-            writer.writerow([str(movieName), movieYear])
+        currentPageMoviesData = []
+        for currentFilmDetail in filmDetails:
+            movieHeadlineElement = currentFilmDetail.find('h2', attrs={'class': 'headline-2 prettify'}) # Film ismini ve yılını içeren kapsayıcının çekimi
+            movieLinkElement = movieHeadlineElement.find('a')
+            movieName = movieLinkElement.text # Link elementiden film isminin çekimi
+            movieLink = siteDomain + movieLinkElement.get('href') # siteDomain + Link elementinden film adresinin çekimi https://letterboxd.com + /film/white-zombie/
+            #> Kapsayıcıdan film yılının çekimi vw boş olma ihtimaline(olasılık mevcut) karşın önlemin alınması.
+            try: movieYear = movieHeadlineElement.find('small').text
+            except: movieYear = ''
+            if cmdPrintFilms: print(f"{tempLoopCount}: {movieYear:4}, {movieName}, {movieLink}") # Kullanıcı eğer isterse çekilen filmler ekrana da yansıtılır.
+            currentMovieData = [movieYear, movieName, movieLink]
+            currentPageMoviesData.append(currentMovieData)
             tempLoopCount += 1
-        return tempLoopCount
+        writer.writerows(currentPageMoviesData) # Çekilen verinin toplu yazılma işlemi veya bu işlem tek tek yazma for içerisinde için writer.writerow(currentMovieData) ile kullanılabilir.
+        return tempLoopCount # Mevcut film sırasına ait sayı geri döndürülür.
     except Exception as e:
         errorLine(e)  
         txtLog('An error was encountered while obtaining movie information.', logFilePath)
@@ -265,8 +271,8 @@ def getChanges(loop,key1,key2):
 
 def getMetaContent(dom, obj): return dom.find('meta', property=obj).attrs['content']
 def getBodyContent(dom, obj): return dom.find('body').attrs[obj]
-def getRunTime():             return datetime.now().strftime('%d%m%Y%H%M%S')
-def cmdBlink(m,c):            return ced(m,c,attrs=["blink"])
+def getRunTime(): return datetime.now().strftime('%d%m%Y%H%M%S')
+def cmdBlink(m,c): return ced(m,c,attrs=["blink"])
 
 def currentListDomainName(currentUrListItem):
     _f_ = '/list/'
@@ -286,7 +292,7 @@ def combineCsv():
         combineCsvPath = combineDir + combineCsvFile #: Kombine dosyasının yolu.
         noDuplicateCsvPath = combineDir + noDuplicateCsvFile #: NoDuplciate file path
         dirCheck([combineDir]) #: Combine dir check
-        txtLog('Birden fazla liste üzerinde çalışıldığından listeler kombine edilecek.',logFilePath) #: Process logger
+        txtLog(f'{preLogInfo}Birden fazla liste üzerinde çalışıldığından listeler kombine edilecek.', logFilePath) #: Process logger
 
         try:
             try: allCsvFiles = list(glob.glob(f'{exportsPath}*.csv')) #: Belirtilmiş dizindeki tüm csv dosyalarının bir değişkene aktarılması.
@@ -374,7 +380,7 @@ if True:
     subLine = '¯'*80 #: sub line lenght
     ## Kullanıcı tarafından değiştirilebilir..
     settingsFileName = 'settings'+'.json'
-    cmdPrintFilms = True #: Filmler ekrana yazılsın mı
+    cmdPrintFilms = False #: Filmler ekrana yazılsın mı
     splitLimit = 1500
     partitionLimit = 10
     splitParameter = "split:"
@@ -567,12 +573,13 @@ while True:
             dirCheck([exportsPath]) #: Export klasörünün kontrolü.
             with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
                 writer = csv.writer(csvFile)
-                writer.writerow(["Title", "Year"]) #: Csv açıldıktan sonra en üste yazılacak başlıklar.
+                header = ['Year', 'Title', 'LetterboxdURI']
+                writer.writerow(header) #: Csv açıldıktan sonra en üste yazılacak başlıklar.
 
                 loopCount = 1
                 print(supLineFilms,end='')
                 for x in range(int(lastPageNo)): #: Sayfa sayısı kadar döngü oluştur.
-                    txtLog(f'Connecting to: {currentUrListItemDetailPage}{str(x+1)}', logFilePath) #: Sayfa numarasını log dosyasına yaz.
+                    txtLog(f'{preLogInfo}Connecting to {currentUrListItemDetailPage}{str(x+1)}', logFilePath) #: Sayfa numarasını log dosyasına yaz.
                     currentDom = doReadPage(f'{currentUrListItemDetailPage}{str(x+1)}') #: Sayfa dom'u alınır.
                     loopCount = doPullFilms(loopCount, currentDom) #: Filmleri al.
                 csvFile.close() #: Açtığımız dosyayı manuel kapattık
