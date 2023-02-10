@@ -270,7 +270,14 @@ def getChanges(loop,key1,key2):
         for i in range(loop)
     )
 
-def getMetaContent(dom, obj): return dom.find('meta', property=obj).attrs['content']
+def getMetaContent(dom, obj): 
+    try: metaContent = dom.find('meta', property=obj).attrs['content']
+    except AttributeError:
+        print(f"{preCmdErr}Meta etiketinden '{obj}' alınamadı.")
+        txtLog(f"Meta etiketinden '{obj}' alınamadı. Hata Mesajı: {AttributeError}", logFilePath)
+        metaContent = ''
+    return metaContent
+
 def getBodyContent(dom, obj): return dom.find('body').attrs[obj]
 def getRunTime(): return datetime.now().strftime('%d%m%Y%H%M%S')
 def cmdBlink(m,c): return ced(m,c,attrs=["blink"])
@@ -456,18 +463,8 @@ while True:
                 searchList = f'{siteDomain}/search/lists/{urlListItem}/'
                 searchListPreviewDom = doReadPage(searchList)
 
-                try: searchMetaTitle = getMetaContent(searchListPreviewDom,'og:title') # getting og:title
-                except AttributeError:
-                    print(searchListPreviewDom)
-                    print(f"{preCmdErr}Meta etiketinden 'og:title' alınamadı.")
-                    txtLog(f"Meta etiketinden 'og:title' alınamadı. Hata Mesajı: {AttributeError}", logFilePath)
-                    searchMetaTitle = ''
-
-                try: searchLMetaUrl = getMetaContent(searchListPreviewDom,'og:url') #: Getting og:url
-                except AttributeError:
-                    print(f"{preCmdErr}Meta etiketinden 'og:url' alınamadı.")
-                    txtLog(f"Meta etiketinden 'og:url' alınamadı. Hata Mesajı: {AttributeError}", logFilePath)
-                    searchLMetaUrl = ''
+                searchMetaTitle = getMetaContent(searchListPreviewDom,'og:title') # getting og:title
+                searchLMetaUrl = getMetaContent(searchListPreviewDom,'og:url') #: Getting og:url
 
                 try: searchListsQCountMsg = searchListPreviewDom.find('h2', attrs={'class':'section-heading'}).text #: Kaç liste bulunduğu hakkında bilgi veren mesaj.
                 except AttributeError:
@@ -496,10 +493,10 @@ while True:
                     listsUrls = searchListDom.find_all('a', attrs={'class':'list-link'}) # okunmuş sayfadaki tüm listelerin adresleri.
                     print(supLine)
                     print(f"{preCmdInfo}{ced('Process info;', color='yellow')}") # process Title
-                    print(f"{preCmdInfo}CP: {ced(sayfa,'blue',attrs=['bold'])}, PL: {ced(len(listsUrls),'blue',attrs=['bold'])}, CPURL: {ced(connectionPage,'blue',attrs=['bold'])}") #: CP: Current Page, PL: Page list, CPURL: Current Page Url
+                    print(f"{preCmdInfo}CP: {ced(sayfa,'blue')}, PL: {ced(len(listsUrls),'blue')}, CPURL: {ced(connectionPage,'blue')}") #: CP: Current Page, PL: Page list, CPURL: Current Page Url
                     for listsUrl in listsUrls:
                         if liste == endList:
-                            print(f"{preCmdInfo}Liste sayısı belirlenen sayıya ({ced(liste,'blue',attrs=['bold'])}) ulaştı.")
+                            print(f"{preCmdInfo}Liste sayısı belirlenen sayıya ({ced(liste,'blue')}) ulaştı.")
                             break
                         liste += 1
                         print(f'{preCmdInfo}P{sayfa}:L{liste}')
@@ -520,39 +517,39 @@ while True:
             if '/detail' in urlListItem: urlListItem = urlListItem.replace('/detail','') # if url is detail page, remove detail part.
 
             urlListItemDom = doReadPage(urlListItem) # sayfa dom'u alınır.
-            userListAvailable, approvedListUrl = userListCheck(urlListItemDom) #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
-            if userListAvailable: ## Liste kullanıma uygunsa..
-                if approvedListUrl not in urlList: ## Doğrulanmış URL daha önce URL Listesine eklenmediyse..
-                    urlList.append(approvedListUrl) #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
-                    if breakLoop: break # Kullanıcı URL sonunda nokta belirttiyse.. URL alımını sonlandırıyoruz.
-                else: ## Doğrulanmış URL daha önce işlem görecek URL listine eklenmiş ise..
+            userListAvailable, approvedListUrl = userListCheck(urlListItemDom) # liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
+            if userListAvailable: # liste kullanıma uygunsa..
+                if approvedListUrl not in urlList: #> doğrulanmış URL daha önce URL Listesine eklenmediyse..
+                    urlList.append(approvedListUrl) # doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
+                    if breakLoop: break # kullanıcı URL sonunda nokta belirttiyse.. URL alımını sonlandırıyoruz.
+                else: #> doğrulanmış URL daha önce işlem görecek URL listine eklenmiş ise..
                     print(f'{preCmdErr}You have already entered this address list.') #: URL'in daha önce girildiğini ekrana yazdırıyoruz.
-                    inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
-            else: ## Kullanıcının girdiği URL doğrulanmazsa..
+                    inputLoopNo -= 1 # başarısız girişlerde döngü sayısının normale çevrilmesi.
+            else: #> kullanıcının girdiği URL doğrulanmazsa..
                 print(f"{preCmdInfo}You did not enter a valid url.")
-                inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
-        else: ## Kullanıcı genişliğe sahip bir değer girmez ise..
+                inputLoopNo -= 1 # başarısız girişlerde döngü sayısının normale çevrilmesi.
+        else: #> kullanıcı genişliğe sahip bir değer girmez ise..
             print(f"{preCmdInfo}Just enter a period to move on to the next steps. You can also add it at the end of the URL.")
-            inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
-    print(f"{preCmdInfo}List address acquisition terminated.") #: Liste url alımı sona erdğinde mesaj bastırılır.
+            inputLoopNo -= 1 # başarısız girişlerde döngü sayısının normale çevrilmesi.
+    print(f"{preCmdInfo}List address acquisition terminated.") # liste url alımı sona erdğinde mesaj bastırılır.
 
     processLoopNo = 0 # for döngüne ait 
     for currentUrListItem in urlList:
         processLoopNo += 1
         processState = f'[{processLoopNo}/{len(urlList)}]'
-        currentUrListItemDetail = f'{currentUrListItem}detail/' # Url'e detail eklendi.
-        currentUrListItemDetailPage = f'{currentUrListItemDetail}page/' #: Detaylı url'e sayfa gezintisi için parametre eklendi.
-        cListDom = doReadPage(currentUrListItemDetail) #: Şu anki liste sayfasını oku.
+        currentUrListItemDetail = f'{currentUrListItem}detail/' # url'e detail eklendi.
+        currentUrListItemDetailPage = f'{currentUrListItemDetail}page/' # detaylı url'e sayfa gezintisi için parametre eklendi.
+        cListDom = doReadPage(currentUrListItemDetail) # şu anki liste sayfasını oku.
 
-        try: cListOwner = getBodyContent(cListDom,'data-owner') #: Liste sahibini al.
+        try: cListOwner = getBodyContent(cListDom,'data-owner') # liste sahibini al.
         except Exception as e:
             print(f'{preCmdErr}Liste sahibi bilgisi alınamadı')
             txtLog(f'Liste sahibi bilgisi alınamadı Hata: {e}',logFilePath)
             cListOwner = 'Unknown'
-        cListDomainName = currentListDomainName(currentUrListItem) #: Liste domain ismini düzenleyerek alır.
-        cListRunTime = getRunTime() #: Liste işlem vaktini al. 
+        cListDomainName = currentListDomainName(currentUrListItem) # liste domain ismini düzenleyerek alır.
+        cListRunTime = getRunTime() # liste işlem vaktini al. 
 
-        listSignature() #: Liste hakkında bilgiler bastırılır.
+        listSignature() # liste hakkında bilgiler bastırılır.
         if listEnterPassOn:
             listEnter = input(f"{preCmdInput}Press enter to confirm the entered information. ({cmdBlink('Enter', 'green')})")
 
@@ -573,8 +570,8 @@ while True:
 
             lastPageNo = getListLastPageNo()
             openCsv = f'{exportsPath}{cListOwner}_{cListDomainName}_{cListRunTime}.csv' 
-            dirCheck([exportsPath]) #: Export klasörünün kontrolü.
-            with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
+            dirCheck([exportsPath]) # export klasörünün kontrolü.
+            with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: # konumda Export klasörü yoksa dosya oluşturmayacaktır.
                 writer = csv.writer(csvFile)
                 header = ['Year', 'Title', 'LetterboxdURI']
                 writer.writerow(header) # csv açıldıktan sonra en üste yazılacak başlıklar.
