@@ -2,6 +2,7 @@ import csv, sys, os, json, glob, time #: PMI
 from datetime import datetime #: PMI
 from inspect import currentframe #: PMI
 from numpy import partition #: PMI
+import constants as c
 while True: #: Other libs
     try:
         import arrow, requests, pandas as pd #: PMI
@@ -188,20 +189,20 @@ def listSignature(): #: x: 0 start msg, 1 end msg
                 print(f"\n{preCmdInfo}Process State: {cmdBlink(processState,'green')}")
                 print(supLine)
                 print(f"{preCmdInfo}{ced('List info;', color='yellow')}")
-                print(f"{preCmdMiddleDot}List by {ced(listBy,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Updated: {ced(listUT,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Published: {ced(listPT,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}List title: {ced(listTitle, 'grey', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}List by {ced(listBy,'blue', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}Updated: {ced(listUT,'blue', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}Published: {ced(listPT,'blue', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}List title: {ced(listTitle, 'blue', attrs=['bold'])}")
                 print(f"{preCmdMiddleDot}Filters;")
-                print(f"{preCmdMiddleDotList}Filtered as {ced(domSelectedDecadeYear,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDotList}Filtered as {ced(domSelectedGenre,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDotList}Movies sorted by {ced(domSelectedSortBy,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}List hash: {ced(cListRunTime,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Sayfa sayısı: {ced(listLastPage,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Number of movies: {ced(listMovieCount,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}List domain name: {ced(cListDomainName,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}List URL: {ced(currentUrListItem,'grey', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Process URL: {ced(currentUrListItemDetail,'grey', attrs=['bold'])}")
+                print(f"{preCmdMiddleDotList}Filtered as {ced(domSelectedDecadeYear,'blue', attrs=['bold'])}")
+                print(f"{preCmdMiddleDotList}Filtered as {ced(domSelectedGenre,'blue', attrs=['bold'])}")
+                print(f"{preCmdMiddleDotList}Movies sorted by {ced(domSelectedSortBy,'blue', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}List hash: {ced(cListRunTime,'blue', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}Sayfa sayısı: {ced(listLastPage,'blue', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}Number of movies: {ced(listMovieCount,'blue', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}List domain name: {ced(cListDomainName,'blue', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}List URL: {ced(currentUrListItem,'blue', attrs=['bold'])}")
+                print(f"{preCmdMiddleDot}Process URL: {ced(currentUrListItemDetail,'blue', attrs=['bold'])}")
 
             txtLog(f'{preLogInfo}İmza yazdırma sonu.',logFilePath)
         except Exception as e:
@@ -316,17 +317,17 @@ def combineCsv():
     else: txtLog('Tek liste üzerinde çalışıldığı için işlem kombine edilmeyecek.',logFilePath) #: Process logger
 
 def splitCsv(split_csv_path):
-    splitCsvLines = open(split_csv_path, 'r', encoding="utf8").readlines() #: lines list
-    csvMovies = len(splitCsvLines) #: Dosyadaki satırların toplamı
-    if csvMovies > splitLimit: #: Dosyadaki satırların toplamı belirlenen limitten büyükse..
+    splitCsvLines = open(split_csv_path, 'r', encoding="utf8").readlines() # lines list
+    csvMovies = len(splitCsvLines) # dosyadaki satırların toplamı
+    if csvMovies > splitLimit: # dosyadaki satırların toplamı belirlenen limitten büyükse..
         splitsPath = f'{exportDirName}/Splits'
         splitCsvName = f'{splitsPath}/{currenSessionHash}'
-        dirCheck([splitsPath]) # Yolu kontrol ediyoruz.
-        defaultCsvCount = 1000 # En ideal aktarma sayısı
-        defaultPartition = 2 # Bölüm 2'den başlar.
+        dirCheck([splitsPath]) # yolu kontrol ediyoruz.
+        defaultCsvCount = 1000 # en ideal aktarma sayısı
+        defaultPartition = 2 # bölüm 2'den başlar.
         splitFileNo = defaultPartition-1
         print(f'{preCmdInfo}Dosya içinde {splitLimit} üzeri film({csvMovies}) olduğu için ayrım uygulanacak.')
-        while True: #: Dosyanın kaça bölüneceği hesaplanır.
+        while True: # dosyanın kaça bölüneceği hesaplanır.
             linesPerCsv = csvMovies/defaultPartition
             if (linesPerCsv <= defaultCsvCount and csvMovies % defaultPartition == 0):
                 linesPerCsv = int(linesPerCsv) # kalan sıfırsa int'e çeviririz.
@@ -334,20 +335,20 @@ def splitCsv(split_csv_path):
                 break
             defaultPartition += 1
 
-        if defaultPartition <= partitionLimit: #: Default partition limit: 10
-            for lineNo in range(csvMovies): #: Dosyanın bölünmesi
+        if defaultPartition <= partitionLimit: # default partition limit: 10
+            for lineNo in range(csvMovies): # dosyanın bölünmesi
                 if lineNo % linesPerCsv == 0:
                     splitCsvLines.insert(lineNo+linesPerCsv,splitCsvLines[0]) #: keep header
                     open(f'{splitCsvName}-{splitFileNo}.csv', 'w+', encoding="utf8").writelines(splitCsvLines[lineNo:lineNo+linesPerCsv])
                     splitFileNo += 1
             print(f'{preCmdInfo}Ayrım işlemi {splitCsvName} adresinde sona erdi. Bölüm: [{defaultPartition}][{linesPerCsv}]')
-        else: print(f'{preCmdInfo}Ayrım işlemi gerçekleşmedi. Ayrım limiti [{defaultPartition}/{partitionLimit}] aşıldı.') # Ayrım limiti aşılırsa
+        else: print(f'{preCmdInfo}Ayrım işlemi gerçekleşmedi. Ayrım limiti [{defaultPartition}/{partitionLimit}] aşıldı.') # ayrım limiti aşılırsa
     else: print(f'{preCmdInfo}Dosyanız içerisinde {splitLimit} altında satır/film({csvMovies}) var, ayrım işlemi uygulanmayacak.')
 
 def extractObj(job,obj):
     try:
         while job[-1] == obj: ## $job sonunda $obj olduğu sürece..
-            job = job[:-1] #: Her defasında $job sonundan $obj siler.
+            job = job[:-1] # her defasında $job sonundan $obj siler.
     except: pass
     return job
 
@@ -358,33 +359,36 @@ def urlFix(x):
         urlList.append(approvedListUrl) #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
     return urlList
 
+def coloredDictPrint(colored_dict, main_title=None): # title, dict
+    print(supLine)
+    if main_title != None: print(f"{preCmdInfo}{ced(f'{main_title}', color='yellow')}")
+    for listHeader in colored_dict:
+        print(f"{preCmdMiddleDot}{ced(listHeader, attrs=['bold', 'underline'])}")
+        for listHeaderItem in colored_dict[listHeader]:
+            print(f"{preCmdMiddleDotList}{listHeaderItem}: {ced(colored_dict[listHeader][listHeaderItem],'blue')}")
+    print(subLine)
+
+os.system(f'color & title Welcome %USERNAME%. & cls')
+# CONSTANTS TO VARIABLES
+siteDomain = c.SITE_DOMAIN # saf domain'in parçalanarak birleştirilmesi
+preLogInfo = c.PRE_LOG_INFO # log file ingo msg pre
+preLogErr = c.PRE_LOG_ERR # log file err msg pre  
+supLine = c.SUP_LINE # sup line lenght
+subLine = c.SUB_LINE # sub line lenght
+settingsFileName = c.SETTINGS_FILE_NAME # settings file name
+cmdPrintFilms = c.CMD_PRINT_FILMS # filmler ekrana yazılsın mı
+splitLimit = c.SPLIT_LIMIT # split limit
+partitionLimit = c.PARTITION_LIMIT # partition limit
+splitParameter = c.SPLIT_PARAMETER # split parameter
 # INITIAL ASSIGNMENTS
-if True:
-    os.system(f'color & title Welcome %USERNAME%. & cls')
-    # Domain
-    siteProtocol, siteUrl = "https://", "letterboxd.com" #: Saf domain'in parçalanarak birleştirilmesi
-    siteDomain = siteProtocol + siteUrl #: Saf domain'in parçalanarak birleştirilmesi
-    # Cmd Pre
-    preCmdMiddleDot,preCmdMiddleDotList  = cmdPre(u'[\u00B7','cyan'), cmdPre(u' \u00B7','cyan') #: Cmd middle dot pre
-    preCmdInput = cmdPre('[>','green') #: Cmd input msg pre
-    preCmdInfo = cmdPre('[#','yellow') #: Cmd info msg pre
-    preCmdErr = cmdPre('[!','red') #: Cmd error msg pre
-    preCmdCheck = cmdPre('[✓','green') #: Cmd error msg pre
-    preCmdUnCheck = cmdPre('[X','red')
-    preBlankCount = 4*' ' #: Cmd msg pre blank calc
-    # Log Pre
-    preLogInfo = "Info: " #: Log file ingo msg pre
-    preLogErr = "Error: " #: Log file err msg pre  
-    # Cmd Lines
-    supLine = '_'*80 #: sup line lenght
-    subLine = '¯'*80 #: sub line lenght
-    ## Kullanıcı tarafından değiştirilebilir..
-    settingsFileName = 'settings'+'.json'
-    cmdPrintFilms = False #: Filmler ekrana yazılsın mı
-    splitLimit = 1500
-    partitionLimit = 10
-    splitParameter = "split:"
-    supLineFilms = f'{supLine}\n{preCmdInfo}{ced("Movies on the list;", color="yellow")}\n' if cmdPrintFilms else ''
+preBlankCount = 4*' ' # cmd msg pre blank calc
+preCmdInput = cmdPre('[>','green') # cmd input msg pre
+preCmdInfo = cmdPre('[#','yellow') # cmd info msg pre
+preCmdErr = cmdPre('[!','red') # cmd error msg pre
+preCmdCheck = cmdPre('[✓','green') # cmd check msg pre
+preCmdUnCheck = cmdPre('[X','red') # cmd uncheck msg pre
+preCmdMiddleDot, preCmdMiddleDotList  = cmdPre(u'[\u00B7','cyan'), cmdPre(u' \u00B7','cyan') #: Cmd middle dot pre
+supLineFilms = f'{supLine}\n{preCmdInfo}{ced("Movies on the list;", color="yellow")}\n' if cmdPrintFilms else ''
 
 # STARTUP
 sessionLoop = 0 #: while loop sayacı
@@ -474,30 +478,28 @@ while True:
                 try:    searchListsQLastsPage = searchListPreviewDom.find_all('li',attrs={'class':'paginate-page'})[-1].text #: Son sayfayı alıyoruz.
                 except: searchListsQLastsPage = 1 #: Alınamazsa sayfada tek sayfa olduğu varsayılır.
                 finally:
-                    print(supLine)
-                    print(f"{preCmdInfo}{ced('Process info;', color='yellow')}")
-                    print(f"{preCmdMiddleDot}{ced('Request;', color='yellow')}")
-                    print(f"{preCmdMiddleDotList}Query: {ced(urlListItem,'grey',attrs=['bold'])}")
-                    print(f"{preCmdMiddleDot}{ced('Request response;', color='yellow')}")
-                    print(f"{preCmdMiddleDotList}Last list: {ced(endList,'grey',attrs=['bold'])}")
-                    print(f'{preCmdMiddleDotList}{searchMetaTitle}')
-                    print(f'{preCmdMiddleDotList}{searchListsQCountMsg}')
-                    print(f"{preCmdMiddleDotList}Page URL: {ced(searchLMetaUrl,'grey',attrs=['bold'])}")
-                    print(f"{preCmdMiddleDotList}Last Page: {ced(searchListsQLastsPage,'grey',attrs=['bold'])}")
-                    print(subLine)
+                    coloredDict = {"Request": {"Query": urlListItem},
+                                   "Response": {"Last list": endList,
+                                                        "Last Page": searchListsQLastsPage,
+                                                        "Page URL": searchLMetaUrl,
+                                                        "Meta Title": searchMetaTitle,
+                                                        "Meta Description": searchListsQCountMsg}}
+                    coloredDictPrint(coloredDict) # print process info
+
+                print(f"{preCmdInfo}Starting list search..")
 
                 sayfa, liste = 0, 0
                 for i in range(int(searchListsQLastsPage)):
                     sayfa += 1
                     connectionPage = f'{searchList}page/{sayfa}'
                     searchListDom = doReadPage(connectionPage)
-                    listsUrls = searchListDom.find_all('a', attrs={'class':'list-link'}) #: Okunmuş sayfadaki tüm listelerin adresleri.
+                    listsUrls = searchListDom.find_all('a', attrs={'class':'list-link'}) # okunmuş sayfadaki tüm listelerin adresleri.
                     print(supLine)
-                    print(f"{preCmdInfo}{ced('Process info;', color='yellow')}") #: Process Title
-                    print(f"{preCmdInfo}CP: {ced(sayfa,'grey',attrs=['bold'])}, PL: {ced(len(listsUrls),'grey',attrs=['bold'])}, CPURL: {ced(connectionPage,'grey',attrs=['bold'])}") #: CP: Current Page, PL: Page list, CPURL: Current Page Url
+                    print(f"{preCmdInfo}{ced('Process info;', color='yellow')}") # process Title
+                    print(f"{preCmdInfo}CP: {ced(sayfa,'blue',attrs=['bold'])}, PL: {ced(len(listsUrls),'blue',attrs=['bold'])}, CPURL: {ced(connectionPage,'blue',attrs=['bold'])}") #: CP: Current Page, PL: Page list, CPURL: Current Page Url
                     for listsUrl in listsUrls:
                         if liste == endList:
-                            print(f"{preCmdInfo}Liste sayısı belirlenen sayıya ({ced(liste,'grey',attrs=['bold'])}) ulaştı.")
+                            print(f"{preCmdInfo}Liste sayısı belirlenen sayıya ({ced(liste,'blue',attrs=['bold'])}) ulaştı.")
                             break
                         liste += 1
                         print(f'{preCmdInfo}P{sayfa}:L{liste}')
@@ -517,7 +519,7 @@ while True:
 
             if '/detail' in urlListItem: urlListItem = urlListItem.replace('/detail','') # if url is detail page, remove detail part.
 
-            urlListItemDom = doReadPage(urlListItem) #: Sayfa dom'u alınır.
+            urlListItemDom = doReadPage(urlListItem) # sayfa dom'u alınır.
             userListAvailable, approvedListUrl = userListCheck(urlListItemDom) #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
             if userListAvailable: ## Liste kullanıma uygunsa..
                 if approvedListUrl not in urlList: ## Doğrulanmış URL daha önce URL Listesine eklenmediyse..
@@ -534,7 +536,7 @@ while True:
             inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
     print(f"{preCmdInfo}List address acquisition terminated.") #: Liste url alımı sona erdğinde mesaj bastırılır.
 
-    processLoopNo = 0 #: For döngüne ait 
+    processLoopNo = 0 # for döngüne ait 
     for currentUrListItem in urlList:
         processLoopNo += 1
         processState = f'[{processLoopNo}/{len(urlList)}]'
@@ -566,6 +568,7 @@ while True:
 
         if listEnter:
             txtLog(f'{preLogInfo}Şimdiki listeye erişim başlatılıyor.',logFilePath)
+            print(supLine)
             print(f"{preCmdInfo}{ced(f'List confirmed. {autoEnterMsg}', color='green')}")
 
             lastPageNo = getListLastPageNo()
@@ -574,26 +577,26 @@ while True:
             with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: #: Konumda Export klasörü yoksa dosya oluşturmayacaktır.
                 writer = csv.writer(csvFile)
                 header = ['Year', 'Title', 'LetterboxdURI']
-                writer.writerow(header) #: Csv açıldıktan sonra en üste yazılacak başlıklar.
+                writer.writerow(header) # csv açıldıktan sonra en üste yazılacak başlıklar.
 
                 loopCount = 1
                 print(supLineFilms,end='')
-                for x in range(int(lastPageNo)): #: Sayfa sayısı kadar döngü oluştur.
-                    txtLog(f'{preLogInfo}Connecting to {currentUrListItemDetailPage}{str(x+1)}', logFilePath) #: Sayfa numarasını log dosyasına yaz.
-                    currentDom = doReadPage(f'{currentUrListItemDetailPage}{str(x+1)}') #: Sayfa dom'u alınır.
-                    loopCount = doPullFilms(loopCount, currentDom) #: Filmleri al.
-                csvFile.close() #: Açtığımız dosyayı manuel kapattık
+                for x in range(int(lastPageNo)): # sayfa sayısı kadar döngü oluştur.
+                    txtLog(f'{preLogInfo}Connecting to {currentUrListItemDetailPage}{str(x+1)}', logFilePath) # sayfa numarasını log dosyasına yaz.
+                    currentDom = doReadPage(f'{currentUrListItemDetailPage}{str(x+1)}') # sayfa dom'u alınır.
+                    loopCount = doPullFilms(loopCount, currentDom) # filmleri al.
+                csvFile.close() # açtığımız dosyayı manuel kapattık
 
-            os.system(f'title {processState} completed!') #: Dosya oluşturulduğunda ekrana yazı yazılır.
-            txtLog(f'{preLogInfo}{processState} completed!', logFilePath) #: Dosya oluşturulduğunda log dosyasına yazı yazılır.
-            print(f'{preCmdInfo}{loopCount-1} film {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.') #: Filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
-            print(subLine) #: Alt satır ekrana yazdırılır.
-            print(f"{preCmdInfo}{ced(f'{processState} completed!', 'green')}") #: İşlem tamamlandığında mesajı ekrana yazdırıyoruz.
+            os.system(f'title {processState} completed!') # dosya oluşturulduğunda ekrana yazı yazılır.
+            txtLog(f'{preLogInfo}{processState} completed!', logFilePath) # dosya oluşturulduğunda log dosyasına yazı yazılır.
+            print(f'{preCmdInfo}{loopCount-1} film {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.') # filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
+            print(subLine)
+            print(f"{preCmdInfo}{ced(f'{processState} completed!', 'green')}") # işlem tamamlandığında mesajı ekrana yazdırıyoruz.
 
-    combineCsv() #: Csv dosyalarını birleştir.
+    combineCsv() # csv dosyalarını birleştir.
 
-    os.system(f'title Session: {currenSessionHash} ended!') #: terminal tab
-    print(f"{preCmdInfo}Process State: {cmdBlink(processState +' Finish.','green')}") # terminal
-    print(f'{preCmdInfo}{ced(f"Session: {currenSessionHash} ended.", "green")}')
-    txtLog(f'{preLogInfo}Session: {currenSessionHash} ended.', logFilePath) # log file
+    os.system(f'title Session: {currenSessionHash} ended!') # terminal header
+    print(f"{preCmdInfo}Process State: {cmdBlink(processState +' Finish.','green')}")
+    print(f"{preCmdInfo}{ced(f'Session: {currenSessionHash} ended.', 'green')}")
+    txtLog(f'{preLogInfo}Session: {currenSessionHash} ended.', logFilePath) # write log
     os.system(f"echo {preCmdInfo}{cmdBlink('Press enter to continue with the new session.','yellow')} & pause >nul")
