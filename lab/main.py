@@ -2,7 +2,7 @@ import csv, sys, os, json, glob, time #: PMI
 from datetime import datetime #: PMI
 from inspect import currentframe #: PMI
 from numpy import partition #: PMI
-import constants as c
+from constants import * #: Constants
 while True: #: Other libs
     try:
         import arrow, requests, pandas as pd #: PMI
@@ -18,8 +18,8 @@ while True: #: Other libs
 def dirCheck(dirs): # List
     for dir in dirs:
         if dir:
-            if os.path.exists(dir): txtLog(f'{preLogInfo}{dir} folder already exists.',logFilePath)
-            else: os.makedirs(dir); txtLog(f'{preLogInfo}{dir} folder created.',logFilePath) #: Oluşturulamaz ise bir izin hatası olabilir.
+            if os.path.exists(dir): txtLog(f'{PRE_LOG_INFO}{dir} folder already exists.',logFilePath)
+            else: os.makedirs(dir); txtLog(f'{PRE_LOG_INFO}{dir} folder created.',logFilePath) #: Oluşturulamaz ise bir izin hatası olabilir.
         print(f'{preCmdInfo}Directory checked: {cmdBlink(dir, "yellow")}')
 
 def doPullFilms(tempLoopCount,tempCurrentDom): # Filmleri çekiyoruz yazıyoruz
@@ -43,11 +43,11 @@ def doPullFilms(tempLoopCount,tempCurrentDom): # Filmleri çekiyoruz yazıyoruz
             movieHeadlineElement = currentFilmDetail.find('h2', attrs={'class': 'headline-2 prettify'}) # Film ismini ve yılını içeren kapsayıcının çekimi
             movieLinkElement = movieHeadlineElement.find('a')
             movieName = movieLinkElement.text # Link elementiden film isminin çekimi
-            movieLink = siteDomain + movieLinkElement.get('href') # siteDomain + Link elementinden film adresinin çekimi https://letterboxd.com + /film/white-zombie/
+            movieLink = SITE_DOMAIN + movieLinkElement.get('href') # SITE_DOMAIN + Link elementinden film adresinin çekimi https://letterboxd.com + /film/white-zombie/
             #> Kapsayıcıdan film yılının çekimi vw boş olma ihtimaline(olasılık mevcut) karşın önlemin alınması.
             try: movieYear = movieHeadlineElement.find('small').text
             except: movieYear = ''
-            if cmdPrintFilms: print(f"{tempLoopCount}: {movieYear:4}, {movieName}, {movieLink}") # Kullanıcı eğer isterse çekilen filmler ekrana da yansıtılır.
+            if CMD_PRINT_FILMS: print(f"{tempLoopCount}: {movieYear:4}, {movieName}, {movieLink}") # Kullanıcı eğer isterse çekilen filmler ekrana da yansıtılır.
             currentMovieData = [movieYear, movieName, movieLink]
             currentPageMoviesData.append(currentMovieData)
             tempLoopCount += 1
@@ -59,7 +59,7 @@ def doPullFilms(tempLoopCount,tempCurrentDom): # Filmleri çekiyoruz yazıyoruz
 
 def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
     try:
-        txtLog(f'{preLogInfo}Trying connect to [{tempUrl}]',logFilePath) #: Log dosyasına bağlantı başlangıcında bilgi veriliyor.
+        txtLog(f'{PRE_LOG_INFO}Trying connect to [{tempUrl}]',logFilePath) #: Log dosyasına bağlantı başlangıcında bilgi veriliyor.
         while True:
             #: https://stackoverflow.com/questions/23013220/max-retries-exceeded-with-url-in-requests
             try:
@@ -82,7 +82,7 @@ def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
             except Exception as e: print('Hata:',e)
     except Exception as e: #: Dom edinirken hata gerçekleşirse..
         errorLine(e)
-        txtLog(f'{preLogErr}Connection to address failed [{tempUrl}]',logFilePath)
+        txtLog(f'{PRE_LOG_ERR}Connection to address failed [{tempUrl}]',logFilePath)
 
 def doReset(): # Porgramı yeniden başlat
     try:
@@ -91,22 +91,22 @@ def doReset(): # Porgramı yeniden başlat
         os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
     except Exception as e:
         errorLine(e)
-        txtLog(f'{preLogErr}Attempting to restart the program failed.', logFilePath)
+        txtLog(f'{PRE_LOG_ERR}Attempting to restart the program failed.', logFilePath)
 
 def getListLastPageNo(): # Listenin son sayfasını öğren
     try:
         # Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al. Son'linin içindeki bağlantının metni bize kaç sayfalı bir listemiz olduğunuz verecek.
-        txtLog(f'{preLogInfo}Listedeki sayfa sayısı denetleniyor..',logFilePath)
+        txtLog(f'{PRE_LOG_INFO}Listedeki sayfa sayısı denetleniyor..',logFilePath)
         lastPageNo = cListDom.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
-        txtLog(f'{preLogInfo}Liste birden çok sayfaya ({lastPageNo}) sahiptir.',logFilePath)
+        txtLog(f'{PRE_LOG_INFO}Liste birden çok sayfaya ({lastPageNo}) sahiptir.',logFilePath)
         getMovieCount(lastPageNo)
     except AttributeError: ## Kontrolümüzde..
-        txtLog(f'{preLogInfo}Birden fazla sayfa yok, bu liste tek sayfadır. {AttributeError}',logFilePath)
+        txtLog(f'{PRE_LOG_INFO}Birden fazla sayfa yok, bu liste tek sayfadır. {AttributeError}',logFilePath)
         lastPageNo = 1 #: Sayfa sayısı bilgisi alınamadığında sayfa sayısı 1 olarak işaretlenir.
         getMovieCount(lastPageNo) #: Sayfa bilgisi gönderiliyor.
     except Exception as e: errorLine(e)
     finally:
-        txtLog(f'{preLogInfo}Sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPageNo} olduğu öğrenildi.',logFilePath)
+        txtLog(f'{PRE_LOG_INFO}Sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPageNo} olduğu öğrenildi.',logFilePath)
         return lastPageNo
 
 def getMovieCount(tempLastPageNo): # Film sayısını öğreniyoruz
@@ -125,18 +125,18 @@ def getMovieCount(tempLastPageNo): # Film sayısını öğreniyoruz
             lastPageArticles = lastPageDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li") #: Sayfa kodları çekildi.
             lastPageMoviesCount =  len(lastPageArticles) #: Film sayısı öğrenildi.
             movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount #: Toplam film sayısını belirlemek.
-            txtLog(f"{preLogInfo}Listedeki film sayısı {movieCount} olarak bulunmuştur.",logFilePath) #: Film sayısı hesaplandıktan sonra ekrana yazdırılır.
+            txtLog(f"{PRE_LOG_INFO}Listedeki film sayısı {movieCount} olarak bulunmuştur.",logFilePath) #: Film sayısı hesaplandıktan sonra ekrana yazdırılır.
         return movieCount #: Film sayısı çağrıya gönderilir.
     except Exception as e: ## Olası hata durumunda. (Dom edinirken)
         errorLine(e)
         txtLog('Error getting movie count.', logFilePath)
-        txtLog(f'{preLogErr}An error occurred while obtaining the number of movies.',logFilePath)
+        txtLog(f'{PRE_LOG_ERR}An error occurred while obtaining the number of movies.',logFilePath)
 
 def settingsFileSet(): #: Ayar dosyası kurulumu.
-    if os.path.exists(settingsFileName):
+    if os.path.exists(SETTINGS_FILE_NAME):
         while True:
             try:
-                with open(settingsFileName) as jsonFile:
+                with open(SETTINGS_FILE_NAME) as jsonFile:
                     jsonObject = json.load(jsonFile)
                     logDirName = jsonObject['log_dir']
                     exportDirName = jsonObject['export_dir']
@@ -151,7 +151,7 @@ def settingsFileSet(): #: Ayar dosyası kurulumu.
                 logDirName = input(f'{preCmdInput}Log directory Name: ')
                 exportDirName = input(f'{preCmdInput}Export directory Name: ')
                 settings_dict = {'log_dir': logDirName,'export_dir': exportDirName,}
-                with open(settingsFileName, 'w') as json_file:
+                with open(SETTINGS_FILE_NAME, 'w') as json_file:
                     json.dump(settings_dict, json_file)
                 break
             except Exception as e:
@@ -174,7 +174,7 @@ def listSignature(): #: x: 0 start msg, 1 end msg
                 domSelectedGenre = cListDom.select(".smenu-subselected")[2].text + 'only movies.' #: Liste sayfasından tür filtre bilgisi alınıyor.
                 domSelectedSortBy = cListDom.select(".smenu-subselected")[0].text + '.' #: Liste sayfasından sıralama filtre bilgisi alınıyor.
             except Exception as e: ## Filtre bilgileri edinirken bir hata oluşursa..
-                txtLog(f'{preLogErr}Filtre bilgileri elde bir sorun gerçekleşti.',logFilePath)
+                txtLog(f'{PRE_LOG_ERR}Filtre bilgileri elde bir sorun gerçekleşti.',logFilePath)
                 print('Filtre bilgileri elde bir sorun gerçekleşti.')
                 domSelectedDecadeYear, domSelectedGenre, domSelectedSortBy = 3*'Unknown' #: Filtre bilgileri edinemediğinde her filtreye None eklenir.
 
@@ -187,7 +187,7 @@ def listSignature(): #: x: 0 start msg, 1 end msg
             finally: ## Kontrol sonu işlemleri.
                 os.system(f'title {processState} Process: @{cListOwner}.')
                 print(f"\n{preCmdInfo}Process State: {cmdBlink(processState,'green')}")
-                print(supLine)
+                print(SUP_LINE)
                 print(f"{preCmdInfo}{ced('List info;', color='yellow')}")
                 print(f"{preCmdMiddleDot}List by {ced(listBy,'blue', attrs=['bold'])}")
                 print(f"{preCmdMiddleDot}Updated: {ced(listUT,'blue', attrs=['bold'])}")
@@ -204,13 +204,13 @@ def listSignature(): #: x: 0 start msg, 1 end msg
                 print(f"{preCmdMiddleDot}List URL: {ced(currentUrListItem,'blue', attrs=['bold'])}")
                 print(f"{preCmdMiddleDot}Process URL: {ced(currentUrListItemDetail,'blue', attrs=['bold'])}")
 
-            txtLog(f'{preLogInfo}İmza yazdırma sonu.',logFilePath)
+            txtLog(f'{PRE_LOG_INFO}İmza yazdırma sonu.',logFilePath)
         except Exception as e:
             errorLine(e)
-            txtLog(f'{preLogErr}Liste bilgileri çekilirken hata.',logFilePath)
+            txtLog(f'{PRE_LOG_ERR}Liste bilgileri çekilirken hata.',logFilePath)
     except Exception as e: #: İmza seçimi başarısız.
         errorLine(e)
-        txtLog(f'{preLogErr}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.',logFilePath)
+        txtLog(f'{PRE_LOG_ERR}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.',logFilePath)
 
 def userListCheck(_url_list_item_dom): #: Kullanıcının girilen şekilde bir listesinin var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
     try:
@@ -218,14 +218,14 @@ def userListCheck(_url_list_item_dom): #: Kullanıcının girilen şekilde bir l
             metaOgType = getMetaContent(_url_list_item_dom,'og:type') 
 
             if metaOgType == "letterboxd:list": # Meta etiketindeki bilgi sorgulanır. Sayfanın liste olup olmadığı anlaşılır.
-                txtLog(f'{preLogInfo}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {metaOgType}',logFilePath)
+                txtLog(f'{PRE_LOG_INFO}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {metaOgType}',logFilePath)
                 metaOgUrl = getMetaContent(_url_list_item_dom,'og:url') #: Liste yönlendirmesi var mı bakıyoruz
                 metaOgTitle = getMetaContent(_url_list_item_dom, 'og:title')  #: Liste ismini alıyoruz. Örnek: 'Search results for best comedy'
                 bodyDataOwner = getBodyContent(_url_list_item_dom,'data-owner') #: Liste sahibinin kullanıcı ismi.
                 print(f'{preCmdCheck}{ced("Found it: ", color="green")}@{ced(bodyDataOwner,"yellow")} "{ced(metaOgTitle,"yellow")}"') #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
 
                 #> Girilen URL Meta ile aynıysa..
-                if urlListItem == metaOgUrl or f'{urlListItem}/' == metaOgUrl: txtLog(f'{preLogInfo}Liste adresi yönlendirme içermiyor.',logFilePath)
+                if urlListItem == metaOgUrl or f'{urlListItem}/' == metaOgUrl: txtLog(f'{PRE_LOG_INFO}Liste adresi yönlendirme içermiyor.',logFilePath)
                 else: # Girilen URL Meta ile uyuşmuyorsa..
                     print(f'{preCmdInfo}Girdiğiniz liste linki yönlendirme içeriyor.')
                     print(f'{preBlankCount}Muhtemelen liste ismi yakın bir zamanda değişildi veya hatalı girdiniz.')
@@ -240,7 +240,7 @@ def userListCheck(_url_list_item_dom): #: Kullanıcının girilen şekilde bir l
                         msgMetaOgUrlChange = getChanges(metaLoop,urlListItem,metaOgUrl)
 
                     print(f'{preBlankCount}({ced("+","green")}): {msgInputUrl}{msgMetaOgUrlChange} şeklinde değiştirdik.')
-                txtLog(f'{preLogInfo}{urlListItem} listesi bulundu: {metaOgTitle}',logFilePath)
+                txtLog(f'{PRE_LOG_INFO}{urlListItem} listesi bulundu: {metaOgTitle}',logFilePath)
 
                 currentListAvaliable = True
         except Exception as e:
@@ -254,7 +254,7 @@ def userListCheck(_url_list_item_dom): #: Kullanıcının girilen şekilde bir l
 
 def errorLine(e): #: Error Code generator
     cl = currentframe()
-    txtLog(f'{preLogErr} Error on line {cl.f_back.f_lineno} Exception Message: {e}',logFilePath)
+    txtLog(f'{PRE_LOG_ERR} Error on line {cl.f_back.f_lineno} Exception Message: {e}',logFilePath)
 
 def txtLog(r_message, log_file_path): #: None: Kullanıcı log lokasyonunu belirtmese de olur.
     try: ## Denenecek işlemler..
@@ -292,7 +292,7 @@ def cmdPre(m,c): #: Mesaj ön ekleri için kalıp.
 
 def combineCsv():
     if len(urlList) > 1:
-        print(supLine)
+        print(SUP_LINE)
         print(f"{preCmdInfo}{ced('Merge process info;', color='yellow')}")
         combineDir = f'{exportDirName}/Combined/' #: Kombine edilen listelerin barındığı klasör
         combineCsvFile = f'{currenSessionHash}_Normal-Combined.csv' #: Kombine dosyasının ismi.
@@ -300,7 +300,7 @@ def combineCsv():
         combineCsvPath = combineDir + combineCsvFile #: Kombine dosyasının yolu.
         noDuplicateCsvPath = combineDir + noDuplicateCsvFile #: NoDuplciate file path
         dirCheck([combineDir]) #: Combine dir check
-        txtLog(f'{preLogInfo}Birden fazla liste üzerinde çalışıldığından listeler kombine edilecek.', logFilePath) #: Process logger
+        txtLog(f'{PRE_LOG_INFO}Birden fazla liste üzerinde çalışıldığından listeler kombine edilecek.', logFilePath) #: Process logger
 
         try:
             try: allCsvFiles = list(glob.glob(f'{exportsPath}*.csv')) #: Belirtilmiş dizindeki tüm csv dosyalarının bir değişkene aktarılması.
@@ -320,20 +320,20 @@ def combineCsv():
             print(f'{preCmdInfo}Yalnızca farklı fimlerin olduğu dosya aynı dizinde {noDuplicateCsvPath} olarak ayarlandı.')
             splitCsv(noDuplicateCsvPath) # Ayıklama sonrası, aktarma ayırması gerekliyse gerçekleştiriyoruz.
         except Exception as e: txtLog(f'Listeler kombine edilemedi. Hata: {e}',logFilePath) #: Process logger
-        print(subLine)
+        print(SUB_LINE)
     else: txtLog('Tek liste üzerinde çalışıldığı için işlem kombine edilmeyecek.',logFilePath) #: Process logger
 
 def splitCsv(split_csv_path):
     splitCsvLines = open(split_csv_path, 'r', encoding="utf8").readlines() # lines list
     csvMovies = len(splitCsvLines) # dosyadaki satırların toplamı
-    if csvMovies > splitLimit: # dosyadaki satırların toplamı belirlenen limitten büyükse..
+    if csvMovies > SPLIT_LIMIT: # dosyadaki satırların toplamı belirlenen limitten büyükse..
         splitsPath = f'{exportDirName}/Splits'
         splitCsvName = f'{splitsPath}/{currenSessionHash}'
         dirCheck([splitsPath]) # yolu kontrol ediyoruz.
         defaultCsvCount = 1000 # en ideal aktarma sayısı
         defaultPartition = 2 # bölüm 2'den başlar.
         splitFileNo = defaultPartition-1
-        print(f'{preCmdInfo}Dosya içinde {splitLimit} üzeri film({csvMovies}) olduğu için ayrım uygulanacak.')
+        print(f'{preCmdInfo}Dosya içinde {SPLIT_LIMIT} üzeri film({csvMovies}) olduğu için ayrım uygulanacak.')
         while True: # dosyanın kaça bölüneceği hesaplanır.
             linesPerCsv = csvMovies/defaultPartition
             if (linesPerCsv <= defaultCsvCount and csvMovies % defaultPartition == 0):
@@ -342,15 +342,15 @@ def splitCsv(split_csv_path):
                 break
             defaultPartition += 1
 
-        if defaultPartition <= partitionLimit: # default partition limit: 10
+        if defaultPartition <= PARTITION_LIMIT: # default partition limit: 10
             for lineNo in range(csvMovies): # dosyanın bölünmesi
                 if lineNo % linesPerCsv == 0:
                     splitCsvLines.insert(lineNo+linesPerCsv,splitCsvLines[0]) #: keep header
                     open(f'{splitCsvName}-{splitFileNo}.csv', 'w+', encoding="utf8").writelines(splitCsvLines[lineNo:lineNo+linesPerCsv])
                     splitFileNo += 1
             print(f'{preCmdInfo}Ayrım işlemi {splitCsvName} adresinde sona erdi. Bölüm: [{defaultPartition}][{linesPerCsv}]')
-        else: print(f'{preCmdInfo}Ayrım işlemi gerçekleşmedi. Ayrım limiti [{defaultPartition}/{partitionLimit}] aşıldı.') # ayrım limiti aşılırsa
-    else: print(f'{preCmdInfo}Dosyanız içerisinde {splitLimit} altında satır/film({csvMovies}) var, ayrım işlemi uygulanmayacak.')
+        else: print(f'{preCmdInfo}Ayrım işlemi gerçekleşmedi. Ayrım limiti [{defaultPartition}/{PARTITION_LIMIT}] aşıldı.') # ayrım limiti aşılırsa
+    else: print(f'{preCmdInfo}Dosyanız içerisinde {SPLIT_LIMIT} altında satır/film({csvMovies}) var, ayrım işlemi uygulanmayacak.')
 
 def extractObj(job,obj):
     try:
@@ -367,26 +367,15 @@ def urlFix(x):
     return urlList
 
 def coloredDictPrint(colored_dict, main_title=None): # title, dict
-    print(supLine)
+    print(SUP_LINE)
     if main_title != None: print(f"{preCmdInfo}{ced(f'{main_title}', color='yellow')}")
     for listHeader in colored_dict:
         print(f"{preCmdMiddleDot}{ced(listHeader, attrs=['bold', 'underline'])}")
         for listHeaderItem in colored_dict[listHeader]:
             print(f"{preCmdMiddleDotList}{listHeaderItem}: {ced(colored_dict[listHeader][listHeaderItem],'blue')}")
-    print(subLine)
+    print(SUB_LINE)
 
 os.system(f'color & title Welcome %USERNAME%. & cls')
-# CONSTANTS TO VARIABLES
-siteDomain = c.SITE_DOMAIN # saf domain'in parçalanarak birleştirilmesi
-preLogInfo = c.PRE_LOG_INFO # log file ingo msg pre
-preLogErr = c.PRE_LOG_ERR # log file err msg pre  
-supLine = c.SUP_LINE # sup line lenght
-subLine = c.SUB_LINE # sub line lenght
-settingsFileName = c.SETTINGS_FILE_NAME # settings file name
-cmdPrintFilms = c.CMD_PRINT_FILMS # filmler ekrana yazılsın mı
-splitLimit = c.SPLIT_LIMIT # split limit
-partitionLimit = c.PARTITION_LIMIT # partition limit
-splitParameter = c.SPLIT_PARAMETER # split parameter
 # INITIAL ASSIGNMENTS
 preBlankCount = 4*' ' # cmd msg pre blank calc
 preCmdInput = cmdPre('[>','green') # cmd input msg pre
@@ -395,7 +384,7 @@ preCmdErr = cmdPre('[!','red') # cmd error msg pre
 preCmdCheck = cmdPre('[✓','green') # cmd check msg pre
 preCmdUnCheck = cmdPre('[X','red') # cmd uncheck msg pre
 preCmdMiddleDot, preCmdMiddleDotList  = cmdPre(u'[\u00B7','cyan'), cmdPre(u' \u00B7','cyan') #: Cmd middle dot pre
-supLineFilms = f'{supLine}\n{preCmdInfo}{ced("Movies on the list;", color="yellow")}\n' if cmdPrintFilms else ''
+supLineFilms = f'{SUP_LINE}\n{preCmdInfo}{ced("Movies on the list;", color="yellow")}\n' if CMD_PRINT_FILMS else ''
 
 # STARTUP
 sessionLoop = 0 #: while loop sayacı
@@ -416,8 +405,8 @@ while True:
         urlListItem = str(input(f'{preCmdInput}List URL[{inputLoopNo}]: ')).lower() #: Kullanıcıdan liste url'i alınması ve düzenlenmesi.
         if len(urlListItem) > 0: ## Giriş boş değilse..
 
-            if urlListItem[0:len(splitParameter)] == splitParameter: # Split görevi.
-                splitCsv(urlListItem[len(splitParameter):])
+            if urlListItem[0:len(SPLIT_PARAMETER)] == SPLIT_PARAMETER: # Split görevi.
+                splitCsv(urlListItem[len(SPLIT_PARAMETER):])
                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                 continue
 
@@ -460,7 +449,7 @@ while True:
                             urlListItem = urlListItem[:x-1]
                         x += -1
                 else: endList = 'Not specified.' # Son liste için bir parametre belirtilmezse.
-                searchList = f'{siteDomain}/search/lists/{urlListItem}/'
+                searchList = f'{SITE_DOMAIN}/search/lists/{urlListItem}/'
                 searchListPreviewDom = doReadPage(searchList)
 
                 searchMetaTitle = getMetaContent(searchListPreviewDom,'og:title') # getting og:title
@@ -491,7 +480,7 @@ while True:
                     connectionPage = f'{searchList}page/{sayfa}'
                     searchListDom = doReadPage(connectionPage)
                     listsUrls = searchListDom.find_all('a', attrs={'class':'list-link'}) # okunmuş sayfadaki tüm listelerin adresleri.
-                    print(supLine)
+                    print(SUP_LINE)
                     print(f"{preCmdInfo}{ced('Process info;', color='yellow')}") # process Title
                     print(f"{preCmdInfo}CP: {ced(sayfa,'blue')}, PL: {ced(len(listsUrls),'blue')}, CPURL: {ced(connectionPage,'blue')}") #: CP: Current Page, PL: Page list, CPURL: Current Page Url
                     for listsUrl in listsUrls:
@@ -500,7 +489,7 @@ while True:
                             break
                         liste += 1
                         print(f'{preCmdInfo}P{sayfa}:L{liste}')
-                        urlListItem = siteDomain+listsUrl.get('href') #: https://letterboxd.com + /user_name/list/list_name
+                        urlListItem = SITE_DOMAIN+listsUrl.get('href') #: https://letterboxd.com + /user_name/list/list_name
                         userListAvailable, approvedListUrl = userListCheck(doReadPage(urlListItem))
                         if approvedListUrl not in urlList:
                             if userListAvailable:
@@ -510,7 +499,7 @@ while True:
                             print(f'{preCmdUnCheck}Bu listeyi daha önce eklemişiz.')
                             liste -= 1
                     else: continue
-                    print(subLine)
+                    print(SUB_LINE)
                     break
                 break
 
@@ -561,11 +550,11 @@ while True:
             else:
                 listEnter = False
                 print(f"{preCmdInfo}The {ced('session was canceled','red', attrs=['dark'])} because you did not verify the information.")
-                txtLog(f'{preLogInfo}The session was canceled because you did not verify the information.',logFilePath)
+                txtLog(f'{PRE_LOG_INFO}The session was canceled because you did not verify the information.',logFilePath)
 
         if listEnter:
-            txtLog(f'{preLogInfo}Şimdiki listeye erişim başlatılıyor.',logFilePath)
-            print(supLine)
+            txtLog(f'{PRE_LOG_INFO}Şimdiki listeye erişim başlatılıyor.',logFilePath)
+            print(SUP_LINE)
             print(f"{preCmdInfo}{ced(f'List confirmed. {autoEnterMsg}', color='green')}")
 
             lastPageNo = getListLastPageNo()
@@ -579,15 +568,15 @@ while True:
                 loopCount = 1
                 print(supLineFilms,end='')
                 for x in range(int(lastPageNo)): # sayfa sayısı kadar döngü oluştur.
-                    txtLog(f'{preLogInfo}Connecting to {currentUrListItemDetailPage}{str(x+1)}', logFilePath) # sayfa numarasını log dosyasına yaz.
+                    txtLog(f'{PRE_LOG_INFO}Connecting to {currentUrListItemDetailPage}{str(x+1)}', logFilePath) # sayfa numarasını log dosyasına yaz.
                     currentDom = doReadPage(f'{currentUrListItemDetailPage}{str(x+1)}') # sayfa dom'u alınır.
                     loopCount = doPullFilms(loopCount, currentDom) # filmleri al.
                 csvFile.close() # açtığımız dosyayı manuel kapattık
 
             os.system(f'title {processState} completed!') # dosya oluşturulduğunda ekrana yazı yazılır.
-            txtLog(f'{preLogInfo}{processState} completed!', logFilePath) # dosya oluşturulduğunda log dosyasına yazı yazılır.
+            txtLog(f'{PRE_LOG_INFO}{processState} completed!', logFilePath) # dosya oluşturulduğunda log dosyasına yazı yazılır.
             print(f'{preCmdInfo}{loopCount-1} film {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.') # filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
-            print(subLine)
+            print(SUB_LINE)
             print(f"{preCmdInfo}{ced(f'{processState} completed!', 'green')}") # işlem tamamlandığında mesajı ekrana yazdırıyoruz.
 
     combineCsv() # csv dosyalarını birleştir.
@@ -595,5 +584,5 @@ while True:
     os.system(f'title Session: {currenSessionHash} ended!') # terminal header
     print(f"{preCmdInfo}Process State: {cmdBlink(processState +' Finish.','green')}")
     print(f"{preCmdInfo}{ced(f'Session: {currenSessionHash} ended.', 'green')}")
-    txtLog(f'{preLogInfo}Session: {currenSessionHash} ended.', logFilePath) # write log
+    txtLog(f'{PRE_LOG_INFO}Session: {currenSessionHash} ended.', logFilePath) # write log
     os.system(f"echo {preCmdInfo}{cmdBlink('Press enter to continue with the new session.','yellow')} & pause >nul")
