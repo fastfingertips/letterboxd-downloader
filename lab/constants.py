@@ -1,3 +1,4 @@
+
 SETTINGS_FILE_NAME = 'settings'+'.json' # settings file name
 SPLIT_LIMIT = 1500 # split limit
 PARTITION_LIMIT = 10 # partition limit
