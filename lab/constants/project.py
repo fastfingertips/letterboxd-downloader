@@ -12,3 +12,4 @@ SUP_LINE = '_'*80 # sup line lenght
 SUB_LINE = '¯'*80 # sub line lenght
 CMD_PRINT_FILMS = True # Print the movies after every request?
 SPLIT_PARAMETER = "split:" # split parameter
+SESSIONS_FILE_NAME = 'sessions'+'.json' # sessions file name
