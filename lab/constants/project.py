@@ -14,4 +14,15 @@ SUP_LINE = '_'*80 # sup line lenght
 SUB_LINE = '¯'*80 # sub line lenght
 CMD_PRINT_FILMS = True # Print the movies after every request?
 SPLIT_PARAMETER = "split:" # split parameter
+# Session
+SESSION_DICT_KEY = 'sessions' # sessions key
+SESSION_PROCESSES_KEY = 'processes' # session processes key
+SESSION_PIDS_KEY = 'pids' # session pids key
+
 SESSIONS_FILE_NAME = 'sessions'+'.json' # sessions file name
+
+SESSION_PID_KEY = 'pid' # session pid key
+SESSION_START_KEY = 'start_key' # session start key
+SESSION_LAST_KEY = 'last_key' # session end key
+
+SESSION_FINISHED_KEY = 'finished' # session finished key
