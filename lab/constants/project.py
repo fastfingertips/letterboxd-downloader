@@ -4,7 +4,9 @@ PARTITION_LIMIT = 10 # partition limit
 # Domain
 SITE_PROTOCOL, SITE_URL = "https://", "letterboxd.com"
 SITE_DOMAIN = SITE_PROTOCOL + SITE_URL # https://letterboxd.com
-# Log Pre
+# Log
+DEFAULT_LOG_KEY = 'log_dir' # default log dir name
+DEFAULT_EXPORT_KEY = 'export_dir' # default export dir name
 PRE_LOG_INFO = "Info: " # log file ingo msg pre
 PRE_LOG_ERR = "Error: " # log file err msg pre  
 # Cmd Lines
