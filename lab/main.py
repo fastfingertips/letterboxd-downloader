@@ -1,14 +1,14 @@
 
 from methods.color_ import ced, cmdBlink, coloredDictPrint, preCmdInfo, preCmdInput, preCmdErr, preCmdCheck, preCmdUnCheck, SUP_LINE, SUB_LINE, supLineFilms #: PMI
 from methods.req_ import urlFix, doReadPage, getMetaContent, userListCheck, getBodyContent, listSignature, getListLastPageNo, doPullFilms
-from methods.system_ import dirCheck, fileCheck, terminalSystem, terminalTitle, settingsFileSet # PMI
+from methods.system_ import dirCheck, fileCheck, terminalSystem, terminalTitle
 from methods.csv_ import splitCsv, combineCsv
 from methods.time_ import getRunTime #: PMI
 from methods.hash_ import getChanges
-from methods.log_ import txtLog, startSession
-from constants.project import SITE_DOMAIN, PRE_LOG_INFO, SPLIT_PARAMETER, SESSIONS_FILE_NAME
+from methods.log_ import txtLog, startSession, updateSession, readSettings, createLogFile, endSession
+from constants.project import SITE_DOMAIN, PRE_LOG_INFO, SPLIT_PARAMETER, DEFAULT_EXPORT_KEY, DEFAULT_LOG_KEY
 # ---
-import csv, json
+import csv
 while True: #: Other libs
     try:
         # from libs.termcolor110.termcolor import colored
@@ -33,28 +33,24 @@ def extractObj(job,obj):
 
 # STARTUP
 sessionLoop = 0 #: while loop sayacı
-sessionStartHash =  getRunTime() #: Generate start hash
-startSession()
+sessionStartHash =  getRunTime() # generate process hash
+sessionCurrentHash = sessionStartHash # generate process hash
+startSession(sessionStartHash) # session start
 
 while True:
     # terminalSystem('cls') #: İlk başlangıç ve yeni başlangıçlara temiz bir başlangıç.
-    currentSessionHash = getRunTime() #: sessionHashes = {'Startup':sessionStartHash,'Current':currenSessionHash}
-    with open(SESSIONS_FILE_NAME, "r", encoding="utf-8") as f:
-        sessionRecords = json.load(f)
-    with open(SESSIONS_FILE_NAME, "w", encoding="utf-8") as f:
-        sessionRecords['sessions'][sessionStartHash] = currentSessionHash
-        json.dump(sessionRecords, f, indent=4)
+    createLogFile(sessionCurrentHash)
 
-    logDirName, exportDirName = settingsFileSet() #: Set Export dir and Log dirs
-    logFilePath = f'{logDirName}/{currentSessionHash}.txt' #: Set log file dir
+    # SETTINGS
+    settings = readSettings()
+    logDirName = settings[DEFAULT_LOG_KEY]
+    exportDirName = settings[DEFAULT_EXPORT_KEY]
+    exportsPath = f'{exportDirName}/{sessionCurrentHash}/'
+
     dirCheck([logDirName,exportDirName]) #: Log file check
 
-    hashChanges = getChanges(len(sessionStartHash),sessionStartHash,currentSessionHash)
-
-    with open(logFilePath, "w", encoding="utf-8") as f: 
-        f.writelines(f'{getRunTime()} {PRE_LOG_INFO} Log file created.\n')
-    exportsPath = f'{exportDirName}/{currentSessionHash}/'
-    print(f"{preCmdInfo}Session Hash: {sessionStartHash}{'' if sessionStartHash == currentSessionHash else ' -> ' + hashChanges}") #: Her oturum başlangıcı için farklı bir isim üretildi.
+    hashChanges = getChanges(len(sessionStartHash), sessionStartHash, sessionCurrentHash)
+    print(f"{preCmdInfo}Session Hash: {sessionStartHash}{'' if sessionStartHash == sessionCurrentHash else ' -> ' + hashChanges}") #: Her oturum başlangıcı için farklı bir isim üretildi.
 
     inputLoopNo, urlList, breakLoop, listEnterPassOn = 0, [], False, True #: While döngüne ait 
     while True:
@@ -63,7 +59,7 @@ while True:
         if len(urlListItem) > 0: ## Giriş boş değilse..
 
             if urlListItem[0:len(SPLIT_PARAMETER)] == SPLIT_PARAMETER: # Split görevi.
-                splitCsv(urlListItem[len(SPLIT_PARAMETER):], exportDirName, currentSessionHash)
+                splitCsv(urlListItem[len(SPLIT_PARAMETER):], exportDirName, sessionCurrentHash)
                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                 continue
 
@@ -237,10 +233,15 @@ while True:
             print(SUB_LINE)
             print(f"{preCmdInfo}{ced(f'{processState} completed!', 'green')}") # işlem tamamlandığında mesajı ekrana yazdırıyoruz.
 
-    combineCsv(urlList, exportDirName, currentSessionHash, exportsPath) # csv dosyalarını birleştir.
+    combineCsv(urlList, exportDirName, sessionCurrentHash, exportsPath) # csv dosyalarını birleştir.
 
-    terminalTitle(f'Session: {currentSessionHash} ended!') # terminal header
+    endSession(sessionCurrentHash)
+
+    terminalTitle(f'Session: {sessionCurrentHash} ended!') # terminal header
     print(f"{preCmdInfo}Process State: {cmdBlink(processState +' Finish.','green')}")
-    print(f"{preCmdInfo}{ced(f'Session: {currentSessionHash} ended.', 'green')}")
-    txtLog(f'{PRE_LOG_INFO}Session: {currentSessionHash} ended.') # write log
+    print(f"{preCmdInfo}{ced(f'Session: {sessionCurrentHash} ended.', 'green')}")
+    txtLog(f'{PRE_LOG_INFO}Session: {sessionCurrentHash} ended.') # write log
     terminalSystem(f"echo {preCmdInfo}{cmdBlink('Press enter to continue with the new session.','yellow')} & pause >nul")
+
+    sessionCurrentHash = getRunTime()
+    updateSession(sessionCurrentHash) # updating session hash
