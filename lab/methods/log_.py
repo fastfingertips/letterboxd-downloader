@@ -33,17 +33,23 @@ def txtLog(r_message): #: None: Kullanıcı log lokasyonunu belirtmese de olur.
     with open(getLogFilePath(), 'a') as logFile:
         logFile.write(f'{r_message}\n')
 
-def createLogFile(app_id):
+def startLog(app_id):
     if checkLogDir():
+        # If the log file exists, it is checked.
         logDir = readSettings()[DEFAULT_LOG_KEY]
         logFullPath = f'{logDir}/{app_id}.txt'
-        if checkLogFile(logFullPath): return True
+        print(f'{preCmdInfo}Session log file creating...', end=' ')
+        if checkLogFile(logFullPath):
+            print(f'already exists.')
+            return True
         else: # If the log file does not exist, it is created.
             try:
                 with open(logFullPath, 'w') as logFile:
                     logFile.write(f'{PRE_LOG_INFO}Log file created. {getLogTime()}')
+                print('successfully.')
                 return True
             except Exception as e:
+                print(f'failed.')
                 print(f'{preCmdErr}Log file could not be created. Error Message: {e}')
                 return False
 
@@ -128,38 +134,47 @@ def updateSession(current_session):
 
     dumpJsonFile(SESSIONS_FILE_NAME, sessionRecords)
 
+def sessionCreator(app_id):
+    try:
+        # If the file does not exist, it will create a new one.
+        print(f'{preCmdInfo}New session file creating...', end=' ')
+        createSession(app_id)
+        print(f'successfully.')
+    except:
+        print(f'failed.')
+        raise Exception(f'{preCmdErr}Session file could not be created.')
+
+def sessionBackup():
+    try:
+        # last session file backup
+        print(f'{preCmdInfo}Session file backup...', end=' ')
+        fileRenamer(SESSIONS_FILE_NAME, f'backup_broken_{SESSIONS_FILE_NAME}')
+        print(f'successfully.') # backup successfully
+    except:
+        print(f'failed.') # backup failed
+        raise Exception(f'{preCmdErr}Last session file could not be backup.')
+
+def addSession(start_hash):
+    try:
+        # add new session
+        print(f'{preCmdInfo}Starting new session...', end=' ')
+        newSession(start_hash)
+        print(f'successfully.') # add new session successfully
+    except json.decoder.JSONDecodeError: 
+        # If the file is broken or empty, the file will be backed up and a new one will be created.
+        print(f'failed.') # add new session failed
+        sessionBackup()
+        sessionCreator(start_hash)
+
 def startSession(start_hash) -> None:
     print(f'{preCmdInfo}Session file checking...', end=' ')
     if fileExists(SESSIONS_FILE_NAME):
-        print(f'successfully.')
-        try:
-            print(f'{preCmdInfo}Starting new session...', end=' ')
-            newSession(start_hash)
-            print(f'successfully.')
-        except json.decoder.JSONDecodeError: 
-            # If the file is broken or empty, the file will be backed up and a new one will be created.
-            print(f'failed.')
-            try:
-                # last session file backup
-                print(f'{preCmdInfo}Session file backup...', end=' ')
-                fileRenamer(SESSIONS_FILE_NAME, f'backup_broken_{SESSIONS_FILE_NAME}')
-                print(f'successfully.')
-            except: raise Exception(f'{preCmdErr}Last session file could not be backup.')
-
-            try:
-                # new session file create
-                print(f'{preCmdInfo}Session file creating...', end=' ')
-                createSession(start_hash)
-                print(f'successfully.')
-            except: raise Exception(f'{preCmdErr}New session file could not be created.')
+        # If the session file exists, the session is started.
+        print(f'successfully.') # checking successfully
+        addSession(start_hash)
     else:
-        print(f'failed.')
-        try:
-            # If the file does not exist, it will create a new one.
-            print(f'{preCmdInfo}Session file creating...', end=' ')
-            createSession(start_hash)
-            print(f'successfully.')
-        except: raise Exception(f'{preCmdErr}Session file could not be created.')
+        print(f'failed.') # checking failed
+        sessionCreator(start_hash)
 
 # -- SETTINGS --
 
