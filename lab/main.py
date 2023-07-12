@@ -5,7 +5,7 @@ from methods.system_ import dirCheck, fileCheck, terminalSystem, terminalTitle
 from methods.csv_ import splitCsv, combineCsv
 from methods.time_ import getRunTime #: PMI
 from methods.hash_ import getChanges
-from methods.log_ import txtLog, startSession, updateSession, readSettings, createLogFile, endSession
+from methods.log_ import txtLog, startSession, readSettings, startLog, endSession
 from constants.project import SITE_DOMAIN, PRE_LOG_INFO, SPLIT_PARAMETER, DEFAULT_EXPORT_KEY, DEFAULT_LOG_KEY
 # ---
 import csv
@@ -29,25 +29,25 @@ def extractObj(job,obj):
     except: pass
     return job
 
-# terminalSystem(f'color & title Welcome %USERNAME%. & cls')
+# system color start end reset
+# user welcome message and screen clear
+terminalSystem(f'color & title Welcome %USERNAME%. & cls')
 
-# STARTUP
-sessionLoop = 0 #: while loop sayacı
 sessionStartHash =  getRunTime() # generate process hash
-sessionCurrentHash = sessionStartHash # generate process hash
-startSession(sessionStartHash) # session start
-
+pLoop = 0 # program loop
 while True:
-    # terminalSystem('cls') #: İlk başlangıç ve yeni başlangıçlara temiz bir başlangıç.
-    createLogFile(sessionCurrentHash)
+    # STARTUP
+    sessionCurrentHash = sessionStartHash if pLoop == 0 else getRunTime() # generate process hash
+    startSession(sessionCurrentHash)
+    startLog(sessionCurrentHash)
+    pLoop += 1
 
     # SETTINGS
     settings = readSettings()
-    logDirName = settings[DEFAULT_LOG_KEY]
-    exportDirName = settings[DEFAULT_EXPORT_KEY]
-    exportsPath = f'{exportDirName}/{sessionCurrentHash}/'
+    logDirName, exportDirName = settings[DEFAULT_LOG_KEY], settings[DEFAULT_EXPORT_KEY]
+    exportsPath = ''.join([exportDirName, '/', sessionCurrentHash, '/']) # exports/000000000/
 
-    dirCheck([logDirName,exportDirName]) #: Log file check
+    dirCheck([logDirName, exportDirName]) #: Log file check
 
     hashChanges = getChanges(len(sessionStartHash), sessionStartHash, sessionCurrentHash)
     print(f"{preCmdInfo}Session Hash: {sessionStartHash}{'' if sessionStartHash == sessionCurrentHash else ' -> ' + hashChanges}") #: Her oturum başlangıcı için farklı bir isim üretildi.
@@ -211,7 +211,7 @@ while True:
             print(f"{preCmdInfo}{ced(f'List confirmed. {autoEnterMsg}', color='green')}")
 
             lastPageNo = getListLastPageNo(cListDom, currentUrListItemDetailPage)
-            openCsv = f'{exportsPath}{cListOwner}_{cListDomainName}_{cListRunTime}.csv' 
+            openCsv = ''.join([exportsPath, cListOwner, '_', cListDomainName, '_', cListRunTime, '.csv'])
             dirCheck([exportsPath]) # export klasörünün kontrolü.
             fileCheck([openCsv]) # csv dosyasının kontrolü.
             with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: # konumda Export klasörü yoksa dosya oluşturmayacaktır.
@@ -242,6 +242,3 @@ while True:
     print(f"{preCmdInfo}{ced(f'Session: {sessionCurrentHash} ended.', 'green')}")
     txtLog(f'{PRE_LOG_INFO}Session: {sessionCurrentHash} ended.') # write log
     terminalSystem(f"echo {preCmdInfo}{cmdBlink('Press enter to continue with the new session.','yellow')} & pause >nul")
-
-    sessionCurrentHash = getRunTime()
-    updateSession(sessionCurrentHash) # updating session hash
