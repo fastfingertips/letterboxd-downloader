@@ -1,11 +1,13 @@
 
+
 from methods.color_ import ced, cmdBlink, coloredDictPrint, preCmdInfo, preCmdInput, preCmdErr, preCmdCheck, preCmdUnCheck, SUP_LINE, SUB_LINE, supLineFilms #: PMI
 from methods.req_ import urlFix, doReadPage, getMetaContent, userListCheck, getBodyContent, listSignature, getListLastPageNo, doPullFilms
 from methods.system_ import dirCheck, fileCheck, terminalSystem, terminalTitle
 from methods.csv_ import splitCsv, combineCsv
+from methods.session_ import startSession, endSession
 from methods.time_ import getRunTime #: PMI
-from methods.hash_ import getChanges
-from methods.log_ import txtLog, startSession, readSettings, startLog, endSession
+from methods.log_ import txtLog, startLog, readSettings
+from methods.hash_ import getChanges, extractObj
 from constants.project import SITE_DOMAIN, PRE_LOG_INFO, SPLIT_PARAMETER, DEFAULT_EXPORT_KEY, DEFAULT_LOG_KEY
 # ---
 import csv
@@ -21,13 +23,6 @@ while True: #: Other libs
 def currentListDomainName(currentUrListItem):
     _f_ = '/list/'
     return currentUrListItem[currentUrListItem.index(_f_)+len(_f_):].replace('/',"")
-
-def extractObj(job,obj):
-    try:
-        while job[-1] == obj: ## $job sonunda $obj olduğu sürece..
-            job = job[:-1] # her defasında $job sonundan $obj siler.
-    except: pass
-    return job
 
 # system color start end reset
 # user welcome message and screen clear
