@@ -7,3 +7,10 @@ def getChanges(loop,key1,key2):
         else cmdBlink(key2[i], 'green')
         for i in range(loop)
     )
+
+def extractObj(job,obj):
+    try:
+        while job[-1] == obj: ## $job sonunda $obj olduğu sürece..
+            job = job[:-1] # her defasında $job sonundan $obj siler.
+    except: pass
+    return job
