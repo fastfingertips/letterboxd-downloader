@@ -141,20 +141,24 @@ def getMovieCount(tempLastPageNo, cListDom, currentUrListItemDetailPage): # Film
         txtLog('Error getting movie count.')
         txtLog(f'{PRE_LOG_ERR}An error occurred while obtaining the number of movies.')
 
-def getListLastPageNo(cListDom, currentUrListItemDetailPage): # Listenin son sayfasını öğren
+def getListLastPageNo(_currentListDom, _currentUrListItemDetailPage): # get list last page no
     try:
-        # Not: Sayfa sayısını bulmak için li'leri sayma. Son sayıyı al. Son'linin içindeki bağlantının metni bize kaç sayfalı bir listemiz olduğunuz verecek.
-        txtLog(f'{PRE_LOG_INFO}Listedeki sayfa sayısı denetleniyor..')
-        lastPageNo = cListDom.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text # > Listede 100 ve 100'den az film sayısı olduğunda sayfa sayısı için bir link oluşturulmaz.
-        txtLog(f'{PRE_LOG_INFO}Liste birden çok sayfaya ({lastPageNo}) sahiptir.')
-        getMovieCount(lastPageNo, cListDom, currentUrListItemDetailPage)
-    except AttributeError: ## Kontrolümüzde..
-        txtLog(f'{PRE_LOG_INFO}Birden fazla sayfa yok, bu liste tek sayfadır. {AttributeError}')
-        lastPageNo = 1 #: Sayfa sayısı bilgisi alınamadığında sayfa sayısı 1 olarak işaretlenir.
-        getMovieCount(lastPageNo, cListDom, currentUrListItemDetailPage) #: Sayfa bilgisi gönderiliyor.
-    except Exception as e: errorLine(e)
+        # Note: To find the number of pages, count the li's. Take the last number.
+        # The text of the link in the last 'li' will give us how many pages our list is.
+        txtLog(f'{PRE_LOG_INFO}Checking the number of pages in the list..')
+
+        #> not created link when the number of movies is 100 or less in the list.
+        lastPageNo = _currentListDom.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text 
+        txtLog(f'{PRE_LOG_INFO}The list has more than one page ({lastPageNo}).')
+        getMovieCount(lastPageNo, _currentListDom, _currentUrListItemDetailPage)
+    except AttributeError: # exception when there is only one page.
+        txtLog(f'{PRE_LOG_INFO}There is no more than one page, this list is one page.')
+        lastPageNo = 1 # when the number of pages cannot be obtained, the number of pages is marked as 1.
+        getMovieCount(lastPageNo, _currentListDom, _currentUrListItemDetailPage) # send page info.
+    except Exception as e:
+        errorLine(e)
     finally:
-        txtLog(f'{PRE_LOG_INFO}Sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPageNo} olduğu öğrenildi.')
+        txtLog(f'{PRE_LOG_INFO}Communication with the page is complete. It is learned that the number of pages in the list is {lastPageNo}.')
         return lastPageNo
 
 def doReadPage(_url):
@@ -168,7 +172,7 @@ def doReadPage(_url):
                 urlResponseCode = requests.get(_url, timeout=30)
                 urlDom = bs(urlResponseCode.content.decode('utf-8'), 'html.parser')
                 if urlDom != None:
-                    return urlDom  # Returns the page DOM
+                    return urlDom # Returns the page DOM
             except requests.ConnectionError as e:
                 print("OOPS!! Connection Error. Make sure you are connected to the Internet. Technical details are provided below.")
                 print(str(e))
