@@ -157,17 +157,20 @@ def getListLastPageNo(cListDom, currentUrListItemDetailPage): # Listenin son say
         txtLog(f'{PRE_LOG_INFO}Sayfa ile iletişim tamamlandı. Listedeki sayfa sayısının {lastPageNo} olduğu öğrenildi.')
         return lastPageNo
 
-def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
+def doReadPage(_url):
+    #> Reads and retrieves the DOM of the specified page URL.
     try:
-        txtLog(f'{PRE_LOG_INFO}Trying connect to [{tempUrl}]') #: Log dosyasına bağlantı başlangıcında bilgi veriliyor.
+        #> Provides information in the log file at the beginning of the connection.
+        txtLog(f'{PRE_LOG_INFO}Trying to connect to [{_url}]') 
         while True:
-            #: https://stackoverflow.com/questions/23013220/max-retries-exceeded-with-url-in-requests
+            #> https://stackoverflow.com/questions/23013220/max-retries-exceeded-with-url-in-requests
             try:
-                urlResponseCode = requests.get(tempUrl,timeout=30)
+                urlResponseCode = requests.get(_url, timeout=30)
                 urlDom = bs(urlResponseCode.content.decode('utf-8'), 'html.parser')
-                if urlDom != None: return urlDom #: Return page dom
+                if urlDom != None:
+                    return urlDom  # Returns the page DOM
             except requests.ConnectionError as e:
-                print("OOPS!! Connection Error. Make sure you are connected to Internet. Technical Details given below.")
+                print("OOPS!! Connection Error. Make sure you are connected to the Internet. Technical details are provided below.")
                 print(str(e))
                 continue
             except requests.Timeout as e:
@@ -178,11 +181,14 @@ def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
                 print("OOPS!! General Error")
                 print(str(e))
                 continue
-            except KeyboardInterrupt: print("Someone closed the program")
-            except Exception as e: print('Hata:',e)
-    except Exception as e: #: Dom edinirken hata gerçekleşirse..
+            except KeyboardInterrupt:
+                print("Someone closed the program")
+            except Exception as e:
+                print('Error:', e)
+    except Exception as e:
+        #> If an error occurs while obtaining the DOM...
         errorLine(e)
-        txtLog(f'{PRE_LOG_ERR}Connection to address failed [{tempUrl}]')
+        txtLog(f'{PRE_LOG_ERR}Connection to the address failed [{_url}]')
 
 def doPullFilms(_loopCount, _currentDom, _writer): # gettin' films and write to csv
     try:
