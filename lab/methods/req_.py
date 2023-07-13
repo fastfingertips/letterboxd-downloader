@@ -118,28 +118,36 @@ def listSignature(cListDom, currentUrListItemDetailPage, processState, cListOwne
         errorLine(e)
         txtLog(f'{PRE_LOG_ERR}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.')
 
-def getMovieCount(tempLastPageNo, cListDom, currentUrListItemDetailPage): # Film sayısını öğreniyoruz
+def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage): # get list film count
     try:
-        try: # Son sayfaya bağlanıp, son sayfadaki film sayısını almak bir get isteği üretir ve programı yavaşlatır bu nedenle bir alternatif
-            metaDescription = cListDom.find('meta', attrs={'name':'description'}).attrs['content']
-            metaDescription = metaDescription[10:] #: açıklama kısmındaki 'A list of ' sonrası
-            for i in range(6):
-                try:
-                    int(metaDescription[i])
-                    ii = i+1
-                except: pass
-            movieCount = metaDescription[:ii]
-        except Exception as e: ## Listenin son sayfa işlemleri.
-            lastPageDom = doReadPage(f'{currentUrListItemDetailPage}{tempLastPageNo}') #: Getting lastpage dom.
-            lastPageArticles = lastPageDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li") #: Sayfa kodları çekildi.
-            lastPageMoviesCount =  len(lastPageArticles) #: Film sayısı öğrenildi.
-            movieCount = ((int(tempLastPageNo)-1)*100)+lastPageMoviesCount #: Toplam film sayısını belirlemek.
-            txtLog(f"{PRE_LOG_INFO}Listedeki film sayısı {movieCount} olarak bulunmuştur.") #: Film sayısı hesaplandıktan sonra ekrana yazdırılır.
-        return movieCount #: Film sayısı çağrıya gönderilir.
-    except Exception as e: ## Olası hata durumunda. (Dom edinirken)
-        errorLine(e)
-        txtLog('Error getting movie count.')
-        txtLog(f'{PRE_LOG_ERR}An error occurred while obtaining the number of movies.')
+        txtLog(f'{preCmdInfo}Getting the number of movies on the list meta description.')
+        # Instead of connecting to the last page and getting the number of movies on the last page, which generates a GET request
+        # and slows down the program, an alternative approach is used by getting the meta description of the list page.
+        metaDescription = _currentListDom.find('meta', attrs={'name':'description'}).attrs['content']
+        metaDescription = metaDescription[10:] # after 'A list of' in the description
+
+        for i in range(6):
+            try:
+                int(metaDescription[i])
+                ii = i+1
+            except: pass
+        movieCount = metaDescription[:ii]
+        return movieCount
+    except: # list's last page process
+        txtLog(f'{preCmdInfo}Getting the number of movies on the list last page.')
+        try:
+            lastPageDom = doReadPage(f'{_currentUrlListItemDetailPage}{_lastPageNo}') # Getting lastpage dom.
+            #> pulled page codes.
+            lastPageArticles = lastPageDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
+            lastPageMoviesCount =  len(lastPageArticles) # film count.
+            movieCount = ((int(_lastPageNo)-1)*100)+lastPageMoviesCount # total movie count.
+            #> after the number of movies is found, it is written to the log file.
+            txtLog(f"{PRE_LOG_INFO}Found list movie count as {movieCount}.")
+            return movieCount # return movie count
+        except Exception as e: # in case of possible error. (While getting dom)
+            errorLine(e)
+            txtLog(f'{PRE_LOG_ERR}An error occurred while obtaining the number of movies on the list last page.')
+
 
 def getListLastPageNo(_currentListDom, _currentUrListItemDetailPage): # get list last page no
     try:
