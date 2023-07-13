@@ -1,11 +1,35 @@
-from constants.project import PRE_LOG_ERR, PRE_LOG_INFO, SUP_LINE, SITE_DOMAIN, CMD_PRINT_FILMS
-from .color_ import cmdBlink, ced, preCmdInfo, preCmdErr, preCmdCheck, preBlankCount, preCmdMiddleDot, preCmdMiddleDotList
-from .log_ import txtLog, errorLine
+from bs4 import BeautifulSoup
+import requests
+import arrow
+
+# -- Local Imports -- #
+
 from .system_ import terminalTitle
 from .hash_ import getChanges
-# other
-from bs4 import BeautifulSoup as bs
-import requests, arrow
+
+from constants.project import(
+    CMD_PRINT_FILMS,
+    PRE_LOG_INFO,
+    PRE_LOG_ERR,
+    SITE_DOMAIN,
+    SUP_LINE
+)
+
+from .color_ import(
+    preCmdMiddleDotList,
+    preCmdMiddleDot,
+    preBlankCount,
+    preCmdCheck,
+    preCmdInfo,
+    preCmdErr,
+    cmdBlink,
+    ced
+)
+
+from .log_ import(
+    errorLine,
+    txtLog
+)
 
 def getBodyContent(dom, obj):
     return dom.find('body').attrs[obj]
@@ -178,7 +202,7 @@ def doReadPage(_url):
             #> https://stackoverflow.com/questions/23013220/max-retries-exceeded-with-url-in-requests
             try:
                 urlResponseCode = requests.get(_url, timeout=30)
-                urlDom = bs(urlResponseCode.content.decode('utf-8'), 'html.parser')
+                urlDom = BeautifulSoup(urlResponseCode.content.decode('utf-8'), 'html.parser')
                 if urlDom != None:
                     return urlDom # Returns the page DOM
             except requests.ConnectionError as e:
