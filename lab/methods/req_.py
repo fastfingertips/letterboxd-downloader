@@ -89,50 +89,76 @@ def userListCheck(_url_list_item_dom, urlListItem): #: Kullanıcının girilen �
         currentListAvaliable = False
     finally: return currentListAvaliable, metaOgUrl
 
-def listSignature(cListDom, currentUrListItemDetailPage, processState, cListOwner, cListRunTime, cListDomainName, currentUrListItem, currentUrListItemDetail): #: x: 0 start msg, 1 end msg
+def getListSignature(_listDict): # Get list's signature
+    listDom = _listDict['list_dom']
+    listDetailPage = _listDict['list_detail_page']
+
+    listBy = listDom.select("[itemprop=name]")[0].text #: Liste sahibi ismi çekiliyor.
+    try: listTitle = listDom.select("[itemprop=title]")[0].text.strip() #: Liste başlığının ismini çekiliyor.
+    except IndexError: listTitle = getMetaContent(listDom, 'og:title') #: Liste başlığının ismini çekiliyor.
+    listPublicationTime = listDom.select(".published time")[0].text #: Liste oluşturulma tarihi çekiliyor.
+    listPublicationTimeHumanize = arrow.get(listPublicationTime).humanize()
+    listLastPage = getListLastPageNo(listDom, listDetailPage) #: Liste sayfa sayısı çekiliyor.
+    listMovieCount =  getMovieCount(listLastPage, listDom, listDetailPage) #: Listedeki film sayısı hesaplanıyor.
+
+    try: ## Filtre bilgilerini liste sayfasından edinmeyi denemek.
+        domSelectedDecadeYear = listDom.select(".smenu-subselected")[3].text + 'movies only was done by.' #: Liste sayfasından yıl aralık filtre bilgisi alınıyor.
+        domSelectedGenre = listDom.select(".smenu-subselected")[2].text + 'only movies.' #: Liste sayfasından tür filtre bilgisi alınıyor.
+        domSelectedSortBy = listDom.select(".smenu-subselected")[0].text + '.' #: Liste sayfasından sıralama filtre bilgisi alınıyor.
+    except Exception as e: ## Filtre bilgileri edinirken bir hata oluşursa..
+        txtLog(f'{PRE_LOG_ERR}Filtre bilgileri elde bir sorun gerçekleşti.')
+        print('Filtre bilgileri elde bir sorun gerçekleşti.')
+        domSelectedDecadeYear, domSelectedGenre, domSelectedSortBy = 3*'Unknown' #: Filtre bilgileri edinemediğinde her filtreye None eklenir.
+
+    try: ## Search list update time
+        listUpdateTime = listDom.select(".updated time")[0].text #: Liste düzenlenme vakti çekiliyor.
+        listUT = arrow.get(listUpdateTime).humanize() #: Çekilen liste düzenlenme vakti okunmaya uygun hale getiriliyor.
+    except Exception as e: #: Düzenleme vakti edinemezse.
+        errorLine(e)
+        listUT = 'No editing.' #: Hata alınırsa liste düzenlenmemiş varsayılır.
+
+    listSign = {
+        'list_by': listBy,
+        'list_title': listTitle,
+        'list_publication_time': listPublicationTime,
+        'list_publication_time_humanize': listPublicationTimeHumanize,
+        'list_last_page': listLastPage,
+        'list_movie_count': listMovieCount,
+        'list_update_time': listUpdateTime,
+        'list_update_time_humanize': listUT,
+        'list_selected_decade_year': domSelectedDecadeYear,
+        'list_selected_genre': domSelectedGenre,
+        'list_selected_sort_by': domSelectedSortBy
+    }
+
+    return listSign
+
+def listSignature(_listDict): # print list's signature info
     try:
         try: ## Liste sayfasından bilgiler çekmeyi denemek.
-            listBy = cListDom.select("[itemprop=name]")[0].text #: Liste sahibi ismi çekiliyor.
-            listTitle = cListDom.select("[itemprop=title]")[0].text.strip() #: Liste başlığının ismini çekiliyor.
-            listPublicationTime = cListDom.select(".published time")[0].text #: Liste oluşturulma tarihi çekiliyor.
-            listPT = arrow.get(listPublicationTime).humanize() #: Liste oluşturulma tarihi düzenleniyor. Arrow: https://arrow.readthedocs.io/en/latest/
-            listLastPage = getListLastPageNo(cListDom, currentUrListItemDetailPage) #: Liste son sayfası öğreniliyor.
-            listMovieCount =  getMovieCount(listLastPage, cListDom, currentUrListItemDetailPage) #: Listedeki film sayısı hesaplanıyor.
+            listSign = getListSignature(_listDict)
 
-            try: ## Filtre bilgilerini liste sayfasından edinmeyi denemek.
-                domSelectedDecadeYear = cListDom.select(".smenu-subselected")[3].text + 'movies only was done by.' #: Liste sayfasından yıl aralık filtre bilgisi alınıyor.
-                domSelectedGenre = cListDom.select(".smenu-subselected")[2].text + 'only movies.' #: Liste sayfasından tür filtre bilgisi alınıyor.
-                domSelectedSortBy = cListDom.select(".smenu-subselected")[0].text + '.' #: Liste sayfasından sıralama filtre bilgisi alınıyor.
-            except Exception as e: ## Filtre bilgileri edinirken bir hata oluşursa..
-                txtLog(f'{PRE_LOG_ERR}Filtre bilgileri elde bir sorun gerçekleşti.')
-                print('Filtre bilgileri elde bir sorun gerçekleşti.')
-                domSelectedDecadeYear, domSelectedGenre, domSelectedSortBy = 3*'Unknown' #: Filtre bilgileri edinemediğinde her filtreye None eklenir.
-
-            try: ## Search list update time
-                listUpdateTime = cListDom.select(".updated time")[0].text #: Liste düzenlenme vakti çekiliyor.
-                listUT = arrow.get(listUpdateTime).humanize() #: Çekilen liste düzenlenme vakti okunmaya uygun hale getiriliyor.
-            except Exception as e: #: Düzenleme vakti edinemezse.
-                errorLine(e)
-                listUT = 'No editing.' #: Hata alınırsa liste düzenlenmemiş varsayılır.
-            finally: ## Kontrol sonu işlemleri.
-                terminalTitle(f'title {processState} Process: @{cListOwner}.')
-                print(f"\n{preCmdInfo}Process State: {cmdBlink(processState,'green')}")
-                print(SUP_LINE)
-                print(f"{preCmdInfo}{ced('List info;', color='yellow')}")
-                print(f"{preCmdMiddleDot}List by {ced(listBy,'blue', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Updated: {ced(listUT,'blue', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Published: {ced(listPT,'blue', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}List title: {ced(listTitle, 'blue', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Filters;")
-                print(f"{preCmdMiddleDotList}Filtered as {ced(domSelectedDecadeYear,'blue', attrs=['bold'])}")
-                print(f"{preCmdMiddleDotList}Filtered as {ced(domSelectedGenre,'blue', attrs=['bold'])}")
-                print(f"{preCmdMiddleDotList}Movies sorted by {ced(domSelectedSortBy,'blue', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}List hash: {ced(cListRunTime,'blue', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Sayfa sayısı: {ced(listLastPage,'blue', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Number of movies: {ced(listMovieCount,'blue', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}List domain name: {ced(cListDomainName,'blue', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}List URL: {ced(currentUrListItem,'blue', attrs=['bold'])}")
-                print(f"{preCmdMiddleDot}Process URL: {ced(currentUrListItemDetail,'blue', attrs=['bold'])}")
+            terminalTitle(f"{_listDict['process_state']} Process: @{_listDict['list_owner']}.")
+            signList = [
+                f"\n{preCmdInfo}Process State: {cmdBlink(_listDict['process_state'],'green')}",
+                SUP_LINE,
+                f"{preCmdInfo}{ced('List info;', color='yellow')}",
+                f"{preCmdMiddleDot}List by {ced(listSign['list_by'],'blue', attrs=['bold'])}",
+                f"{preCmdMiddleDot}Updated: {ced(listSign['list_update_time_humanize'],'blue', attrs=['bold'])}",
+                f"{preCmdMiddleDot}Published: {ced(listSign['list_publication_time_humanize'],'blue', attrs=['bold'])}",
+                f"{preCmdMiddleDot}List title: {ced(listSign['list_title'], 'blue', attrs=['bold'])}",
+                f"{preCmdMiddleDot}Filters;",
+                f"{preCmdMiddleDotList}Filtered as {ced(listSign['list_selected_decade_year'],'blue', attrs=['bold'])}",
+                f"{preCmdMiddleDotList}Filtered as {ced(listSign['list_selected_genre'],'blue', attrs=['bold'])}",
+                f"{preCmdMiddleDotList}Movies sorted by {ced(listSign['list_selected_sort_by'],'blue', attrs=['bold'])}",
+                f"{preCmdMiddleDot}List hash: {ced(_listDict['list_run_time'],'blue', attrs=['bold'])}",
+                f"{preCmdMiddleDot}Sayfa sayısı: {ced(listSign['list_last_page'],'blue', attrs=['bold'])}",
+                f"{preCmdMiddleDot}Number of movies: {ced(listSign['list_movie_count'],'blue', attrs=['bold'])}",
+                f"{preCmdMiddleDot}List domain name: {ced(_listDict['list_domain_name'],'blue', attrs=['bold'])}",
+                f"{preCmdMiddleDot}List URL: {ced(_listDict['list_url'],'blue', attrs=['bold'])}",
+                f"{preCmdMiddleDot}Process URL: {ced(_listDict['list_detail_url'],'blue', attrs=['bold'])}"
+            ]
+            print('\n'.join(signList))
 
             txtLog(f'{PRE_LOG_INFO}İmza yazdırma sonu.')
         except Exception as e:
@@ -171,7 +197,6 @@ def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage): 
         except Exception as e: # in case of possible error. (While getting dom)
             errorLine(e)
             txtLog(f'{PRE_LOG_ERR}An error occurred while obtaining the number of movies on the list last page.')
-
 
 def getListLastPageNo(_currentListDom, _currentUrListItemDetailPage): # get list last page no
     try:

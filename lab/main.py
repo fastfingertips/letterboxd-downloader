@@ -186,7 +186,19 @@ while True:
         cListDomainName = currentListDomainName(currentUrListItem) # liste domain ismini düzenleyerek alır.
         cListRunTime = getRunTime() # liste işlem vaktini al. 
 
-        listSignature(cListDom, currentUrListItemDetailPage, processState, cListOwner, cListRunTime, cListDomainName, currentUrListItem, currentUrListItemDetail) # liste hakkında bilgiler bastırılır.
+        listDict = {
+            "list_detail_page": currentUrListItemDetailPage, # https://letterboxd.com/{un}/list/{ln}/detail/page/
+            "list_detail_url": currentUrListItemDetail, # https://letterboxd.com/{un}/list/{ln}/detail/
+            "list_domain_name": cListDomainName, # {ln}
+            "process_state": processState, #  [1/1]
+            "list_run_time": cListRunTime, # 14072023022401
+            "list_url": currentUrListItem, # https://letterboxd.com/{un}/list/{ln}
+            "list_owner": cListOwner, # {un}
+            "list_dom": cListDom # <html>...</html>
+        }
+
+        listSignature(listDict) # liste hakkında bilgiler bastırılır.
+
         if listEnterPassOn:
             listEnter = input(f"{preCmdInput}Press enter to confirm the entered information. ({cmdBlink('Enter', 'green')})")
 
@@ -209,6 +221,7 @@ while True:
             openCsv = ''.join([exportsPath, cListOwner, '_', cListDomainName, '_', cListRunTime, '.csv'])
             dirCheck([exportsPath]) # export klasörünün kontrolü.
             fileCheck([openCsv]) # csv dosyasının kontrolü.
+
             with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: # konumda Export klasörü yoksa dosya oluşturmayacaktır.
                 writer = csv.writer(csvFile)
                 header = ['Year', 'Title', 'LetterboxdURI']
@@ -222,18 +235,21 @@ while True:
                     loopCount = doPullFilms(loopCount, currentDom, writer) # filmleri al.
                 csvFile.close() # açtığımız dosyayı manuel kapattık
 
-            terminalTitle(f'{processState} completed!') # dosya oluşturulduğunda ekrana yazı yazılır.
-            txtLog(f'{PRE_LOG_INFO}{processState} completed!') # dosya oluşturulduğunda log dosyasına yazı yazılır.
-            print(f'{preCmdInfo}{loopCount-1} film {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.') # filmerin hangi CSV dosyasına aktarıldığı ekrana yazdırılır.
+            # process end
+            terminalTitle(f'{processState} completed!') # change title
+            print(f'{preCmdInfo}{loopCount-1} film {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.') # print info
+            print(f"{preCmdInfo}{ced(f'{processState} completed!', 'green')}") # print info
+            txtLog(f'{PRE_LOG_INFO}{processState} completed!') # log info
             print(SUB_LINE)
-            print(f"{preCmdInfo}{ced(f'{processState} completed!', 'green')}") # işlem tamamlandığında mesajı ekrana yazdırıyoruz.
 
-    combineCsv(urlList, exportDirName, sessionCurrentHash, exportsPath) # csv dosyalarını birleştir.
+    combineCsv(urlList, exportDirName, sessionCurrentHash, exportsPath) # merge csv files
 
+    # session end
     endSession(sessionCurrentHash)
+    terminalTitle(f'Session: {sessionCurrentHash} ended!') # change title
+    print(f"{preCmdInfo}{ced(f'Session: {sessionCurrentHash} ended.', 'green')}") # print info
+    txtLog(f'{PRE_LOG_INFO}Session: {sessionCurrentHash} ended.') # log info
 
-    terminalTitle(f'Session: {sessionCurrentHash} ended!') # terminal header
+    # process end
     print(f"{preCmdInfo}Process State: {cmdBlink(processState +' Finish.','green')}")
-    print(f"{preCmdInfo}{ced(f'Session: {sessionCurrentHash} ended.', 'green')}")
-    txtLog(f'{PRE_LOG_INFO}Session: {sessionCurrentHash} ended.') # write log
     terminalSystem(f"echo {preCmdInfo}{cmdBlink('Press enter to continue with the new session.','yellow')} & pause >nul")
