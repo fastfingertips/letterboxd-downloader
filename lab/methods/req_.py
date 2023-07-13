@@ -184,37 +184,56 @@ def doReadPage(tempUrl): #: Url'si belirtilen sayfanın okunup, dom alınması.
         errorLine(e)
         txtLog(f'{PRE_LOG_ERR}Connection to address failed [{tempUrl}]')
 
-def doPullFilms(tempLoopCount,tempCurrentDom, writer): # Filmleri çekiyoruz yazıyoruz
+def doPullFilms(_loopCount, _currentDom, _writer): # gettin' films and write to csv
     try:
-        #> Filmleri/Posterleri içeren kapsayıcının çekimi (<ul> elemanı)
-        filmDetailsList = tempCurrentDom.find('ul', attrs={'class': 'js-list-entries poster-list -p70 film-list clear film-details-list'})
-        #> Yukarıda edinmeye çalışılan kapsayıcının(<ul> elemanı) boş olması durumunda alternatif yollar denenmiş, eşleşememenin önüne geçilmeye çalışılmıştır.
+        #> getting' films/posters container (<ul> element)
+        filmDetailsList = _currentDom.find('ul', attrs={'class': 'js-list-entries poster-list -p70 film-list clear film-details-list'})
+
+        #> above line is tryin' to get container, if it's None, tryin' alternative ways to get it
         for currentAlternative in ['ul.film-list', 'ul.poster-list', 'ul.film-details-list']:
-            if filmDetailsList is None: filmDetailsList = tempCurrentDom.select_one(currentAlternative)
-            else: 
-                print(f'{preCmdInfo}{tempLoopCount} ve sonrası için film/poster kapsayıcısı alternatif yardımı gerekmeksizin çekildi.')
+            if filmDetailsList is None: filmDetailsList = _currentDom.select_one(currentAlternative)
+            else:
+                print(f'{preCmdInfo}{_loopCount} and after film/poster container pulled without alternative help.')
                 break
         else:
-            if filmDetailsList is None: print(f'{preCmdInfo}{tempLoopCount} ve sonrası için film/poster kapsayıcısı çekilemedi.')
-            else: print(f'{preCmdInfo}{tempLoopCount} ve sonrasi için film/poster kapsayıcısı alternatif yardımıyla çekildi.')
-        #> Kapsayıcıdan tüm filmlerin/posterlerin çekimi (<li> elemanları)
+            if filmDetailsList is None:
+                print(f'{preCmdInfo}{_loopCount} and after film/poster container could not be pulled.')
+            else:
+                print(f'{preCmdInfo}{_loopCount} and after film/poster container pulled with alternative help.')
+
+        #> getting' container's all films/posters (<li> elements)
         filmDetails = filmDetailsList.find_all("li")
-        #> Filmleri ekrana ve dosyaya yazdırma işlemleri
+
+        #> printing and writing films to file operations
         currentPageMoviesData = []
         for currentFilmDetail in filmDetails:
-            movieHeadlineElement = currentFilmDetail.find('h2', attrs={'class': 'headline-2 prettify'}) # Film ismini ve yılını içeren kapsayıcının çekimi
+            #> pulling container of movie name and year
+            movieHeadlineElement = currentFilmDetail.find('h2', attrs={'class': 'headline-2 prettify'}) 
             movieLinkElement = movieHeadlineElement.find('a')
-            movieName = movieLinkElement.text # Link elementiden film isminin çekimi
-            movieLink = SITE_DOMAIN + movieLinkElement.get('href') # SITE_DOMAIN + Link elementinden film adresinin çekimi https://letterboxd.com + /film/white-zombie/
-            #> Kapsayıcıdan film yılının çekimi vw boş olma ihtimaline(olasılık mevcut) karşın önlemin alınması.
-            try: movieYear = movieHeadlineElement.find('small').text
-            except: movieYear = ''
-            if CMD_PRINT_FILMS: print(f"{tempLoopCount}: {movieYear:4}, {movieName}, {movieLink}") # Kullanıcı eğer isterse çekilen filmler ekrana da yansıtılır.
-            currentMovieData = [movieYear, movieName, movieLink]
+            movieName = movieLinkElement.text # Pulling movie name from link element
+
+            #> pulling movie link from link element https://letterboxd.com(SITE_DOMAIN) + /film/white-zombie/
+            movieLink = SITE_DOMAIN + movieLinkElement.get('href') 
+
+            #> pulling and checking the movie year from the container and taking precautions against the possibility of being empty
+            try:
+                movieYear = movieHeadlineElement.find('small').text
+            except:
+                movieYear = ''
+                txtLog(f'{PRE_LOG_ERR}Movie year could not be pulled. Link: {movieLink}')
+
+            if CMD_PRINT_FILMS: # if user want to print films to console, this line will check it
+                print(f"{_loopCount}: {movieYear:4}, {movieName}, {movieLink}")
+
+            currentMovieData = [movieYear, movieName, movieLink] # 1973, World on a Wire, https://letterboxd.com/film/world-on-a-wire/
             currentPageMoviesData.append(currentMovieData)
-            tempLoopCount += 1
-        writer.writerows(currentPageMoviesData) # Çekilen verinin toplu yazılma işlemi veya bu işlem tek tek yazma for içerisinde için writer.writerow(currentMovieData) ile kullanılabilir.
-        return tempLoopCount # Mevcut film sırasına ait sayı geri döndürülür.
+            _loopCount += 1
+
+        #> Pulled data is written to the file.
+        #> if you want to write the data one by one, you can use writer.writerow(currentMovieData) in for.
+        _writer.writerows(currentPageMoviesData)
+
+        return _loopCount # the number of movies belonging to the current page is returned.
     except Exception as e:
-        errorLine(e)  
+        errorLine(e)
         txtLog('An error was encountered while obtaining movie information.')
