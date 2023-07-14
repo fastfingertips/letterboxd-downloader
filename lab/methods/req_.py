@@ -34,11 +34,17 @@ from .log_ import(
 def getBodyContent(dom, obj):
     return dom.find('body').attrs[obj]
 
-def getMetaContent(dom, obj): 
-    try: metaContent = dom.find('meta', property=obj).attrs['content']
+def getMetaContent(_dom, _obj):
+    """
+    a function that returns the content of the meta tag..
+    """
+    try:
+        #> get the content of the meta tag.
+        metaContent = _dom.find('meta', property=_obj).attrs['content']
     except AttributeError:
-        print(f"{preCmdErr}Meta etiketinden '{obj}' alınamadı.")
-        txtLog(f"Meta etiketinden '{obj}' alınamadı. Hata Mesajı: {AttributeError}")
+        #> if the meta tag is not found, return an empty string.
+        print(f"{preCmdErr}Cannot retrieve '{_obj}' from the meta tag.")
+        txtLog(f"Cannot retrieve '{_obj}' from the meta tag. Error Message: {AttributeError}")
         metaContent = ''
     return metaContent
 
