@@ -49,45 +49,51 @@ def urlFix(x, urlList, urlListItem):
         urlList.append(approvedListUrl) #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
     return urlList
 
-def userListCheck(_url_list_item_dom, urlListItem): #: Kullanıcının girilen şekilde bir listesinin var olup olmadığını kontrol ediyoruz. Yoksa tekrar sormak için.
-    try:
-        try: #: meta etiketinden veri almayı dener eğer yoksa liste değil.
-            metaOgType = getMetaContent(_url_list_item_dom,'og:type') 
+def userListCheck(_urlListItemDom, _urlListItem):  # check if the user has a list in the given format. If not, prompt again.
+    try: # try to extract data from the meta tag; if not found, it's not a list.
+        metaOgType = getMetaContent(_urlListItemDom,'og:type') 
 
-            if metaOgType == "letterboxd:list": # Meta etiketindeki bilgi sorgulanır. Sayfanın liste olup olmadığı anlaşılır.
-                txtLog(f'{PRE_LOG_INFO}Meta içeriği girilen adresin bir liste olduğunu doğruladı. Meta içeriği: {metaOgType}')
-                metaOgUrl = getMetaContent(_url_list_item_dom,'og:url') #: Liste yönlendirmesi var mı bakıyoruz
-                metaOgTitle = getMetaContent(_url_list_item_dom, 'og:title')  #: Liste ismini alıyoruz. Örnek: 'Search results for best comedy'
-                bodyDataOwner = getBodyContent(_url_list_item_dom,'data-owner') #: Liste sahibinin kullanıcı ismi.
-                print(f'{preCmdCheck}{ced("Found it: ", color="green")}@{ced(bodyDataOwner,"yellow")} "{ced(metaOgTitle,"yellow")}"') #: Liste sahibinin kullanıcı ismi ve liste ismi ekrana yazdırılır.
+        #> check if the meta tag indicates that it's a list.
+        if metaOgType == "letterboxd:list":
+            txtLog(f'{PRE_LOG_INFO}Meta content confirmed that the entered address is a list. Meta content: {metaOgType}')
 
-                #> Girilen URL Meta ile aynıysa..
-                if urlListItem == metaOgUrl or f'{urlListItem}/' == metaOgUrl: txtLog(f'{PRE_LOG_INFO}Liste adresi yönlendirme içermiyor.')
-                else: # Girilen URL Meta ile uyuşmuyorsa..
-                    print(f'{preCmdInfo}Girdiğiniz liste linki yönlendirme içeriyor.')
-                    print(f'{preBlankCount}Muhtemelen liste ismi yakın bir zamanda değişildi veya hatalı girdiniz.')
-                    print(f'{preBlankCount}({ced("+","red")}): {ced(urlListItem, color="yellow")} adresini')
-                    
-                    if urlListItem in metaOgUrl:
-                        msgInputUrl = ced(urlListItem, color="yellow")
-                        msgMetaOgUrlChange = ced(metaOgUrl.replace(urlListItem,""), color="green")
-                    else:
-                        metaLoop = len(metaOgUrl)
-                        msgInputUrl = ''
-                        msgMetaOgUrlChange = getChanges(metaLoop,urlListItem,metaOgUrl)
+            #> get the URL of the list from the meta tag.
+            #> if the URL is not the same as the one entered, it means that the list has been redirected.
+            metaOgUrl = getMetaContent(_urlListItemDom,'og:url')
+            #> get the title of the list from the meta tag. Example: 'Search results for best comedy'
+            metaOgTitle = getMetaContent(_urlListItemDom, 'og:title')
+            #> get the username of the list owner from the body tag.
+            bodyDataOwner = getBodyContent(_urlListItemDom,'data-owner')
 
-                    print(f'{preBlankCount}({ced("+","green")}): {msgInputUrl}{msgMetaOgUrlChange} şeklinde değiştirdik.')
-                txtLog(f'{PRE_LOG_INFO}{urlListItem} listesi bulundu: {metaOgTitle}')
+            #> print the list owner's username and the list title.
+            print(f'{preCmdCheck}{ced("Found it: ", color="green")}@{ced(bodyDataOwner,"yellow")} "{ced(metaOgTitle,"yellow")}"')
 
-                currentListAvaliable = True
-        except Exception as e:
-            errorLine(e)
-            metaOgUrl = ''
-            currentListAvaliable = False
+            #> if the entered URL matches the meta URL...
+            if _urlListItem == metaOgUrl or f'{_urlListItem}/' == metaOgUrl:
+                txtLog(f'{PRE_LOG_INFO}The list URL does not contain any redirects.')
+            else: # Girilen URL Meta ile uyuşmuyorsa..
+                print(f'{preCmdInfo}The list URL you entered contains redirects.')
+                print(f'{preBlankCount}The list title was likely changed recently or you entered it incorrectly.')
+                print(f'{preBlankCount}({ced("+", "red")}): {ced(_urlListItem, color="yellow")}')
+                
+                if _urlListItem in metaOgUrl:
+                    msgInputUrl = ced(_urlListItem, color="yellow")
+                    msgMetaOgUrlChange = ced(metaOgUrl.replace(_urlListItem,""), color="green")
+                else:
+                    metaLoop = len(metaOgUrl)
+                    msgInputUrl = ''
+                    msgMetaOgUrlChange = getChanges(metaLoop,_urlListItem,metaOgUrl)
+
+                print(f'{preBlankCount}({ced("+", "green")}): {msgInputUrl}{msgMetaOgUrlChange} as the corrected URL.')
+            txtLog(f'{PRE_LOG_INFO}List "{metaOgTitle}" found for {_urlListItem}')
+
+            currentListAvaliable = True
     except Exception as e:
         errorLine(e)
+        metaOgUrl = ''
         currentListAvaliable = False
-    finally: return currentListAvaliable, metaOgUrl
+    finally:
+        return currentListAvaliable, metaOgUrl
 
 def getListSignature(_listDict): # get list's signature
     #> extract the DOM element and detail page of the list
