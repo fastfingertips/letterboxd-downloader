@@ -1,24 +1,71 @@
-
-
-from methods.color_ import ced, cmdBlink, coloredDictPrint, preCmdInfo, preCmdInput, preCmdErr, preCmdCheck, preCmdUnCheck, SUP_LINE, SUB_LINE, supLineFilms #: PMI
-from methods.req_ import urlFix, doReadPage, getMetaContent, userListCheck, getBodyContent, listSignature, getListLastPageNo, doPullFilms
-from methods.system_ import dirCheck, fileCheck, terminalSystem, terminalTitle
-from methods.csv_ import splitCsv, combineCsv
-from methods.session_ import startSession, endSession
-from methods.time_ import getRunTime #: PMI
-from methods.log_ import txtLog, startLog, readSettings
-from methods.hash_ import getChanges, extractObj
-from constants.project import SITE_DOMAIN, PRE_LOG_INFO, SPLIT_PARAMETER, DEFAULT_EXPORT_KEY, DEFAULT_LOG_KEY
-# ---
 import csv
-while True: #: Other libs
-    try:
-        # from libs.termcolor110.termcolor import colored
-        break
-    except ImportError as e: #: Trying import
-        print('Import Error: ', e)
-        terminalSystem('pipreqs --encoding utf-8 --force') #: pipreqs kullanarak kurulmasını sağlıyoruz.
-        terminalSystem('pip install -r requirements.txt & pip list') #: pip list kullanarak kurulmuş modülleri listeliyoruz.
+
+# -- Local Imports -- #
+
+from methods.time_ import getRunTime
+
+from constants.project import(
+    DEFAULT_EXPORT_KEY,
+    SPLIT_PARAMETER,
+    DEFAULT_LOG_KEY,
+    PRE_LOG_INFO,
+    SITE_DOMAIN
+)
+
+from methods.color_ import(
+    coloredDictPrint,
+    preCmdUnCheck,
+    supLineFilms,
+    preCmdInput,
+    preCmdCheck,
+    preCmdInfo,
+    preCmdErr,
+    cmdBlink,
+    SUP_LINE,
+    SUB_LINE,
+    ced
+)
+
+from methods.req_ import(
+    getListLastPageNo,
+    getMetaContent,
+    getBodyContent,
+    userListCheck,
+    listSignature,
+    doPullFilms,
+    doReadPage,
+    urlFix
+)
+
+from methods.system_ import(
+    terminalSystem,
+    terminalTitle,
+    fileCheck,
+    dirCheck
+)
+
+from methods.log_ import(
+    readSettings,
+    startLog,
+    txtLog
+)
+
+from methods.csv_ import(
+    combineCsv,
+    splitCsv
+)
+
+from methods.session_ import(
+    startSession,
+    endSession
+)
+
+from methods.hash_ import(
+    getChanges,
+    extractObj
+)
+
+# -- MAIN -- #
 
 def currentListDomainName(currentUrListItem):
     _f_ = '/list/'
