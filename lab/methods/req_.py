@@ -133,40 +133,38 @@ def getListSignature(_listDict): # Get list's signature
 
     return listSign
 
-def listSignature(_listDict): # print list's signature info
+def listSignature(_listDict): # print list's signature
     try:
-        try: ## Liste sayfasından bilgiler çekmeyi denemek.
-            listSign = getListSignature(_listDict)
+        #> attempt to get list information from the list page.
+        listSign = getListSignature(_listDict)
 
-            terminalTitle(f"{_listDict['process_state']} Process: @{_listDict['list_owner']}.")
-            signList = [
-                f"\n{preCmdInfo}Process State: {cmdBlink(_listDict['process_state'],'green')}",
-                SUP_LINE,
-                f"{preCmdInfo}{ced('List info;', color='yellow')}",
-                f"{preCmdMiddleDot}List by {ced(listSign['list_by'],'blue', attrs=['bold'])}",
-                f"{preCmdMiddleDot}Updated: {ced(listSign['list_update_time_humanize'],'blue', attrs=['bold'])}",
-                f"{preCmdMiddleDot}Published: {ced(listSign['list_publication_time_humanize'],'blue', attrs=['bold'])}",
-                f"{preCmdMiddleDot}List title: {ced(listSign['list_title'], 'blue', attrs=['bold'])}",
-                f"{preCmdMiddleDot}Filters;",
-                f"{preCmdMiddleDotList}Filtered as {ced(listSign['list_selected_decade_year'],'blue', attrs=['bold'])}",
-                f"{preCmdMiddleDotList}Filtered as {ced(listSign['list_selected_genre'],'blue', attrs=['bold'])}",
-                f"{preCmdMiddleDotList}Movies sorted by {ced(listSign['list_selected_sort_by'],'blue', attrs=['bold'])}",
-                f"{preCmdMiddleDot}List hash: {ced(_listDict['list_run_time'],'blue', attrs=['bold'])}",
-                f"{preCmdMiddleDot}Sayfa sayısı: {ced(listSign['list_last_page'],'blue', attrs=['bold'])}",
-                f"{preCmdMiddleDot}Number of movies: {ced(listSign['list_movie_count'],'blue', attrs=['bold'])}",
-                f"{preCmdMiddleDot}List domain name: {ced(_listDict['list_domain_name'],'blue', attrs=['bold'])}",
-                f"{preCmdMiddleDot}List URL: {ced(_listDict['list_url'],'blue', attrs=['bold'])}",
-                f"{preCmdMiddleDot}Process URL: {ced(_listDict['list_detail_url'],'blue', attrs=['bold'])}"
-            ]
-            print('\n'.join(signList))
+        terminalTitle(f"{_listDict['process_state']} Process: @{_listDict['list_owner']}.")
 
-            txtLog(f'{PRE_LOG_INFO}İmza yazdırma sonu.')
-        except Exception as e:
-            errorLine(e)
-            txtLog(f'{PRE_LOG_ERR}Liste bilgileri çekilirken hata.')
-    except Exception as e: #: İmza seçimi başarısız.
+        signList = [
+            f"\n{preCmdInfo}Process State: {cmdBlink(_listDict['process_state'],'green')}",
+            SUP_LINE,
+            f"{preCmdInfo}{ced('List info;', color='yellow')}",
+            f"{preCmdMiddleDot}List by {ced(listSign['list_by'],'blue', attrs=['bold'])}",
+            f"{preCmdMiddleDot}Updated: {ced(listSign['list_update_time_humanize'],'blue', attrs=['bold'])}",
+            f"{preCmdMiddleDot}Published: {ced(listSign['list_publication_time_humanize'],'blue', attrs=['bold'])}",
+            f"{preCmdMiddleDot}List title: {ced(listSign['list_title'], 'blue', attrs=['bold'])}",
+            f"{preCmdMiddleDot}Filters;",
+            f"{preCmdMiddleDotList}Filtered as {ced(listSign['list_selected_decade_year'],'blue', attrs=['bold'])}",
+            f"{preCmdMiddleDotList}Filtered as {ced(listSign['list_selected_genre'],'blue', attrs=['bold'])}",
+            f"{preCmdMiddleDotList}Movies sorted by {ced(listSign['list_selected_sort_by'],'blue', attrs=['bold'])}",
+            f"{preCmdMiddleDot}List hash: {ced(_listDict['list_run_time'],'blue', attrs=['bold'])}",
+            f"{preCmdMiddleDot}Sayfa sayısı: {ced(listSign['list_last_page'],'blue', attrs=['bold'])}",
+            f"{preCmdMiddleDot}Number of movies: {ced(listSign['list_movie_count'],'blue', attrs=['bold'])}",
+            f"{preCmdMiddleDot}List domain name: {ced(_listDict['list_domain_name'],'blue', attrs=['bold'])}",
+            f"{preCmdMiddleDot}List URL: {ced(_listDict['list_url'],'blue', attrs=['bold'])}",
+            f"{preCmdMiddleDot}Process URL: {ced(_listDict['list_detail_url'],'blue', attrs=['bold'])}"
+        ]
+
+        print('\n'.join(signList))
+        txtLog(f"{PRE_LOG_INFO}List's signature print success.")
+    except Exception as e:
         errorLine(e)
-        txtLog(f'{PRE_LOG_ERR}İmza yüklenemedi. Program yine de devam etmeyi deneyecek.')
+        txtLog(f'{PRE_LOG_ERR}List signature print error.')
 
 def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage): # get list film count
     try:
