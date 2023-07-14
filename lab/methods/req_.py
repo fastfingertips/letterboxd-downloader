@@ -31,8 +31,13 @@ from .log_ import(
     txtLog
 )
 
-def getBodyContent(dom, obj):
-    return dom.find('body').attrs[obj]
+def getBodyContent(_dom, _obj):
+    """
+    a function that returns the content of the body tag..
+    """
+    #> get the content of the body tag.
+    bodyContent = _dom.find('body').attrs[_obj]
+    return bodyContent
 
 def getMetaContent(_dom, _obj):
     """
