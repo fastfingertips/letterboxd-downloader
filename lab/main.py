@@ -76,7 +76,7 @@ while True:
                             try:
                                 urlListItem = urlListItem.replace('?','')
                                 urlListItem = extractObj(urlListItem,'.')
-                                urlList = urlFix(urlListItem, urlList, urlListItem)
+                                urlList = urlFix(urlListItem, urlList)
                                 break
                             except:
                                 print(f"{preCmdInfo}To finish, you must first specify a list.") 

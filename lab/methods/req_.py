@@ -42,14 +42,21 @@ def getMetaContent(dom, obj):
         metaContent = ''
     return metaContent
 
-def urlFix(x, urlList, urlListItem):
-    urlListItemDom = doReadPage(x) #: Sayfa dom'u alınır.
-    userListAvailable, approvedListUrl = userListCheck(urlListItemDom, urlListItem) #: Liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
-    if userListAvailable and approvedListUrl not in urlList: ## Liste kullanıma uygunsa ve doğrulanmış URL daha önce URL Listesine eklenmediyse..
-        urlList.append(approvedListUrl) #: Doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
-    return urlList
+def urlFix(_urlListItem, _urlList):
+    #> get the DOM element of the page.
+    urlListItemDom = doReadPage(_urlListItem)
+    #> check the availability of the list and get the approved URL.
+    userListAvailable, approvedListUrl = userListCheck(urlListItemDom, _urlListItem)
+    #> if the list is available and the approved URL is not already in the URL list...
+    if userListAvailable and approvedListUrl not in _urlList:
+        #> add the approved URL to the URL list for further processing.
+        _urlList.append(approvedListUrl)
+    return _urlList
 
-def userListCheck(_urlListItemDom, _urlListItem):  # check if the user has a list in the given format. If not, prompt again.
+def userListCheck(_urlListItemDom, _urlListItem):
+    """
+    check if the user has a list in the given format. if not, prompt again.
+    """
     try: # try to extract data from the meta tag; if not found, it's not a list.
         metaOgType = getMetaContent(_urlListItemDom,'og:type') 
 
