@@ -1,29 +1,44 @@
 import json
 import os
 
-def loadJsonFile(filePath):
-    with open(filePath, 'r', encoding='utf-8') as json_file:
+# -- FILE OPERATIONS --
+
+def loadJsonFile(_filePath):
+    """
+    Loads a json file
+    """
+    with open(_filePath, 'r', encoding='utf-8') as json_file:
         data = json.load(json_file)
         return data
 
-def dumpJsonFile(filePath, data):
-    with open(filePath, 'w', encoding='utf-8') as json_file:
-        json.dump(data, json_file, indent=2)
+def dumpJsonFile(_filePath, _data):
+    """
+    Dumps a json file
+    """
+    with open(_filePath, 'w', encoding='utf-8') as json_file:
+        json.dump(_data, json_file, indent=2)
 
-# -- FILE OPERATIONS --
-
-def fileExists(f) -> bool:
-    if os.path.exists(f): return True
+def fileExists(_filePath) -> bool:
+    """
+    Checks if a file exists
+    """
+    if os.path.exists(_filePath): return True
     else: return False
 
-def checkFilename(filename, removestring="\"|%:/,.\\[]<>*?"):
-    filenameChars = list(filename)
+def checkFilename(_fileName, _removestring="\"|%:/,.\\[]<>*?"):
+    """
+    Checks if a filename is valid
+    """
+    filenameChars = list(_fileName)
     for currentChar in filenameChars:
-        if currentChar in removestring:
+        if currentChar in _removestring:
             return False
     return True
 
-def cleanFilename(sourcestring,  removestring="\"|%:/,.\\[]<>*?") :
-    for currentChar in removestring:
-        sourcestring = sourcestring.replace(currentChar, "")
-    return sourcestring
+def cleanFilename(_sourcestring,  _removestring="\"|%:/,.\\[]<>*?") :
+    """
+    Removes invalid characters from a filename
+    """
+    for currentChar in _removestring:
+        _sourcestring = _sourcestring.replace(currentChar, "")
+    return _sourcestring
