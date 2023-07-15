@@ -7,8 +7,8 @@ from constants.project import(
 from termcolor import colored as ced
 
 def cmdPre(_msg, _color):
-    if _msg[0] == " ": return f' {ced(_color[1:],color=_color)}  '
-    elif _msg[0] == "[": return f'[{ced(_color[1:],color=_color)}] '
+    if _msg[0] == " ": return f' {ced(_msg[1:],color=_color)}  '
+    elif _msg[0] == "[": return f'[{ced(_msg[1:],color=_color)}] '
 
 # INITIAL ASSIGNMENTS
 preBlankCount = 4*' ' # cmd msg pre blank calc
