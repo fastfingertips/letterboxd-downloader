@@ -1,25 +1,43 @@
-from methods.system_ import fileRenamer
-from methods.log_ import preCmdErr, preCmdInfo
-from methods.file_ import loadJsonFile, dumpJsonFile, fileExists
-from constants.project import (SESSIONS_FILE_NAME, SESSION_DICT_KEY,
-                               SESSION_PROCESSES_KEY, SESSION_START_KEY,
-                               SESSION_LAST_KEY, SESSION_FINISHED_KEY)
 import json
 import os
+
+# -- Local Imports -- #
+
+from methods.system_ import fileRenamer
+from methods.log_ import(
+    preCmdInfo,
+    preCmdErr
+)
+
+from methods.file_ import(
+    loadJsonFile,
+    dumpJsonFile,
+    fileExists
+)
+
+from constants.project import (
+    SESSION_PROCESSES_KEY,
+    SESSION_FINISHED_KEY,
+    SESSIONS_FILE_NAME,
+    SESSION_START_KEY,
+    SESSION_DICT_KEY,
+    SESSION_LAST_KEY
+)
+
 
 current_pid = str(os.getpid())
 
 # -- SESSIONS --
 
-def createSession(app_id) -> None:
-    # If the session file does not exist, it is created.
+def createSession(_hash) -> None:
+    # if the session file does not exist, it is created.
     jsonObject = {
         SESSION_DICT_KEY: {
             current_pid: {
-                SESSION_START_KEY: app_id,
-                SESSION_LAST_KEY: app_id,
+                SESSION_START_KEY: _hash,
+                SESSION_LAST_KEY: _hash,
                 SESSION_PROCESSES_KEY: {
-                    app_id: {
+                    _hash: {
                         SESSION_FINISHED_KEY: False
                     }
                 }
@@ -28,46 +46,46 @@ def createSession(app_id) -> None:
     }
     dumpJsonFile(SESSIONS_FILE_NAME, jsonObject)
 
-def endSession(current_hash) -> None:
-    # Current process is marked as finished.
+def endSession(_hash) -> None:
+    # current process is marked as finished.
     sessionRecords = loadJsonFile(SESSIONS_FILE_NAME)
-    sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_PROCESSES_KEY][current_hash][SESSION_FINISHED_KEY] = True
+    sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_PROCESSES_KEY][_hash][SESSION_FINISHED_KEY] = True
     dumpJsonFile(SESSIONS_FILE_NAME, sessionRecords)
 
-def newSession(start_hash) -> None:
+def newSession(_hash) -> None:
     sessionRecords = loadJsonFile(SESSIONS_FILE_NAME)
     if current_pid in sessionRecords[SESSION_DICT_KEY]:
-        # If the process is already in the session file, the session is updated.
-        updateSession(start_hash)
+        # if the process is already in the session file, the session is updated.
+        updateSession(_hash)
     else:
-        # If the process is not in the session file, a new session is created.
+        # if the process is not in the session file, a new session is created.
         sessionRecords[SESSION_DICT_KEY] |= {
             current_pid: {
-                SESSION_START_KEY: start_hash,
-                SESSION_LAST_KEY: start_hash,
+                SESSION_START_KEY: _hash,
+                SESSION_LAST_KEY: _hash,
                 SESSION_PROCESSES_KEY: {
-                    start_hash: {SESSION_FINISHED_KEY: False}
+                    _hash: {SESSION_FINISHED_KEY: False}
                 }
             }
         }
         dumpJsonFile(SESSIONS_FILE_NAME, sessionRecords)
 
-def updateSession(current_session):
+def updateSession(_currentSession):
     sessionRecords = loadJsonFile(SESSIONS_FILE_NAME)
-    sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_LAST_KEY] = current_session
+    sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_LAST_KEY] = _currentSession
     sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_PROCESSES_KEY] |= {
-        current_session: {
+        _currentSession: {
             SESSION_FINISHED_KEY: False
             }
         }
 
     dumpJsonFile(SESSIONS_FILE_NAME, sessionRecords)
 
-def sessionCreator(app_id):
+def sessionCreator(_hash):
     try:
-        # If the file does not exist, it will create a new one.
+        # if the file does not exist, it will create a new one.
         print(f'{preCmdInfo}New session file creating...', end=' ')
-        createSession(app_id)
+        createSession(_hash)
         print(f'successfully.')
     except:
         print(f'failed.')
@@ -83,24 +101,24 @@ def sessionBackup():
         print(f'failed.') # backup failed
         raise Exception(f'{preCmdErr}Last session file could not be backup.')
 
-def addSession(start_hash):
+def addSession(_hash):
     try:
         # add new session
         print(f'{preCmdInfo}Starting new session...', end=' ')
-        newSession(start_hash)
+        newSession(_hash)
         print(f'successfully.') # add new session successfully
     except json.decoder.JSONDecodeError: 
-        # If the file is broken or empty, the file will be backed up and a new one will be created.
+        # if the file is broken or empty, the file will be backed up and a new one will be created.
         print(f'failed.') # add new session failed
         sessionBackup()
-        sessionCreator(start_hash)
+        sessionCreator(_hash)
 
-def startSession(start_hash) -> None:
+def startSession(_hash) -> None:
     print(f'{preCmdInfo}Session file checking...', end=' ')
     if fileExists(SESSIONS_FILE_NAME):
-        # If the session file exists, the session is started.
+        # if the session file exists, the session is started.
         print(f'successfully.') # checking successfully
-        addSession(start_hash)
+        addSession(_hash)
     else:
         print(f'failed.') # checking failed
-        sessionCreator(start_hash)
+        sessionCreator(_hash)
