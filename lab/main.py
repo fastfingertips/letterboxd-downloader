@@ -112,7 +112,7 @@ while True:
                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                 continue
 
-            if urlListItem[-1] == '.':
+            if urlListItem[-1] == '.' and urlListItem[0] == '?':
                 if not inputLoopNo > 1:
                     print(f"{preCmdInfo}To finish, you must first specify a list.") 
                     inputLoopNo -= 1
