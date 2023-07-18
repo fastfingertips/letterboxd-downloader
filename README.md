@@ -1,5 +1,4 @@
-### ![commits](https://img.shields.io/github/last-commit/FastFingertips/letterboxd-list) ![visitors](https://visitor-badge.laobi.icu/badge?page_id=FastFingertips.letterboxd-list) 
-Attempts to extract data from letterboxd with bs4<br>
+### ![commits](https://img.shields.io/github/last-commit/FastFingertips/letterboxd-list) ![visitors](https://visitor-badge.laobi.icu/badge?page_id=FastFingertips.letterboxd-list)
 
 ## Simple Usage
 <details><summary>Single/batch scraping using list addresses</summary>
