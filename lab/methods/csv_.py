@@ -21,7 +21,10 @@ from .color_ import(
 
 # -- CSV Methods -- #
 
-def splitCsv(_csvPath: str, _exportDirName: str, _currenSessionHash: int):
+def splitCsv(_csvPath: str, _exportDirName: str, _currenSessionHash: int) -> None:
+    """
+    Splits a csv file into multiple csv files
+    """
     splitCsvLines = open(_csvPath, 'r', encoding="utf8").readlines() # lines list
     csvMovies = len(splitCsvLines) # file line count
     if csvMovies > SPLIT_LIMIT: # file's line count is bigger than limit
@@ -53,21 +56,24 @@ def splitCsv(_csvPath: str, _exportDirName: str, _currenSessionHash: int):
     else:
         print(f'{preCmdInfo}There is a line/film({csvMovies}) under {SPLIT_LIMIT} in your file, the separation process will not be applied.')
 
-def combineCsv(urlList, exportDirName, currenSessionHash, exportsPath):
-    if len(urlList) > 1:
+def combineCsv(_urlList, _exportDirName, _currenSessionHash, _exportsPath) -> None:
+    """
+    Combines multiple csv files into one csv file
+    """
+    if len(_urlList) > 1:
         print(SUP_LINE)
         print(f"{preCmdInfo}{ced('Merge process info;', color='yellow')}")
-        combineDir = f'{exportDirName}/Combined/' # folder containing the combined lists
-        combineCsvFile = f'{currenSessionHash}_Normal-Combined.csv' # the name of the combine file.
-        noDuplicateCsvFile = f'{currenSessionHash}_NoDuplicate-Combined.csv' # NoDuplicate file name
+        combineDir = f'{_exportDirName}/Combined/' # folder containing the combined lists
+        combineCsvFile = f'{_currenSessionHash}_Normal-Combined.csv' # the name of the combine file.
+        noDuplicateCsvFile = f'{_currenSessionHash}_NoDuplicate-Combined.csv' # NoDuplicate file name
         combineCsvPath = combineDir + combineCsvFile # path to the combine file.
         noDuplicateCsvPath = combineDir + noDuplicateCsvFile # NoDuplciate file path
         dirCheck([combineDir]) # combine dir check
         txtLog(f'{PRE_LOG_INFO}Lists will be combined because more than one list is being worked on.') # process logger
 
         try:
-            try: allCsvFiles = list(glob.glob(f'{exportsPath}*.csv')) # exporting all csv files in the specified directory to a variable.
-            except: allCsvFiles = [i for i in glob.glob(f'{exportsPath}*.csv')] # a different alternative
+            try: allCsvFiles = list(glob.glob(f'{_exportsPath}*.csv')) # exporting all csv files in the specified directory to a variable.
+            except: allCsvFiles = [i for i in glob.glob(f'{_exportsPath}*.csv')] # a different alternative
             combinedCsvFiles = pd.concat([pd.read_csv(f) for f in allCsvFiles]) # all csv files are merged.
             combinedCsvFiles.to_csv(combineCsvPath, index=False, encoding='utf-8-sig') # encode setting of the csv file.
 
@@ -82,7 +88,7 @@ def combineCsv(urlList, exportDirName, currenSessionHash, exportsPath):
 
             print(f'{preCmdInfo}All movies in lists have been saved to {combineCsvPath}.')
             print(f'{preCmdInfo}Only the file with different movies is set to {noDuplicateCsvPath} in the same directory.')
-            splitCsv(noDuplicateCsvPath, exportDirName, currenSessionHash) # after extraction, we perform transfer splitting if necessary.
+            splitCsv(noDuplicateCsvPath, _exportDirName, _currenSessionHash) # after extraction, we perform transfer splitting if necessary.
         except Exception as e: txtLog(f'Lists could not be combined. Error: {e}') #rocess logger
         print(SUB_LINE)
     else: txtLog('The process will not be combined because it is working on a single list.') # process logger
