@@ -31,7 +31,7 @@ from .log_ import(
     txtLog
 )
 
-def getBodyContent(_dom, _obj):
+def getBodyContent(_dom, _obj) -> str:
     """
     a function that returns the content of the body tag..
     """
@@ -39,7 +39,7 @@ def getBodyContent(_dom, _obj):
     bodyContent = _dom.find('body').attrs[_obj]
     return bodyContent
 
-def getMetaContent(_dom, _obj):
+def getMetaContent(_dom, _obj) -> str:
     """
     a function that returns the content of the meta tag..
     """
@@ -53,7 +53,10 @@ def getMetaContent(_dom, _obj):
         metaContent = ''
     return metaContent
 
-def urlFix(_urlListItem, _urlList):
+def urlFix(_urlListItem, _urlList) -> list:
+    """
+    fixes the URL of the list and adds it to the URL list.
+    """
     #> get the DOM element of the page.
     urlListItemDom = doReadPage(_urlListItem)
     #> check the availability of the list and get the approved URL.
@@ -64,9 +67,9 @@ def urlFix(_urlListItem, _urlList):
         _urlList.append(approvedListUrl)
     return _urlList
 
-def userListCheck(_urlListItemDom, _urlListItem):
+def userListCheck(_urlListItemDom, _urlListItem) -> tuple:
     """
-    check if the user has a list in the given format. if not, prompt again.
+    checks the availability of the list and returns the approved URL.
     """
     try: # try to extract data from the meta tag; if not found, it's not a list.
         metaOgType = getMetaContent(_urlListItemDom,'og:type') 
@@ -113,7 +116,10 @@ def userListCheck(_urlListItemDom, _urlListItem):
     finally:
         return currentListAvaliable, metaOgUrl
 
-def getListSignature(_listDict): # get list's signature
+def getListSignature(_listDict) -> dict:
+    """
+    a function that returns the signature of the list.
+    """
     #> extract the DOM element and detail page of the list
     listDom = _listDict['list_dom']
     listDetailPage = _listDict['list_detail_page']
@@ -178,7 +184,10 @@ def getListSignature(_listDict): # get list's signature
 
     return listSign
 
-def listSignature(_listDict): # print list's signature
+def listSignature(_listDict) -> None:
+    """
+    Print the list information on the screen.
+    """
     try:
         #> attempt to get list information from the list page.
         listSign = getListSignature(_listDict)
@@ -211,7 +220,10 @@ def listSignature(_listDict): # print list's signature
         errorLine(e)
         txtLog(f'{PRE_LOG_ERR}List signature print error.')
 
-def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage): # get list film count
+def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage) -> int:
+    """
+    Get the number of movies on the list.
+    """
     try:
         txtLog(f'{preCmdInfo}Getting the number of movies on the list meta description.')
         # Instead of connecting to the last page and getting the number of movies on the last page, which generates a GET request
@@ -241,7 +253,10 @@ def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage): 
             errorLine(e)
             txtLog(f'{PRE_LOG_ERR}An error occurred while obtaining the number of movies on the list last page.')
 
-def getListLastPageNo(_currentListDom, _currentUrListItemDetailPage): # get list last page no
+def getListLastPageNo(_currentListDom, _currentUrListItemDetailPage) -> int:
+    """
+    Get the number of pages in the list (last page no)
+    """
     try:
         # Note: To find the number of pages, count the li's. Take the last number.
         # The text of the link in the last 'li' will give us how many pages our list is.
@@ -261,8 +276,10 @@ def getListLastPageNo(_currentListDom, _currentUrListItemDetailPage): # get list
         txtLog(f'{PRE_LOG_INFO}Communication with the page is complete. It is learned that the number of pages in the list is {lastPageNo}.')
         return lastPageNo
 
-def doReadPage(_url):
-    #> Reads and retrieves the DOM of the specified page URL.
+def doReadPage(_url) -> BeautifulSoup:
+    """
+    Reads and retrieves the DOM of the specified page URL.
+    """
     try:
         #> Provides information in the log file at the beginning of the connection.
         txtLog(f'{PRE_LOG_INFO}Trying to connect to [{_url}]') 
@@ -294,7 +311,10 @@ def doReadPage(_url):
         errorLine(e)
         txtLog(f'{PRE_LOG_ERR}Connection to the address failed [{_url}]')
 
-def doPullFilms(_loopCount, _currentDom, _writer): # gettin' films and write to csv
+def doPullFilms(_loopCount, _currentDom, _writer) -> None:
+    """
+    This function pulls the films on the list page and writes them to the csv file.
+    """
     try:
         #> getting' films/posters container (<ul> element)
         filmDetailsList = _currentDom.find('ul', attrs={'class': 'js-list-entries poster-list -p70 film-list clear film-details-list'})
