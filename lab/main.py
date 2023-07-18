@@ -86,21 +86,28 @@ while True:
 
     # SETTINGS
     settings = readSettings()
-    logDirName, exportDirName = settings[DEFAULT_LOG_KEY], settings[DEFAULT_EXPORT_KEY]
+    logDirName = settings[DEFAULT_LOG_KEY]
+    exportDirName = settings[DEFAULT_EXPORT_KEY]
+    dirCheck([logDirName, exportDirName]) # check directories
+
     exportsPath = ''.join([exportDirName, '/', sessionCurrentHash, '/']) # exports/000000000/
 
-    dirCheck([logDirName, exportDirName]) #: Log file check
-
+    #> every session has a different name for the start.
     hashChanges = getChanges(len(sessionStartHash), sessionStartHash, sessionCurrentHash)
-    print(f"{preCmdInfo}Session Hash: {sessionStartHash}{'' if sessionStartHash == sessionCurrentHash else ' -> ' + hashChanges}") #: Her oturum başlangıcı için farklı bir isim üretildi.
+    print(f"{preCmdInfo}Session Hash: {sessionStartHash}{'' if sessionStartHash == sessionCurrentHash else ' -> ' + hashChanges}") 
 
-    inputLoopNo, urlList, breakLoop, listEnterPassOn = 0, [], False, True #: While döngüne ait 
+    #> while initializing
+    listEnterPassOn = True
+    breakLoop = False
+    inputLoopNo = 0
+    urlList = []
     while True:
         inputLoopNo += 1 #: Başlangıçta döngü değerini artırıyoruz.
         urlListItem = str(input(f'{preCmdInput}List URL[{inputLoopNo}]: ')).lower() #: Kullanıcıdan liste url'i alınması ve düzenlenmesi.
         if len(urlListItem) > 0: ## Giriş boş değilse..
 
-            if urlListItem[0:len(SPLIT_PARAMETER)] == SPLIT_PARAMETER: # Split görevi.
+            #> input starts with split parameter
+            if urlListItem[0:len(SPLIT_PARAMETER)] == SPLIT_PARAMETER: 
                 splitCsv(urlListItem[len(SPLIT_PARAMETER):], exportDirName, sessionCurrentHash)
                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                 continue
