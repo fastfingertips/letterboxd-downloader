@@ -112,6 +112,12 @@ while True:
                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                 continue
 
+            if urlListItem[-1] == '.':
+                if not inputLoopNo > 1:
+                    print(f"{preCmdInfo}To finish, you must first specify a list.") 
+                    inputLoopNo -= 1
+                    continue
+
             if '.' in urlListItem: # Girişte nokta varsa..
                 if urlListItem[-1] == '.' or urlListItem == '.': # Giriş nokta ile bitiyor veya tek nokta ise..
                     breakLoop = True #: Url alımını sonlandıracak bilgi.
