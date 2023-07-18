@@ -3,7 +3,7 @@ import os
 
 # -- FILE OPERATIONS --
 
-def loadJsonFile(_filePath):
+def loadJsonFile(_filePath) -> dict:
     """
     Loads a json file
     """
@@ -11,7 +11,7 @@ def loadJsonFile(_filePath):
         data = json.load(json_file)
         return data
 
-def dumpJsonFile(_filePath, _data):
+def dumpJsonFile(_filePath, _data) -> None:
     """
     Dumps a json file
     """
@@ -25,7 +25,7 @@ def fileExists(_filePath) -> bool:
     if os.path.exists(_filePath): return True
     else: return False
 
-def checkFilename(_fileName, _removestring="\"|%:/,.\\[]<>*?"):
+def checkFilename(_fileName, _removestring="\"|%:/,.\\[]<>*?") -> bool:
     """
     Checks if a filename is valid
     """
@@ -35,7 +35,7 @@ def checkFilename(_fileName, _removestring="\"|%:/,.\\[]<>*?"):
             return False
     return True
 
-def cleanFilename(_sourcestring,  _removestring="\"|%:/,.\\[]<>*?") :
+def cleanFilename(_sourcestring,  _removestring="\"|%:/,.\\[]<>*?") -> str:
     """
     Removes invalid characters from a filename
     """
