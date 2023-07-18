@@ -1,7 +1,26 @@
-from .file_ import fileExists, loadJsonFile, dumpJsonFile, checkFilename, cleanFilename
-from .color_ import preCmdErr, preCmdInput, preCmdInfo
-from constants.project import SETTINGS_FILE_NAME, DEFAULT_LOG_KEY, DEFAULT_EXPORT_KEY
 import json
+
+# -- Local Imports -- #
+
+from constants.project import(
+    SETTINGS_FILE_NAME,
+    DEFAULT_EXPORT_KEY,
+    DEFAULT_LOG_KEY
+)
+
+from .file_ import(
+    cleanFilename,
+    checkFilename,
+    dumpJsonFile,
+    loadJsonFile,
+    fileExists
+)
+
+from .color_ import(
+    preCmdErr,
+    preCmdInput,
+    preCmdInfo
+)
 
 # -- SETTINGS --
 
@@ -32,7 +51,7 @@ def createSettings() -> None:
                 DEFAULT_LOG_KEY: logDirName,
                 DEFAULT_EXPORT_KEY: exportDirName
             }
-            
+
             dumpJsonFile(SETTINGS_FILE_NAME, default_settings)
             break
         else:
