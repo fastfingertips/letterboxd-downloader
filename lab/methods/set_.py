@@ -5,7 +5,10 @@ import json
 
 # -- SETTINGS --
 
-def createSettings():
+def createSettings() -> None:
+    """
+    Creates the settings file.
+    """
     while True:
         print(f'{preCmdErr}The settings file could not be found. Please enter the required information.')
 
@@ -36,7 +39,10 @@ def createSettings():
             print(f'{preCmdErr}Invalid input. Please try again.')
             exit()
 
-def readSettings():
+def readSettings() -> dict:
+    """
+    Reads the settings file and returns the data.
+    """
     if fileExists(SETTINGS_FILE_NAME):
         # If the file exists
         try:
