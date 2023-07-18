@@ -1,5 +1,7 @@
 ### ![commits](https://img.shields.io/github/last-commit/FastFingertips/letterboxd-list) ![visitors](https://visitor-badge.laobi.icu/badge?page_id=FastFingertips.letterboxd-list)
 
+
+
 ## Simple Usage
 <details><summary>Single/batch scraping using list addresses</summary>
 Define the list addresses, press Enter for each new address:
@@ -22,3 +24,5 @@ To use the list search mode, your entry should start with the "?" question mark.
 <br><code>[>]: ?crime movies!10</code> Here, we set the scraping limit by using "!". It is set to the first 10 lists.
 <br><code>[>]: ?crime movies!10.</code> If you use a period "." at the end of a query, it will automatically approve all the added lists.
 </details>
+
+https://github.com/FastFingertips/letterboxd-downloader/assets/46646991/2d44bc2d-1bb3-498f-963f-976d82dbfe6a
