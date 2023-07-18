@@ -1,19 +1,34 @@
-from constants.project import PRE_LOG_ERR
 import os
 import sys
+
+# -- Local Imports -- #
+
+from constants.project import PRE_LOG_ERR
 from .time_ import getRunTime
-from .color_ import cmdBlink, preCmdInfo
+
+from .color_ import(
+    preCmdInfo,
+    cmdBlink
+)
 
 # -- FILE --
 
-def dirCheck(dirs): # List
+def dirCheck(dirs:list) -> None:
+    """
+    Check if a directory exists, if not create it
+    """
     for dir in dirs:
         if dir:
             if os.path.exists(dir): pass
-            else: os.makedirs(dir)
+            else:
+                print(f'{preCmdInfo}Directory created: {cmdBlink(dir, "yellow")}')
+                os.makedirs(dir)
         print(f'{preCmdInfo}Directory checked: {cmdBlink(dir, "yellow")}')
 
-def fileCheck(files): # List
+def fileCheck(files:list) -> None:
+    """
+    Check if a file exists, if not create it
+    """
     for file in files:
         if file:
             if os.path.exists(file): pass
@@ -28,6 +43,9 @@ def fileCheck(files): # List
         print(f'{preCmdInfo}File checked: {cmdBlink(file, "yellow")}')
 
 def fileRenamer(old_name, new_name) -> bool:
+    """
+    Rename a file
+    """
     current_time = getRunTime()
     new_name = f'{new_name}'.replace('.', f'{current_time}.')
     if os.path.exists(new_name): return False
@@ -36,13 +54,22 @@ def fileRenamer(old_name, new_name) -> bool:
 
 # -- TERMINAL --
 
-def terminalTitle(title:str):
+def terminalTitle(title:str) -> None:
+    """
+    Change the title of the terminal
+    """
     os.system(f'title {title}')
 
-def terminalSystem(s:str):
+def terminalSystem(s:str) -> None:
+    """
+    Execute a command in the terminal
+    """
     os.system(s)
 
-def doReset(): # Porgramı yeniden başlat
+def doReset() -> None:
+    """
+    Restart the program
+    """
     try:
         terminalSystem('echo Press and any key to reboot & pause >nul')
         terminalSystem('echo Confirm reboot press any key again & pause >nul')
