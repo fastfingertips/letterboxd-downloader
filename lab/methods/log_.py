@@ -11,7 +11,10 @@ current_pid = str(os.getpid())
 
 # -- LOGS --
 
-def getLogFilePath():
+def getLogFilePath() -> str:
+    """
+    Returns the log file path.
+    """
     if fileExists(SETTINGS_FILE_NAME):
         settingDict = readSettings()
         logDirName = settingDict[DEFAULT_LOG_KEY]
@@ -21,19 +24,28 @@ def getLogFilePath():
             log_path = f'{logDirName}/{lastKey}.txt'
             return log_path
 
-def errorLine(e): #: Error Code generator
+def errorLine(_e) -> None:
+    """
+    Writes the error line with the error message to the log file.
+    """
     cl = currentframe()
-    txtLog(f'{PRE_LOG_ERR} Error on line {cl.f_back.f_lineno} Exception Message: {e}')
+    txtLog(f'{PRE_LOG_ERR} Error on line {cl.f_back.f_lineno} Exception Message: {_e}')
 
-def txtLog(r_message): #: None: Kullanıcı log lokasyonunu belirtmese de olur.
+def txtLog(_message) -> None:
+    """
+    Writes the message to the log file.
+    """
     with open(getLogFilePath(), 'a') as logFile:
-        logFile.write(f'{r_message}\n')
+        logFile.write(f'{_message}\n')
 
-def startLog(app_id):
+def startLog(_appId) -> bool:
+    """
+    Creates the log file.
+    """
     if checkLogDir():
         # If the log file exists, it is checked.
         logDir = readSettings()[DEFAULT_LOG_KEY]
-        logFullPath = f'{logDir}/{app_id}.txt'
+        logFullPath = f'{logDir}/{_appId}.txt'
         print(f'{preCmdInfo}Session log file creating...', end=' ')
         if checkLogFile(logFullPath):
             print(f'already exists.')
@@ -49,20 +61,29 @@ def startLog(app_id):
                 print(f'{preCmdErr}Log file could not be created. Error Message: {e}')
                 return False
 
-def getCurrentSessionLogPath(app_id):
+def getCurrentSessionLogPath(_appId) -> str:
+    """
+    Returns the current session log file path.
+    """
     if checkLogDir():
         logDir = readSettings()[DEFAULT_LOG_KEY]
-        logFullPath = f'{logDir}/{app_id}.txt'
+        logFullPath = f'{logDir}/{_appId}.txt'
         if checkLogFile(logFullPath): return logFullPath
         else: return False
 
-def checkLogFile(log_path):
-    log_type = '.txt'
-    if log_path.endswith(log_type):
-        if os.path.exists(log_path): return True
+def checkLogFile(_logPath) -> bool:
+    """
+    Checks if the log file exists.
+    """
+    logType = '.txt'
+    if _logPath.endswith(logType):
+        if os.path.exists(_logPath): return True
     else: return False
 
-def checkLogDir():
+def checkLogDir() -> bool:
+    """
+    Checks if the log directory exists.
+    """
     if fileExists(SETTINGS_FILE_NAME):
         settingDict = readSettings()
         logDirName = settingDict[DEFAULT_LOG_KEY]
