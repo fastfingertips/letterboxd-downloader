@@ -1,11 +1,30 @@
 from inspect import currentframe #: PMI
-from .color_ import preCmdErr, preCmdInfo
-from .time_ import getLogTime
-from .file_ import fileExists, loadJsonFile
-from .set_ import readSettings
 import os
-from constants.project import (SETTINGS_FILE_NAME, SESSIONS_FILE_NAME, PRE_LOG_ERR, PRE_LOG_INFO,
-                               DEFAULT_LOG_KEY, SESSION_DICT_KEY, SESSION_LAST_KEY)
+
+v# -- Local Imports -- #
+
+from .set_ import readSettings
+from .time_ import getLogTime
+
+from constants.project import(
+    SETTINGS_FILE_NAME,
+    SESSIONS_FILE_NAME,
+    SESSION_DICT_KEY,
+    SESSION_LAST_KEY,
+    DEFAULT_LOG_KEY,
+    PRE_LOG_INFO,
+    PRE_LOG_ERR
+)
+
+from .file_ import(
+    loadJsonFile,
+    fileExists
+)
+
+from .color_ import(
+    preCmdInfo,
+    preCmdErr
+)
 
 current_pid = str(os.getpid())
 
