@@ -1,7 +1,7 @@
 from inspect import currentframe #: PMI
 import os
 
-v# -- Local Imports -- #
+# -- Local Imports -- #
 
 from .set_ import readSettings
 from .time_ import getLogTime
