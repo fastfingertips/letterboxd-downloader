@@ -19,11 +19,11 @@ def dirCheck(dirs:list) -> None:
     """
     for dir in dirs:
         if dir:
-            if os.path.exists(dir): pass
+            if os.path.exists(dir):
+                print(f'{preCmdInfo}Directory checked: {cmdBlink(dir, "yellow")}')
             else:
-                print(f'{preCmdInfo}Directory created: {cmdBlink(dir, "yellow")}')
                 os.makedirs(dir)
-        print(f'{preCmdInfo}Directory checked: {cmdBlink(dir, "yellow")}')
+                print(f'{preCmdInfo}Directory created: {cmdBlink(dir, "yellow")}')
 
 def fileCheck(files:list) -> None:
     """
