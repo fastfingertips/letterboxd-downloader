@@ -31,16 +31,17 @@ def fileCheck(files:list) -> None:
     """
     for file in files:
         if file:
-            if os.path.exists(file): pass
+            if os.path.exists(file): 
+                print(f'{preCmdInfo}File checked: {cmdBlink(file, "yellow")}')
             else:
                 with open(file, 'w') as f:
                     if file.endswith('.json'): 
-                        print(f'json file created: {file}')
+                        print(f'{preCmdInfo}json file created: {cmdBlink(file, "yellow")}')
                         f.write('{}')
                     elif file.endswith('.csv'): 
-                        print(f'csv file created: {file}')
+                        print(f'{preCmdInfo}csv file created: {cmdBlink(file, "yellow")}')
                     else: f.write('')
-        print(f'{preCmdInfo}File checked: {cmdBlink(file, "yellow")}')
+        
 
 def fileRenamer(old_name, new_name) -> bool:
     """
