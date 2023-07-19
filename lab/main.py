@@ -172,12 +172,17 @@ while True:
                 try:    searchListsQLastsPage = searchListPreviewDom.find_all('li',attrs={'class':'paginate-page'})[-1].text #: Son sayfayı alıyoruz.
                 except: searchListsQLastsPage = 1 #: Alınamazsa sayfada tek sayfa olduğu varsayılır.
                 finally:
-                    coloredDict = {"Request": {"Query": urlListItem},
-                                   "Response": {"Last list": endList,
-                                                        "Last Page": searchListsQLastsPage,
-                                                        "Page URL": searchLMetaUrl,
-                                                        "Meta Title": searchMetaTitle,
-                                                        "Meta Description": searchListsQCountMsg}}
+                    coloredDict = {
+                    "Request": {
+                        "Query": urlListItem},
+                    "Response": {
+                        "Last list": endList,
+                        "Last Page": searchListsQLastsPage,
+                        "Page URL": searchLMetaUrl,
+                        "Meta Title": searchMetaTitle,
+                        "Meta Description": searchListsQCountMsg
+                        }
+                    }
                     coloredDictPrint(coloredDict) # print process info
 
                 print(f"{preCmdInfo}Starting list search..")
@@ -188,15 +193,22 @@ while True:
                     connectionPage = f'{searchList}page/{sayfa}'
                     searchListDom = doReadPage(connectionPage)
                     listsUrls = searchListDom.find_all('a', attrs={'class':'list-link'}) # okunmuş sayfadaki tüm listelerin adresleri.
-                    print(SUP_LINE)
-                    print(f"{preCmdInfo}{ced('Process info;', color='yellow')}") # process Title
-                    print(f"{preCmdInfo}CP: {ced(sayfa,'blue')}, PL: {ced(len(listsUrls),'blue')}, CPURL: {ced(connectionPage,'blue')}") #: CP: Current Page, PL: Page list, CPURL: Current Page Url
+
+                    queryPage = {
+                        "Process": {
+                            "Current Page": sayfa,
+                            "Page URL": connectionPage,
+                            "Lists Count": len(listsUrls)
+                        }
+                    }
+
+                    coloredDictPrint(queryPage)
                     for listsUrl in listsUrls:
                         if liste == endList:
                             print(f"{preCmdInfo}Liste sayısı belirlenen sayıya ({ced(liste,'blue')}) ulaştı.")
                             break
                         liste += 1
-                        print(f'{preCmdInfo}P{sayfa}:L{liste}')
+                        print(f'{preCmdInfo}List page/rank: {ced(sayfa, "blue")}/{ced(liste, "blue")}')
                         urlListItem = SITE_DOMAIN+listsUrl.get('href') #: https://letterboxd.com + /user_name/list/list_name
                         userListAvailable, approvedListUrl = userListCheck(doReadPage(urlListItem), urlListItem)
                         if approvedListUrl not in urlList:
