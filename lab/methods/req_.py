@@ -101,9 +101,8 @@ def userListCheck(_urlListItemDom, _urlListItem) -> tuple:
                     msgInputUrl = ced(_urlListItem, color="yellow")
                     msgMetaOgUrlChange = ced(metaOgUrl.replace(_urlListItem,""), color="green")
                 else:
-                    metaLoop = len(metaOgUrl)
                     msgInputUrl = ''
-                    msgMetaOgUrlChange = getChanges(metaLoop,_urlListItem,metaOgUrl)
+                    msgMetaOgUrlChange = getChanges(_urlListItem, metaOgUrl)
 
                 print(f'{preBlankCount}({ced("+", "green")}): {msgInputUrl}{msgMetaOgUrlChange} as the corrected URL.')
             txtLog(f'{PRE_LOG_INFO}List "{metaOgTitle}" found for {_urlListItem}')

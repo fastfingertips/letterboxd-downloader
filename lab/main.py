@@ -93,7 +93,7 @@ while True:
     exportsPath = ''.join([exportDirName, '/', sessionCurrentHash, '/']) # exports/000000000/
 
     #> every session has a different name for the start.
-    hashChanges = getChanges(len(sessionStartHash), sessionStartHash, sessionCurrentHash)
+    hashChanges = getChanges(sessionStartHash, sessionCurrentHash)
     print(f"{preCmdInfo}Session Hash: {sessionStartHash}{'' if sessionStartHash == sessionCurrentHash else ' -> ' + hashChanges}") 
 
     #> while initializing
