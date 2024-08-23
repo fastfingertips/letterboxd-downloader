@@ -37,11 +37,6 @@ from methods.req_ import(
     urlFix
 )
 
-from methods.system_ import(
-    terminalSystem,
-    terminalTitle
-)
-
 from methods.log_ import(
     readSettings,
     startLog,
@@ -66,6 +61,11 @@ from methods.hash_ import(
 from utils.file_utils import(
     fileCheck,
     dirCheck
+)
+
+from utils.terminal_utils import(
+    terminalSystem,
+    terminalTitle
 )
 
 # -- MAIN -- #

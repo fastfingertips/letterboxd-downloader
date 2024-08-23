@@ -4,7 +4,7 @@ import arrow
 
 # -- Local Imports -- #
 
-from .system_ import terminalTitle
+from utils.terminal_utils import terminalTitle
 from .hash_ import getChanges
 
 from constants.project import(
