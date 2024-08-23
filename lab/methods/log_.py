@@ -5,7 +5,7 @@ import os
 
 from .set_ import readSettings
 from .time_ import getLogTime
-from .file_ import fileExists
+from utils.file_utils import fileExists
 from utils.json_utils import loadJsonFile
 
 from constants.project import(

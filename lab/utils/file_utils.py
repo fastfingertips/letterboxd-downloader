@@ -40,3 +40,27 @@ def fileRenamer(old_name, new_name) -> bool:
     if os.path.exists(new_name): return False
     os.rename(old_name, new_name)
     return True
+
+def fileExists(_filePath) -> bool:
+    """
+    Checks if a file exists at the given path.
+    """
+    return os.path.exists(_filePath)
+
+def checkFilename(_fileName, _removestring="\"|%:/,.\\[]<>*?") -> bool:
+    """
+    Checks if a filename is valid
+    """
+    filenameChars = list(_fileName)
+    for currentChar in filenameChars:
+        if currentChar in _removestring:
+            return False
+    return True
+
+def cleanFilename(_sourcestring, _removestring="\"|%:/,.\\[]<>*?") -> str:
+    """
+    Cleans a filename by removing invalid characters.
+    """
+    for currentChar in _removestring:
+        _sourcestring = _sourcestring.replace(currentChar, "")
+    return _sourcestring

@@ -3,8 +3,10 @@ import os
 
 # -- Local Imports -- #
 
-from methods.file_ import fileExists
-from utils.file_utils import fileRenamer
+from utils.file_utils import (
+  fileRenamer,
+  fileExists
+)
 
 from utils.json_utils import (
   loadJsonFile,
