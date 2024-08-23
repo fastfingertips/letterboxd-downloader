@@ -49,13 +49,9 @@ def fileExists(_filePath) -> bool:
 
 def checkFilename(_fileName, _removestring="\"|%:/,.\\[]<>*?") -> bool:
     """
-    Checks if a filename is valid
+    Checks if a filename is valid by ensuring it doesn't contain invalid characters.
     """
-    filenameChars = list(_fileName)
-    for currentChar in filenameChars:
-        if currentChar in _removestring:
-            return False
-    return True
+    return all(char not in _removestring for char in _fileName)
 
 def cleanFilename(_sourcestring, _removestring="\"|%:/,.\\[]<>*?") -> str:
     """
