@@ -1,22 +1,6 @@
-import json
 import os
 
 # -- FILE OPERATIONS --
-
-def loadJsonFile(_filePath) -> dict:
-    """
-    Loads a json file
-    """
-    with open(_filePath, 'r', encoding='utf-8') as json_file:
-        data = json.load(json_file)
-        return data
-
-def dumpJsonFile(_filePath, _data) -> None:
-    """
-    Dumps a json file
-    """
-    with open(_filePath, 'w', encoding='utf-8') as json_file:
-        json.dump(_data, json_file, indent=2)
 
 def fileExists(_filePath) -> bool:
     """

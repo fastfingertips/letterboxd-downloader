@@ -8,11 +8,14 @@ from constants.project import(
     DEFAULT_LOG_KEY
 )
 
+from utils.json_utils import(
+    dumpJsonFile,
+    loadJsonFile
+)
+
 from .file_ import(
     cleanFilename,
     checkFilename,
-    dumpJsonFile,
-    loadJsonFile,
     fileExists
 )
 

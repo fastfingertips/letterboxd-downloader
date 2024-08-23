@@ -5,6 +5,8 @@ import os
 
 from .set_ import readSettings
 from .time_ import getLogTime
+from .file_ import fileExists
+from utils.json_utils import loadJsonFile
 
 from constants.project import(
     SETTINGS_FILE_NAME,
@@ -14,11 +16,6 @@ from constants.project import(
     DEFAULT_LOG_KEY,
     PRE_LOG_INFO,
     PRE_LOG_ERR
-)
-
-from .file_ import(
-    loadJsonFile,
-    fileExists
 )
 
 from .color_ import(

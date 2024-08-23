@@ -3,16 +3,17 @@ import os
 
 # -- Local Imports -- #
 
+from methods.file_ import fileExists
 from utils.file_utils import fileRenamer
+
+from utils.json_utils import (
+  loadJsonFile,
+  dumpJsonFile
+)
+
 from methods.log_ import(
     preCmdInfo,
     preCmdErr
-)
-
-from methods.file_ import(
-    loadJsonFile,
-    dumpJsonFile,
-    fileExists
 )
 
 from constants.project import (
