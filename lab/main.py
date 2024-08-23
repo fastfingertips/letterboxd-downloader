@@ -39,9 +39,7 @@ from methods.req_ import(
 
 from methods.system_ import(
     terminalSystem,
-    terminalTitle,
-    fileCheck,
-    dirCheck
+    terminalTitle
 )
 
 from methods.log_ import(
@@ -63,6 +61,11 @@ from methods.session_ import(
 from methods.hash_ import(
     getChanges,
     extractObj
+)
+
+from utils.file_utils import(
+    fileCheck,
+    dirCheck
 )
 
 # -- MAIN -- #

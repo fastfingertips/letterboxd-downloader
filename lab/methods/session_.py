@@ -3,7 +3,7 @@ import os
 
 # -- Local Imports -- #
 
-from methods.system_ import fileRenamer
+from utils.file_utils import fileRenamer
 from methods.log_ import(
     preCmdInfo,
     preCmdErr

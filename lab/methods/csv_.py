@@ -3,7 +3,7 @@ import glob
 
 # -- Local Imports -- #
 
-from .system_ import dirCheck
+from utils.file_utils import dirCheck
 from .log_ import txtLog
 
 from constants.project import(
