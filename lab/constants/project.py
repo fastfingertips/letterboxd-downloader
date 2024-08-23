@@ -1,10 +1,17 @@
+"""
+Constants for the project configuration.
+
+These constants are used throughout the project for setting file names,
+managing limits, defining the site domain, and configuring logging behavior.
+"""
+
 # File Names
-SETTINGS_FILE_NAME = 'settings.json'
-SESSIONS_FILE_NAME = 'sessions.json'
+SETTINGS_FILE_NAME = 'settings.json'  # The name of the settings file used to store configuration data.
+SESSIONS_FILE_NAME = 'sessions.json'  # The name of the file where session data is stored.
 
 # Limits
-SPLIT_LIMIT = 1500
-PARTITION_LIMIT = 10
+SPLIT_LIMIT = 1500  # The maximum size before splitting data into smaller parts.
+PARTITION_LIMIT = 10  # The maximum number of partitions allowed.
 
 # Domain
 SITE_PROTOCOL = "https://"
