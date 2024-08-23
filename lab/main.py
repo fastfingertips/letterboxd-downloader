@@ -53,7 +53,7 @@ from methods.session_ import(
     endSession
 )
 
-from methods.hash_ import(
+from utils.hash_utils import(
     getChanges,
     extractObj
 )

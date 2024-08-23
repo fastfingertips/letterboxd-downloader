@@ -5,7 +5,7 @@ import arrow
 # -- Local Imports -- #
 
 from utils.terminal_utils import terminalTitle
-from .hash_ import getChanges
+from utils.hash_utils import getChanges
 
 from constants.project import(
     CMD_PRINT_FILMS,

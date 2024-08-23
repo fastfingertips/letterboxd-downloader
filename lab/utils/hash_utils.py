@@ -1,13 +1,8 @@
-from .color_ import(
-    cmdBlink,
-    ced
-)
-
-# -- HASH --
+from methods.color_ import cmdBlink, ced
 
 def getChanges(_key1, _key2) -> str:
     """
-    returns a string with the changes between two keys
+    Returns a string with the changes between two keys
     """
     return ''.join(
         ced(_key2[i], color="yellow")
@@ -18,12 +13,13 @@ def getChanges(_key1, _key2) -> str:
 
 def extractObj(_job, _obj) -> str:
     """
-    delete 'obj' from the end of 'job'
+    Deletes 'obj' from the end of 'job'
     """
     try:
         #> while _job ends with _obj..
         while _job[-1] == _obj:
             #> deletes _obj from the end of _job every time.
             _job = _job[:-1]
-    except: pass
+    except: 
+        pass
     return _job
