@@ -3,7 +3,7 @@ from datetime import datetime
 def getRunTime() -> str:
     """
     Get the current date and time formatted as 'ddmmyyyyHHMMSS'.
-    
+
     Returns:
         str: The current date and time in the format 'ddmmyyyyHHMMSS'.
     """
@@ -15,7 +15,7 @@ def getRunTime() -> str:
 def getLogTime() -> str:
     """
     Get the current date and time formatted as 'dd/mm/yyyy HH:MM:SS'.
-    
+
     Returns:
         str: The current date and time in the format 'dd/mm/yyyy HH:MM:SS'.
     """

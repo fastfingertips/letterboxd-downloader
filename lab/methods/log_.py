@@ -4,7 +4,7 @@ import os
 # -- Local Imports -- #
 
 from .set_ import readSettings
-from .time_ import getLogTime
+from utils.time_utils import getLogTime
 from utils.file_utils import fileExists
 from utils.json_utils import loadJsonFile
 

@@ -1,6 +1,6 @@
 import os
 from methods.color_ import preCmdInfo, cmdBlink
-from methods.time_ import getRunTime
+from utils.time_utils import getRunTime
 
 def dirCheck(dirs: list) -> None:
     """

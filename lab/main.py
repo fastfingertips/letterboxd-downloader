@@ -2,7 +2,7 @@ import csv
 
 # -- Local Imports -- #
 
-from methods.time_ import getRunTime
+from utils.time_utils import getRunTime
 
 from constants.project import(
     DEFAULT_EXPORT_KEY,
