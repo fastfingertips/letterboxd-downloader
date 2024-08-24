@@ -30,11 +30,11 @@ from methods.req_ import(
     getListLastPageNo,
     getMetaContent,
     getBodyContent,
-    userListCheck,
+    check_user_list,
     listSignature,
     doPullFilms,
-    doReadPage,
-    urlFix
+    do_read_page,
+    fix_url
 )
 
 from methods.log_ import(
@@ -139,7 +139,7 @@ while True:
                             try:
                                 urlListItem = urlListItem.replace('?','')
                                 urlListItem = extractObj(urlListItem,'.')
-                                urlList = urlFix(urlListItem, urlList)
+                                urlList = fix_url(urlListItem, urlList)
                                 break
                             except:
                                 print(f"{PRE_CMD_INFO}To finish, you must first specify a list.") 
@@ -161,7 +161,7 @@ while True:
                         x += -1
                 else: endList = 'Not specified.' # Son liste için bir parametre belirtilmezse.
                 searchList = f'{SITE_DOMAIN}/search/lists/{urlListItem}/'
-                searchListPreviewDom = doReadPage(searchList)
+                searchListPreviewDom = do_read_page(searchList)
 
                 searchMetaTitle = getMetaContent(searchListPreviewDom,'og:title') # getting og:title
                 searchLMetaUrl = getMetaContent(searchListPreviewDom,'og:url') #: Getting og:url
@@ -194,7 +194,7 @@ while True:
                 for i in range(int(searchListsQLastsPage)):
                     sayfa += 1
                     connectionPage = f'{searchList}page/{sayfa}'
-                    searchListDom = doReadPage(connectionPage)
+                    searchListDom = do_read_page(connectionPage)
                     listsUrls = searchListDom.find_all('a', attrs={'class':'list-link'}) # okunmuş sayfadaki tüm listelerin adresleri.
 
                     queryPage = {
@@ -213,7 +213,7 @@ while True:
                         liste += 1
                         print(f'{PRE_CMD_INFO}List page/rank: {ced(sayfa, "blue")}/{ced(liste, "blue")}')
                         urlListItem = SITE_DOMAIN+listsUrl.get('href') #: https://letterboxd.com + /user_name/list/list_name
-                        userListAvailable, approvedListUrl = userListCheck(doReadPage(urlListItem), urlListItem)
+                        userListAvailable, approvedListUrl = check_user_list(do_read_page(urlListItem), urlListItem)
                         if approvedListUrl not in urlList:
                             if userListAvailable:
                                 urlList.append(approvedListUrl)
@@ -228,8 +228,8 @@ while True:
 
             if '/detail' in urlListItem: urlListItem = urlListItem.replace('/detail','') # if url is detail page, remove detail part.
 
-            urlListItemDom = doReadPage(urlListItem) # sayfa dom'u alınır.
-            userListAvailable, approvedListUrl = userListCheck(urlListItemDom, urlListItem) # liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
+            urlListItemDom = do_read_page(urlListItem) # sayfa dom'u alınır.
+            userListAvailable, approvedListUrl = check_user_list(urlListItemDom, urlListItem) # liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
             if userListAvailable: # liste kullanıma uygunsa..
                 if approvedListUrl not in urlList: #> doğrulanmış URL daha önce URL Listesine eklenmediyse..
                     urlList.append(approvedListUrl) # doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
@@ -251,7 +251,7 @@ while True:
         processState = f'[{processLoopNo}/{len(urlList)}]'
         currentUrListItemDetail = f'{currentUrListItem}detail/' # url'e detail eklendi.
         currentUrListItemDetailPage = f'{currentUrListItemDetail}page/' # detaylı url'e sayfa gezintisi için parametre eklendi.
-        cListDom = doReadPage(currentUrListItemDetail) # şu anki liste sayfasını oku.
+        cListDom = do_read_page(currentUrListItemDetail) # şu anki liste sayfasını oku.
 
         try: cListOwner = getBodyContent(cListDom,'data-owner') # liste sahibini al.
         except Exception as e:
@@ -306,7 +306,7 @@ while True:
                 print(SUP_LINE_FILMS, end='')
                 for x in range(int(lastPageNo)): # sayfa sayısı kadar döngü oluştur.
                     txtLog(f'{PRE_LOG_INFO}Connecting to {currentUrListItemDetailPage}{str(x+1)}') # sayfa numarasını log dosyasına yaz.
-                    currentDom = doReadPage(f'{currentUrListItemDetailPage}{str(x+1)}') # sayfa dom'u alınır.
+                    currentDom = do_read_page(f'{currentUrListItemDetailPage}{str(x+1)}') # sayfa dom'u alınır.
                     loopCount = doPullFilms(loopCount, currentDom, writer) # filmleri al.
                 csvFile.close() # açtığımız dosyayı manuel kapattık
 

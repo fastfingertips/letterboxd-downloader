@@ -53,21 +53,31 @@ def getMetaContent(_dom, _obj) -> str:
         metaContent = ''
     return metaContent
 
-def urlFix(_urlListItem, _urlList) -> list:
+def fix_url(url_item: str, url_list: list) -> list:
     """
-    fixes the URL of the list and adds it to the URL list.
-    """
-    #> get the DOM element of the page.
-    urlListItemDom = doReadPage(_urlListItem)
-    #> check the availability of the list and get the approved URL.
-    userListAvailable, approvedListUrl = userListCheck(urlListItemDom, _urlListItem)
-    #> if the list is available and the approved URL is not already in the URL list...
-    if userListAvailable and approvedListUrl not in _urlList:
-        #> add the approved URL to the URL list for further processing.
-        _urlList.append(approvedListUrl)
-    return _urlList
+    Processes and validates a URL from the provided item, adding it to the list if it meets specified conditions.
 
-def userListCheck(_urlListItemDom, _urlListItem) -> tuple:
+    Args:
+        url_item (str): The URL item to be processed.
+        url_list (list): The list of URLs to be updated with the valid URL.
+
+    Returns:
+        list: The updated list of URLs with the new, validated URL if applicable.
+
+    The function performs the following:
+    1. Retrieves the DOM structure of the page from the given URL item.
+    2. Checks if the user list is available in the DOM and retrieves the validated URL.
+    3. Appends the validated URL to the url_list if it's not already present.
+    """
+    dom = do_read_page(url_item)
+    is_available, validated_url = check_user_list(dom, url_item)
+    
+    if is_available and validated_url not in url_list:
+        url_list.append(validated_url)
+    
+    return url_list
+ 
+def check_user_list(_urlListItemDom, _urlListItem) -> tuple:
     """
     checks the availability of the list and returns the approved URL.
     """
@@ -240,7 +250,7 @@ def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage) -
     except: # list's last page process
         txtLog(f'{PRE_CMD_INFO}Getting the number of movies on the list last page.')
         try:
-            lastPageDom = doReadPage(f'{_currentUrlListItemDetailPage}{_lastPageNo}') # Getting lastpage dom.
+            lastPageDom = do_read_page(f'{_currentUrlListItemDetailPage}{_lastPageNo}') # Getting lastpage dom.
             #> pulled page codes.
             lastPageArticles = lastPageDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
             lastPageMoviesCount =  len(lastPageArticles) # film count.
@@ -275,7 +285,7 @@ def getListLastPageNo(_currentListDom, _currentUrListItemDetailPage) -> int:
         txtLog(f'{PRE_LOG_INFO}Communication with the page is complete. It is learned that the number of pages in the list is {lastPageNo}.')
         return lastPageNo
 
-def doReadPage(_url) -> BeautifulSoup:
+def do_read_page(_url) -> BeautifulSoup:
     """
     Reads and retrieves the DOM of the specified page URL.
     """
