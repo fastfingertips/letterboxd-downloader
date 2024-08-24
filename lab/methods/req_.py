@@ -69,7 +69,7 @@ def fix_url(url_item: str, url_list: list) -> list:
     2. Checks if the user list is available in the DOM and retrieves the validated URL.
     3. Appends the validated URL to the url_list if it's not already present.
     """
-    dom = do_read_page(url_item)
+    dom = read_page(url_item)
     is_available, validated_url = check_user_list(dom, url_item)
     
     if is_available and validated_url not in url_list:
@@ -250,7 +250,7 @@ def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage) -
     except: # list's last page process
         txtLog(f'{PRE_CMD_INFO}Getting the number of movies on the list last page.')
         try:
-            lastPageDom = do_read_page(f'{_currentUrlListItemDetailPage}{_lastPageNo}') # Getting lastpage dom.
+            lastPageDom = read_page(f'{_currentUrlListItemDetailPage}{_lastPageNo}') # Getting lastpage dom.
             #> pulled page codes.
             lastPageArticles = lastPageDom.find('ul', attrs={'class': 'poster-list -p70 film-list clear film-details-list'}).find_all("li")
             lastPageMoviesCount =  len(lastPageArticles) # film count.
@@ -285,40 +285,60 @@ def getListLastPageNo(_currentListDom, _currentUrListItemDetailPage) -> int:
         txtLog(f'{PRE_LOG_INFO}Communication with the page is complete. It is learned that the number of pages in the list is {lastPageNo}.')
         return lastPageNo
 
-def do_read_page(_url) -> BeautifulSoup:
+def read_page(url: str) -> BeautifulSoup:
     """
-    Reads and retrieves the DOM of the specified page URL.
+    Retrieves the DOM structure of the specified page URL using BeautifulSoup.
+
+    Args:
+        url (str): The URL of the page to be retrieved.
+
+    Returns:
+        BeautifulSoup: The parsed DOM structure of the page.
+
+    The function attempts to connect to the specified URL and parse its content into a BeautifulSoup object.
+    It handles various exceptions related to network issues, such as connection errors, timeouts, and general request exceptions.
+    If successful, it returns the DOM structure; otherwise, it logs the error and retries.
     """
     try:
-        #> Provides information in the log file at the beginning of the connection.
-        txtLog(f'{PRE_LOG_INFO}Trying to connect to [{_url}]') 
+        txtLog(f'{PRE_LOG_INFO}Attempting to connect to [{url}]')
+        
         while True:
-            #> https://stackoverflow.com/questions/23013220/max-retries-exceeded-with-url-in-requests
             try:
-                urlResponseCode = requests.get(_url, timeout=30)
-                urlDom = BeautifulSoup(urlResponseCode.content.decode('utf-8'), 'html.parser')
-                if urlDom != None:
-                    return urlDom # Returns the page DOM
+                response = requests.get(url, timeout=30)
+                response.raise_for_status()  # Raises an exception for HTTP errors
+                dom = BeautifulSoup(response.content.decode('utf-8'), 'html.parser')
+                
+                if dom:
+                    return dom  # Returns the page DOM
+                
             except requests.ConnectionError as e:
-                print("OOPS!! Connection Error. Make sure you are connected to the Internet. Technical details are provided below.")
-                print(str(e))
+                print("Connection Error: Please check your Internet connection.")
+                print(f"Details: {e}")
                 continue
+                
             except requests.Timeout as e:
-                print("OOPS!! Timeout Error")
-                print(str(e))
+                print("Timeout Error: The request timed out.")
+                print(f"Details: {e}")
                 continue
+                
             except requests.RequestException as e:
-                print("OOPS!! General Error")
-                print(str(e))
+                print("Request Error: A general error occurred during the request.")
+                print(f"Details: {e}")
                 continue
+                
             except KeyboardInterrupt:
-                print("Someone closed the program")
+                print("Process interrupted by the user.")
+                break
+                
             except Exception as e:
-                print('Error:', e)
+                print(f"An unexpected error occurred: {e}")
+                break
+    
     except Exception as e:
-        #> If an error occurs while obtaining the DOM...
         errorLine(e)
-        txtLog(f'{PRE_LOG_ERR}Connection to the address failed [{_url}]')
+        txtLog(f'{PRE_LOG_ERR}Failed to connect to [{url}]')
+
+    return None  # Return None if the process is interrupted or an error occurs
 
 def doPullFilms(_loopCount, _currentDom, _writer) -> None:
     """
