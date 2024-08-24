@@ -1,4 +1,5 @@
-from methods.color_ import cmdBlink, ced
+from methods.color_ import ced
+from utils.cmd_format import cmdBlink
 
 def getChanges(_key1, _key2) -> str:
     """

@@ -3,6 +3,7 @@ import csv
 # -- Local Imports -- #
 
 from utils.time_utils import getRunTime
+from utils.cmd_format import cmdBlink
 
 from constants.project import(
     DEFAULT_EXPORT_KEY,
@@ -20,7 +21,6 @@ from methods.color_ import(
     preCmdCheck,
     preCmdInfo,
     preCmdErr,
-    cmdBlink,
     SUP_LINE,
     SUB_LINE,
     ced

@@ -6,6 +6,7 @@ import arrow
 
 from utils.terminal_utils import terminalTitle
 from utils.hash_utils import getChanges
+from utils.cmd_format import cmdBlink
 
 from constants.project import(
     CMD_PRINT_FILMS,
@@ -22,7 +23,6 @@ from .color_ import(
     preCmdCheck,
     preCmdInfo,
     preCmdErr,
-    cmdBlink,
     ced
 )
 
