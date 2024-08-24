@@ -195,7 +195,7 @@ def getListSignature(_listDict) -> dict:
     listPublicationTimeHumanize = arrow.get(listPublicationTime).humanize()
 
     #> get the number of pages in the list.
-    listLastPage = getListLastPageNo(listDom, listDetailPage)
+    listLastPage = get_list_last_page_no(listDom, listDetailPage)
 
     #> calculate the number of movies in the list.
     listMovieCount =  getMovieCount(listLastPage, listDom, listDetailPage)
@@ -307,28 +307,55 @@ def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage) -
             errorLine(e)
             txtLog(f'{PRE_LOG_ERR}An error occurred while obtaining the number of movies on the list last page.')
 
-def getListLastPageNo(_currentListDom, _currentUrListItemDetailPage) -> int:
+def get_list_last_page_no(current_list_dom: BeautifulSoup, current_url_list_item_detail_page: str) -> int:
     """
-    Get the number of pages in the list (last page no)
+    Retrieves the number of pages in the list by finding the last page number from the pagination.
+
+    Args:
+        current_list_dom (BeautifulSoup): The parsed DOM structure of the current list page.
+        current_url_list_item_detail_page (str): The URL of the detail page for the current list item.
+
+    Returns:
+        int: The number of the last page in the list.
+        
+    If there is only one page or if an error occurs, the function defaults to returning 1.
+
+    Logs the process and any errors encountered during the retrieval of the last page number.
     """
     try:
-        # Note: To find the number of pages, count the li's. Take the last number.
-        # The text of the link in the last 'li' will give us how many pages our list is.
-        txtLog(f'{PRE_LOG_INFO}Checking the number of pages in the list..')
-
-        #> not created link when the number of movies is 100 or less in the list.
-        lastPageNo = _currentListDom.find('div', attrs={'class': 'paginate-pages'}).find_all("li")[-1].a.text 
-        txtLog(f'{PRE_LOG_INFO}The list has more than one page ({lastPageNo}).')
-        getMovieCount(lastPageNo, _currentListDom, _currentUrListItemDetailPage)
-    except AttributeError: # exception when there is only one page.
-        txtLog(f'{PRE_LOG_INFO}There is no more than one page, this list is one page.')
-        lastPageNo = 1 # when the number of pages cannot be obtained, the number of pages is marked as 1.
-        getMovieCount(lastPageNo, _currentListDom, _currentUrListItemDetailPage) # send page info.
+        txtLog(f'{PRE_LOG_INFO}Checking the number of pages in the list...')
+        
+        # Locate the pagination container and find the last page number
+        pagination_div = current_list_dom.find('div', class_='paginate-pages')
+        if not pagination_div:
+            raise ValueError('Pagination container not found.')
+        
+        page_items = pagination_div.find_all('li')
+        if not page_items:
+            raise ValueError('No pagination items found.')
+        
+        last_page_number = page_items[-1].a.text.strip()
+        last_page_number = int(last_page_number)  # Convert to integer
+        
+        txtLog(f'{PRE_LOG_INFO}The list has more than one page (Last page number: {last_page_number}).')
+        
+        # Process the movie count on the last page
+        getMovieCount(last_page_number, current_list_dom, current_url_list_item_detail_page)
+        
+    except (AttributeError, ValueError) as e:
+        txtLog(f'{PRE_LOG_INFO}Error determining the number of pages: {e}')
+        last_page_number = 1  # Default to 1 if there is an error or single page
+        
+        # Handle the case with only one page
+        getMovieCount(last_page_number, current_list_dom, current_url_list_item_detail_page)
+        
     except Exception as e:
         errorLine(e)
+        last_page_number = 1  # Default to 1 on unexpected exceptions
+    
     finally:
-        txtLog(f'{PRE_LOG_INFO}Communication with the page is complete. It is learned that the number of pages in the list is {lastPageNo}.')
-        return lastPageNo
+        txtLog(f'{PRE_LOG_INFO}Completed page count check. Last page number is {last_page_number}.')
+        return last_page_number
 
 def read_page(url: str) -> BeautifulSoup:
     """

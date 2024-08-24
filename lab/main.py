@@ -27,7 +27,7 @@ from constants.terminal import(
 )
 
 from methods.req_ import(
-    getListLastPageNo,
+    get_list_last_page_no,
     get_meta_content,
     get_body_content,
     check_user_list,
@@ -292,7 +292,7 @@ while True:
             print(SUP_LINE)
             print(f"{PRE_CMD_INFO}{ced(f'List confirmed. {autoEnterMsg}', color='green')}")
 
-            lastPageNo = getListLastPageNo(cListDom, currentUrListItemDetailPage)
+            lastPageNo = get_list_last_page_no(cListDom, currentUrListItemDetailPage)
             openCsv = ''.join([exportsPath, cListOwner, '_', cListDomainName, '_', cListRunTime, '.csv'])
             dirCheck([exportsPath]) # export klasörünün kontrolü.
             fileCheck([openCsv]) # csv dosyasının kontrolü.
