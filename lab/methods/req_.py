@@ -31,13 +31,32 @@ from .log_ import(
     txtLog
 )
 
-def getBodyContent(_dom, _obj) -> str:
+def get_body_content(dom: BeautifulSoup, attribute: str) -> str:
     """
-    a function that returns the content of the body tag..
+    Retrieves the specified attribute value from the <body> tag of the given DOM.
+
+    Args:
+        dom (BeautifulSoup): The parsed DOM structure of a web page.
+        attribute (str): The attribute whose value is to be retrieved from the <body> tag.
+
+    Returns:
+        str: The value of the specified attribute from the <body> tag.
+
+    Raises:
+        ValueError: If the <body> tag or the specified attribute is not found in the DOM.
+
+    The function searches for the <body> tag in the provided DOM and attempts to retrieve the value of the specified attribute.
+    If the attribute is not present or the <body> tag is missing, a ValueError is raised.
     """
-    #> get the content of the body tag.
-    bodyContent = _dom.find('body').attrs[_obj]
-    return bodyContent
+    body_tag = dom.find('body')
+
+    if body_tag is None:
+        raise ValueError("The <body> tag was not found in the DOM.")
+
+    if attribute not in body_tag.attrs:
+        raise ValueError(f"The attribute '{attribute}' was not found in the <body> tag.")
+    
+    return body_tag.attrs[attribute]
 
 def getMetaContent(_dom, _obj) -> str:
     """
@@ -96,7 +115,7 @@ def check_user_list(_urlListItemDom, _urlListItem) -> tuple:
             #> get the title of the list from the meta tag. Example: 'Search results for best comedy'
             metaOgTitle = getMetaContent(_urlListItemDom, 'og:title')
             #> get the username of the list owner from the body tag.
-            bodyDataOwner = getBodyContent(_urlListItemDom,'data-owner')
+            bodyDataOwner = get_body_content(_urlListItemDom,'data-owner')
 
             #> print the list owner's username and the list title.
             print(f'{PRE_CMD_CHECK}{ced("Found it: ", color="green")}@{ced(bodyDataOwner,"yellow")} "{ced(metaOgTitle,"yellow")}"')

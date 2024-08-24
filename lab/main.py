@@ -29,7 +29,7 @@ from constants.terminal import(
 from methods.req_ import(
     getListLastPageNo,
     getMetaContent,
-    getBodyContent,
+    get_body_content,
     check_user_list,
     listSignature,
     doPullFilms,
@@ -253,7 +253,7 @@ while True:
         currentUrListItemDetailPage = f'{currentUrListItemDetail}page/' # detaylı url'e sayfa gezintisi için parametre eklendi.
         cListDom = read_page(currentUrListItemDetail) # şu anki liste sayfasını oku.
 
-        try: cListOwner = getBodyContent(cListDom,'data-owner') # liste sahibini al.
+        try: cListOwner = get_body_content(cListDom,'data-owner') # liste sahibini al.
         except Exception as e:
             print(f'{PRE_CMD_ERR}Liste sahibi bilgisi alınamadı')
             txtLog(f'Liste sahibi bilgisi alınamadı Hata: {e}')
