@@ -71,6 +71,8 @@ def userListCheck(_urlListItemDom, _urlListItem) -> tuple:
     """
     checks the availability of the list and returns the approved URL.
     """
+    metaOgUrl = ''
+    currentListAvaliable = False
     try: # try to extract data from the meta tag; if not found, it's not a list.
         metaOgType = getMetaContent(_urlListItemDom,'og:type') 
 
@@ -110,8 +112,6 @@ def userListCheck(_urlListItemDom, _urlListItem) -> tuple:
             currentListAvaliable = True
     except Exception as e:
         errorLine(e)
-        metaOgUrl = ''
-        currentListAvaliable = False
     finally:
         return currentListAvaliable, metaOgUrl
 
