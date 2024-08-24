@@ -4,25 +4,25 @@ import csv
 
 from utils.time_utils import getRunTime
 from utils.cmd_format import cmdBlink
+from utils.cmd_display import coloredDictPrint
 
 from constants.project import(
     DEFAULT_EXPORT_KEY,
     SPLIT_PARAMETER,
     DEFAULT_LOG_KEY,
     PRE_LOG_INFO,
-    SITE_DOMAIN
+    SITE_DOMAIN,
+    SUB_LINE,
+    SUP_LINE
 )
 
 from methods.color_ import(
-    coloredDictPrint,
     preCmdUnCheck,
     supLineFilms,
     preCmdInput,
     preCmdCheck,
     preCmdInfo,
     preCmdErr,
-    SUP_LINE,
-    SUB_LINE,
     ced
 )
 
