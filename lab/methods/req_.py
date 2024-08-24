@@ -58,19 +58,45 @@ def get_body_content(dom: BeautifulSoup, attribute: str) -> str:
     
     return body_tag.attrs[attribute]
 
-def getMetaContent(_dom, _obj) -> str:
+def get_meta_content(dom: BeautifulSoup, property_name: str, attribute_name: str = 'content', raise_on_error: bool = True) -> str:
     """
-    a function that returns the content of the meta tag..
+    Retrieves the value of a specified attribute from a <meta> tag with a specified property attribute.
+
+    Args:
+        dom (BeautifulSoup): The parsed DOM structure of a web page.
+        property_name (str): The property attribute value to search for in the <meta> tag.
+        attribute_name (str): The name of the attribute whose value is to be retrieved from the <meta> tag. Defaults to 'content'.
+        raise_on_error (bool): Whether to raise an exception if the <meta> tag or the specified attribute is not found. If False, returns an empty string instead.
+
+    Returns:
+        str: The value of the specified attribute from the <meta> tag, or an empty string if not found and raise_on_error is False.
+        
+    If raise_on_error is True and the <meta> tag or the specified attribute is missing, a ValueError is raised.
+    Otherwise, an empty string is returned and the error is logged.
+
+    Raises:
+        ValueError: If the <meta> tag with the specified property attribute is not found and raise_on_error is True.
     """
     try:
-        #> get the content of the meta tag.
-        metaContent = _dom.find('meta', property=_obj).attrs['content']
-    except AttributeError:
-        #> if the meta tag is not found, return an empty string.
-        print(f"{PRE_CMD_ERR}Cannot retrieve '{_obj}' from the meta tag.")
-        txtLog(f"Cannot retrieve '{_obj}' from the meta tag. Error Message: {AttributeError}")
-        metaContent = ''
-    return metaContent
+        meta_tag = dom.find('meta', property=property_name)
+        
+        if meta_tag is None:
+            if raise_on_error:
+                raise ValueError(f"Meta tag with property '{property_name}' not found.")
+            return ''
+        
+        if attribute_name not in meta_tag.attrs:
+            if raise_on_error:
+                raise ValueError(f"Attribute '{attribute_name}' not found in meta tag with property '{property_name}'.")
+            return ''
+        
+        return meta_tag.attrs[attribute_name]
+    
+    except Exception as e:
+        txtLog(f"Error retrieving '{attribute_name}' from the meta tag with property '{property_name}'. Error Message: {e}")
+        if raise_on_error:
+            raise
+        return ''
 
 def fix_url(url_item: str, url_list: list) -> list:
     """
@@ -103,7 +129,7 @@ def check_user_list(_urlListItemDom, _urlListItem) -> tuple:
     metaOgUrl = ''
     currentListAvaliable = False
     try: # try to extract data from the meta tag; if not found, it's not a list.
-        metaOgType = getMetaContent(_urlListItemDom,'og:type') 
+        metaOgType = get_meta_content(_urlListItemDom,'og:type') 
 
         #> check if the meta tag indicates that it's a list.
         if metaOgType == "letterboxd:list":
@@ -111,9 +137,9 @@ def check_user_list(_urlListItemDom, _urlListItem) -> tuple:
 
             #> get the URL of the list from the meta tag.
             #> if the URL is not the same as the one entered, it means that the list has been redirected.
-            metaOgUrl = getMetaContent(_urlListItemDom,'og:url')
+            metaOgUrl = get_meta_content(_urlListItemDom,'og:url')
             #> get the title of the list from the meta tag. Example: 'Search results for best comedy'
-            metaOgTitle = getMetaContent(_urlListItemDom, 'og:title')
+            metaOgTitle = get_meta_content(_urlListItemDom, 'og:title')
             #> get the username of the list owner from the body tag.
             bodyDataOwner = get_body_content(_urlListItemDom,'data-owner')
 
@@ -160,7 +186,7 @@ def getListSignature(_listDict) -> dict:
         listTitle = listDom.select("[itemprop=title]")[0].text.strip()
     except IndexError:
         #> get the title of the list from the meta tag if it's not found in the DOM.
-        listTitle = getMetaContent(listDom, 'og:title')
+        listTitle = get_meta_content(listDom, 'og:title')
 
     #> get the creation date of the list.
     listPublicationTime = listDom.select(".published time")[0].text

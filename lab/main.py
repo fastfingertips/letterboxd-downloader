@@ -28,7 +28,7 @@ from constants.terminal import(
 
 from methods.req_ import(
     getListLastPageNo,
-    getMetaContent,
+    get_meta_content,
     get_body_content,
     check_user_list,
     listSignature,
@@ -163,8 +163,8 @@ while True:
                 searchList = f'{SITE_DOMAIN}/search/lists/{urlListItem}/'
                 searchListPreviewDom = read_page(searchList)
 
-                searchMetaTitle = getMetaContent(searchListPreviewDom,'og:title') # getting og:title
-                searchLMetaUrl = getMetaContent(searchListPreviewDom,'og:url') #: Getting og:url
+                searchMetaTitle = get_meta_content(searchListPreviewDom,'og:title') # getting og:title
+                searchLMetaUrl = get_meta_content(searchListPreviewDom,'og:url') #: Getting og:url
 
                 try: searchListsQCountMsg = searchListPreviewDom.find('h2', attrs={'class':'section-heading'}).text #: Kaç liste bulunduğu hakkında bilgi veren mesaj.
                 except AttributeError:
