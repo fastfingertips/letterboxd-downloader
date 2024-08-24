@@ -1,6 +1,7 @@
-import os
-import sys
 from constants.project import PRE_LOG_ERR
+import sys
+import os
+
 
 def terminalTitle(title: str) -> None:
     """

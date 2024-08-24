@@ -1,3 +1,4 @@
+from termcolor import colored as ced
 from bs4 import BeautifulSoup
 import requests
 import arrow
@@ -16,14 +17,13 @@ from constants.project import(
     SUP_LINE
 )
 
-from .color_ import(
-    preCmdMiddleDotList,
-    preCmdMiddleDot,
-    preBlankCount,
-    preCmdCheck,
-    preCmdInfo,
-    preCmdErr,
-    ced
+from constants.terminal import(
+    PRE_CMD_MIDDLE_DOT_LIST,
+    PRE_CMD_MIDDLE_DOT,
+    PRE_BLANK_COUNT,
+    PRE_CMD_CHECK,
+    PRE_CMD_INFO,
+    PRE_CMD_ERR
 )
 
 from .log_ import(
@@ -48,7 +48,7 @@ def getMetaContent(_dom, _obj) -> str:
         metaContent = _dom.find('meta', property=_obj).attrs['content']
     except AttributeError:
         #> if the meta tag is not found, return an empty string.
-        print(f"{preCmdErr}Cannot retrieve '{_obj}' from the meta tag.")
+        print(f"{PRE_CMD_ERR}Cannot retrieve '{_obj}' from the meta tag.")
         txtLog(f"Cannot retrieve '{_obj}' from the meta tag. Error Message: {AttributeError}")
         metaContent = ''
     return metaContent
@@ -87,15 +87,15 @@ def userListCheck(_urlListItemDom, _urlListItem) -> tuple:
             bodyDataOwner = getBodyContent(_urlListItemDom,'data-owner')
 
             #> print the list owner's username and the list title.
-            print(f'{preCmdCheck}{ced("Found it: ", color="green")}@{ced(bodyDataOwner,"yellow")} "{ced(metaOgTitle,"yellow")}"')
+            print(f'{PRE_CMD_CHECK}{ced("Found it: ", color="green")}@{ced(bodyDataOwner,"yellow")} "{ced(metaOgTitle,"yellow")}"')
 
             #> if the entered URL matches the meta URL...
             if _urlListItem == metaOgUrl or f'{_urlListItem}/' == metaOgUrl:
                 txtLog(f'{PRE_LOG_INFO}The list URL does not contain any redirects.')
             else: # Girilen URL Meta ile uyuşmuyorsa..
-                print(f'{preCmdInfo}The list URL you entered contains redirects.')
-                print(f'{preBlankCount}The list title was likely changed recently or you entered it incorrectly.')
-                print(f'{preBlankCount}({ced("+", "red")}): {ced(_urlListItem, color="yellow")}')
+                print(f'{PRE_CMD_INFO}The list URL you entered contains redirects.')
+                print(f'{PRE_BLANK_COUNT}The list title was likely changed recently or you entered it incorrectly.')
+                print(f'{PRE_BLANK_COUNT}({ced("+", "red")}): {ced(_urlListItem, color="yellow")}')
                 
                 if _urlListItem in metaOgUrl:
                     msgInputUrl = ced(_urlListItem, color="yellow")
@@ -104,7 +104,7 @@ def userListCheck(_urlListItemDom, _urlListItem) -> tuple:
                     msgInputUrl = ''
                     msgMetaOgUrlChange = getChanges(_urlListItem, metaOgUrl)
 
-                print(f'{preBlankCount}({ced("+", "green")}): {msgInputUrl}{msgMetaOgUrlChange} as the corrected URL.')
+                print(f'{PRE_BLANK_COUNT}({ced("+", "green")}): {msgInputUrl}{msgMetaOgUrlChange} as the corrected URL.')
             txtLog(f'{PRE_LOG_INFO}List "{metaOgTitle}" found for {_urlListItem}')
 
             currentListAvaliable = True
@@ -194,23 +194,23 @@ def listSignature(_listDict) -> None:
         terminalTitle(f"{_listDict['process_state']} Process: @{_listDict['list_owner']}.")
 
         signList = [
-            f"\n{preCmdInfo}Process State: {cmdBlink(_listDict['process_state'],'green')}",
+            f"\n{PRE_CMD_INFO}Process State: {cmdBlink(_listDict['process_state'],'green')}",
             SUP_LINE,
-            f"{preCmdInfo}{ced('List info;', color='yellow')}",
-            f"{preCmdMiddleDot}List by {ced(listSign['list_by'],'blue', attrs=['bold'])}",
-            f"{preCmdMiddleDot}Updated: {ced(listSign['list_update_time_humanize'],'blue', attrs=['bold'])}",
-            f"{preCmdMiddleDot}Published: {ced(listSign['list_publication_time_humanize'],'blue', attrs=['bold'])}",
-            f"{preCmdMiddleDot}List title: {ced(listSign['list_title'], 'blue', attrs=['bold'])}",
-            f"{preCmdMiddleDot}Filters;",
-            f"{preCmdMiddleDotList}Filtered as {ced(listSign['list_selected_decade_year'],'blue', attrs=['bold'])}",
-            f"{preCmdMiddleDotList}Filtered as {ced(listSign['list_selected_genre'],'blue', attrs=['bold'])}",
-            f"{preCmdMiddleDotList}Movies sorted by {ced(listSign['list_selected_sort_by'],'blue', attrs=['bold'])}",
-            f"{preCmdMiddleDot}List hash: {ced(_listDict['list_run_time'],'blue', attrs=['bold'])}",
-            f"{preCmdMiddleDot}Sayfa sayısı: {ced(listSign['list_last_page'],'blue', attrs=['bold'])}",
-            f"{preCmdMiddleDot}Number of movies: {ced(listSign['list_movie_count'],'blue', attrs=['bold'])}",
-            f"{preCmdMiddleDot}List domain name: {ced(_listDict['list_domain_name'],'blue', attrs=['bold'])}",
-            f"{preCmdMiddleDot}List URL: {ced(_listDict['list_url'],'blue', attrs=['bold'])}",
-            f"{preCmdMiddleDot}Process URL: {ced(_listDict['list_detail_url'],'blue', attrs=['bold'])}"
+            f"{PRE_CMD_INFO}{ced('List info;', color='yellow')}",
+            f"{PRE_CMD_MIDDLE_DOT}List by {ced(listSign['list_by'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Updated: {ced(listSign['list_update_time_humanize'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Published: {ced(listSign['list_publication_time_humanize'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}List title: {ced(listSign['list_title'], 'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Filters;",
+            f"{PRE_CMD_MIDDLE_DOT_LIST}Filtered as {ced(listSign['list_selected_decade_year'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Filtered as {ced(listSign['list_selected_genre'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Movies sorted by {ced(listSign['list_selected_sort_by'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}List hash: {ced(_listDict['list_run_time'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Sayfa sayısı: {ced(listSign['list_last_page'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Number of movies: {ced(listSign['list_movie_count'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}List domain name: {ced(_listDict['list_domain_name'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}List URL: {ced(_listDict['list_url'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Process URL: {ced(_listDict['list_detail_url'],'blue', attrs=['bold'])}"
         ]
 
         print('\n'.join(signList))
@@ -224,7 +224,7 @@ def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage) -
     Get the number of movies on the list.
     """
     try:
-        txtLog(f'{preCmdInfo}Getting the number of movies on the list meta description.')
+        txtLog(f'{PRE_CMD_INFO}Getting the number of movies on the list meta description.')
         # Instead of connecting to the last page and getting the number of movies on the last page, which generates a GET request
         # and slows down the program, an alternative approach is used by getting the meta description of the list page.
         metaDescription = _currentListDom.find('meta', attrs={'name':'description'}).attrs['content']
@@ -238,7 +238,7 @@ def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage) -
         movieCount = metaDescription[:ii]
         return movieCount
     except: # list's last page process
-        txtLog(f'{preCmdInfo}Getting the number of movies on the list last page.')
+        txtLog(f'{PRE_CMD_INFO}Getting the number of movies on the list last page.')
         try:
             lastPageDom = doReadPage(f'{_currentUrlListItemDetailPage}{_lastPageNo}') # Getting lastpage dom.
             #> pulled page codes.
@@ -322,13 +322,13 @@ def doPullFilms(_loopCount, _currentDom, _writer) -> None:
         for currentAlternative in ['ul.film-list', 'ul.poster-list', 'ul.film-details-list']:
             if filmDetailsList is None: filmDetailsList = _currentDom.select_one(currentAlternative)
             else:
-                print(f'{preCmdInfo}{_loopCount} and after film/poster container pulled without alternative help.')
+                print(f'{PRE_CMD_INFO}{_loopCount} and after film/poster container pulled without alternative help.')
                 break
         else:
             if filmDetailsList is None:
-                print(f'{preCmdInfo}{_loopCount} and after film/poster container could not be pulled.')
+                print(f'{PRE_CMD_INFO}{_loopCount} and after film/poster container could not be pulled.')
             else:
-                print(f'{preCmdInfo}{_loopCount} and after film/poster container pulled with alternative help.')
+                print(f'{PRE_CMD_INFO}{_loopCount} and after film/poster container pulled with alternative help.')
 
         #> getting' container's all films/posters (<li> elements)
         filmDetails = filmDetailsList.find_all("li")

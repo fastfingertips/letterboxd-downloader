@@ -1,4 +1,4 @@
-from methods.color_ import ced
+from termcolor import colored as ced
 from utils.cmd_format import cmdBlink
 
 def getChanges(_key1, _key2) -> str:

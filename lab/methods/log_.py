@@ -18,9 +18,9 @@ from constants.project import(
     PRE_LOG_ERR
 )
 
-from .color_ import(
-    preCmdInfo,
-    preCmdErr
+from constants.terminal import(
+    PRE_CMD_INFO,
+    PRE_CMD_ERR
 )
 
 current_pid = str(os.getpid())
@@ -62,7 +62,7 @@ def startLog(_appId) -> bool:
         # If the log file exists, it is checked.
         logDir = readSettings()[DEFAULT_LOG_KEY]
         logFullPath = f'{logDir}/{_appId}.txt'
-        print(f'{preCmdInfo}Session log file creating...', end=' ')
+        print(f'{PRE_CMD_INFO}Session log file creating...', end=' ')
         if checkLogFile(logFullPath):
             print(f'already exists.')
             return True
@@ -74,7 +74,7 @@ def startLog(_appId) -> bool:
                 return True
             except Exception as e:
                 print(f'failed.')
-                print(f'{preCmdErr}Log file could not be created. Error Message: {e}')
+                print(f'{PRE_CMD_ERR}Log file could not be created. Error Message: {e}')
                 return False
 
 def getCurrentSessionLogPath(_appId) -> str:

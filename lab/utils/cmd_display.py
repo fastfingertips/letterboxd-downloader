@@ -1,6 +1,14 @@
 from termcolor import colored as ced
-from constants.project import SUP_LINE, SUB_LINE
-from methods.color_ import preCmdInfo, preCmdMiddleDot, preCmdMiddleDotList
+from constants.terminal import (
+  PRE_CMD_MIDDLE_DOT_LIST,
+  PRE_CMD_MIDDLE_DOT,
+  PRE_CMD_INFO
+)
+from constants.project import (
+  SUP_LINE,
+  SUB_LINE
+)
+   
 
 def coloredDictPrint(_coloredDict, _mainTitle=None) -> None:
     """
@@ -8,9 +16,9 @@ def coloredDictPrint(_coloredDict, _mainTitle=None) -> None:
     """
     print(SUP_LINE)
     if _mainTitle != None: 
-        print(f"{preCmdInfo}{ced(f'{_mainTitle}', color='yellow')}")
+        print(f"{PRE_CMD_INFO}{ced(f'{_mainTitle}', color='yellow')}")
     for listHeader in _coloredDict:
-        print(f"{preCmdMiddleDot}{ced(listHeader, attrs=['bold', 'underline'])}")
+        print(f"{PRE_CMD_MIDDLE_DOT}{ced(listHeader, attrs=['bold', 'underline'])}")
         for listHeaderItem in _coloredDict[listHeader]:
-            print(f"{preCmdMiddleDotList}{listHeaderItem}: {ced(_coloredDict[listHeader][listHeaderItem],'blue')}")
+            print(f"{PRE_CMD_MIDDLE_DOT_LIST}{listHeaderItem}: {ced(_coloredDict[listHeader][listHeaderItem],'blue')}")
     print(SUB_LINE)

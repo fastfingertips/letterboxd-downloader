@@ -8,10 +8,11 @@ from constants.project import(
     DEFAULT_LOG_KEY
 )
 
-from utils.json_utils import(
-    dumpJsonFile,
-    loadJsonFile
-)
+from constants.terminal import(
+    PRE_CMD_INPUT,
+    PRE_CMD_INFO,
+    PRE_CMD_ERR
+)   
 
 from utils.file_utils import(
     cleanFilename,
@@ -19,10 +20,9 @@ from utils.file_utils import(
     fileExists
 )
 
-from .color_ import(
-    preCmdErr,
-    preCmdInput,
-    preCmdInfo
+from utils.json_utils import(
+    dumpJsonFile,
+    loadJsonFile
 )
 
 # -- SETTINGS --
@@ -32,20 +32,20 @@ def createSettings() -> None:
     Creates the settings file.
     """
     while True:
-        print(f'{preCmdErr}The settings file could not be found. Please enter the required information.')
+        print(f'{PRE_CMD_ERR}The settings file could not be found. Please enter the required information.')
 
-        logDirName = input(f'{preCmdInput}Log directory Name: ').strip()
-        exportDirName = input(f'{preCmdInput}Export directory Name: ').strip()
+        logDirName = input(f'{PRE_CMD_INPUT}Log directory Name: ').strip()
+        exportDirName = input(f'{PRE_CMD_INPUT}Export directory Name: ').strip()
 
         if not checkFilename(logDirName):
             logDirName = cleanFilename(logDirName)
-            print(f'{preCmdInfo}Log directory name cleaned: "{logDirName}"')
+            print(f'{PRE_CMD_INFO}Log directory name cleaned: "{logDirName}"')
 
         if not checkFilename(exportDirName):
             exportDirName = cleanFilename(exportDirName)
-            print(f'{preCmdInfo}Export directory name cleaned: "{exportDirName}"')
+            print(f'{PRE_CMD_INFO}Export directory name cleaned: "{exportDirName}"')
 
-        userAgree = input(f'{preCmdInput}Do you agree with the information you entered? (y/n): ')
+        userAgree = input(f'{PRE_CMD_INPUT}Do you agree with the information you entered? (y/n): ')
 
         if userAgree.lower() == 'n': continue
         elif userAgree.lower() == 'y': 
@@ -58,7 +58,7 @@ def createSettings() -> None:
             dumpJsonFile(SETTINGS_FILE_NAME, default_settings)
             break
         else:
-            print(f'{preCmdErr}Invalid input. Please try again.')
+            print(f'{PRE_CMD_ERR}Invalid input. Please try again.')
             exit()
 
 def readSettings() -> dict:

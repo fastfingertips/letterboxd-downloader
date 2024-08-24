@@ -1,5 +1,5 @@
 import os
-from methods.color_ import preCmdInfo
+from constants.terminal import PRE_CMD_INFO
 from utils.cmd_format import cmdBlink
 from utils.time_utils import getRunTime
 
@@ -10,10 +10,10 @@ def dirCheck(dirs: list) -> None:
     for dir in dirs:
         if dir:
             if os.path.exists(dir):
-                print(f'{preCmdInfo}Directory checked: {cmdBlink(dir, "yellow")}')
+                print(f'{PRE_CMD_INFO}Directory checked: {cmdBlink(dir, "yellow")}')
             else:
                 os.makedirs(dir)
-                print(f'{preCmdInfo}Directory created: {cmdBlink(dir, "yellow")}')
+                print(f'{PRE_CMD_INFO}Directory created: {cmdBlink(dir, "yellow")}')
 
 def fileCheck(files: list) -> None:
     """
@@ -22,14 +22,14 @@ def fileCheck(files: list) -> None:
     for file in files:
         if file:
             if os.path.exists(file): 
-                print(f'{preCmdInfo}File checked: {cmdBlink(file, "yellow")}')
+                print(f'{PRE_CMD_INFO}File checked: {cmdBlink(file, "yellow")}')
             else:
                 with open(file, 'w') as f:
                     if file.endswith('.json'): 
-                        print(f'{preCmdInfo}json file created: {cmdBlink(file, "yellow")}')
+                        print(f'{PRE_CMD_INFO}json file created: {cmdBlink(file, "yellow")}')
                         f.write('{}')
                     elif file.endswith('.csv'): 
-                        print(f'{preCmdInfo}csv file created: {cmdBlink(file, "yellow")}')
+                        print(f'{PRE_CMD_INFO}csv file created: {cmdBlink(file, "yellow")}')
                     else: f.write('')
 
 def fileRenamer(old_name, new_name) -> bool:
