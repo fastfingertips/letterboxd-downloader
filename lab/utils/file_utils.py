@@ -1,7 +1,7 @@
 import os
 from constants.terminal import PRE_CMD_INFO
 from utils.cmd_format import cmd_blink
-from utils.time_utils import get_run_time
+from utils.time.custom import get_run_time
 
 def dirCheck(dirs: list) -> None:
     """

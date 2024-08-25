@@ -8,12 +8,12 @@ from utils.request import fetch_page_dom
 from utils.url.custom import fix_url
 from utils.dom.custom import doPullFilms
 from utils.set.custom import readSettings
+from utils.time.custom import get_run_time
 from utils.dict.custom import listSignature
 from utils.log.custom import startLog, txtLog
 from utils.csv.custom import combineCsv, splitCsv
 from utils.session.custom import startSession, endSession
 
-from utils.time_utils import get_run_time
 from utils.cmd_format import cmd_blink
 from utils.cmd_display import coloredDictPrint
 from utils.hash_utils import getChanges, extractObj
