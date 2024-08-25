@@ -55,3 +55,30 @@ def get_list_last_page_no(current_list_dom: BeautifulSoup, current_url_list_item
     finally:
         txtLog(f'{PRE_LOG_INFO}Completed page count check. Last page number is {last_page_number}.')
         return last_page_number
+    
+def get_body_content(dom: BeautifulSoup, attribute: str) -> str:
+    """
+    Retrieves the specified attribute value from the <body> tag of the given DOM.
+
+    Args:
+        dom (BeautifulSoup): The parsed DOM structure of a web page.
+        attribute (str): The attribute whose value is to be retrieved from the <body> tag.
+
+    Returns:
+        str: The value of the specified attribute from the <body> tag.
+
+    Raises:
+        ValueError: If the <body> tag or the specified attribute is not found in the DOM.
+
+    The function searches for the <body> tag in the provided DOM and attempts to retrieve the value of the specified attribute.
+    If the attribute is not present or the <body> tag is missing, a ValueError is raised.
+    """
+    body_tag = dom.find('body')
+
+    if body_tag is None:
+        raise ValueError("The <body> tag was not found in the DOM.")
+
+    if attribute not in body_tag.attrs:
+        raise ValueError(f"The attribute '{attribute}' was not found in the <body> tag.")
+    
+    return body_tag.attrs[attribute]

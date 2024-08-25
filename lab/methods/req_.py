@@ -5,10 +5,13 @@ import arrow
 
 # -- Local Imports -- #
 
-from utils.dom_utils import get_list_last_page_no
 from utils.terminal_utils import terminalTitle
 from utils.hash_utils import getChanges
 from utils.cmd_format import cmdBlink
+from utils.dom_utils import (
+  get_list_last_page_no,
+  get_body_content
+)
 
 from constants.project import(
     CMD_PRINT_FILMS,
@@ -31,32 +34,6 @@ from .log_ import(
     txtLog
 )
 
-def get_body_content(dom: BeautifulSoup, attribute: str) -> str:
-    """
-    Retrieves the specified attribute value from the <body> tag of the given DOM.
-
-    Args:
-        dom (BeautifulSoup): The parsed DOM structure of a web page.
-        attribute (str): The attribute whose value is to be retrieved from the <body> tag.
-
-    Returns:
-        str: The value of the specified attribute from the <body> tag.
-
-    Raises:
-        ValueError: If the <body> tag or the specified attribute is not found in the DOM.
-
-    The function searches for the <body> tag in the provided DOM and attempts to retrieve the value of the specified attribute.
-    If the attribute is not present or the <body> tag is missing, a ValueError is raised.
-    """
-    body_tag = dom.find('body')
-
-    if body_tag is None:
-        raise ValueError("The <body> tag was not found in the DOM.")
-
-    if attribute not in body_tag.attrs:
-        raise ValueError(f"The attribute '{attribute}' was not found in the <body> tag.")
-    
-    return body_tag.attrs[attribute]
 
 def get_meta_content(dom: BeautifulSoup, property_name: str, attribute_name: str = 'content', raise_on_error: bool = True) -> str:
     """
