@@ -4,10 +4,11 @@ import glob
 
 # -- Local Imports -- #
 
-from constants.terminal import PRE_CMD_INFO
-from utils.file_utils import dirCheck
-from .log_ import txtLog
+from utils.log.custom import txtLog
 
+from utils.file_utils import dirCheck
+
+from constants.terminal import PRE_CMD_INFO
 from constants.project import(
     PARTITION_LIMIT,
     PRE_LOG_INFO,
@@ -15,6 +16,7 @@ from constants.project import(
     SUP_LINE,
     SUB_LINE
 )
+
 
 # -- CSV Methods -- #
 

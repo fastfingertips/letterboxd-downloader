@@ -1,11 +1,12 @@
 import arrow
+
+from utils.log.custom import txtLog, errorLine
+from utils.dom.custom import getMovieCount
+
+from utils.dom_utils import get_meta_content, get_list_last_page_no
+
 from constants.project import PRE_LOG_ERR
-from methods.req_ import getMovieCount
-from methods.log_ import txtLog, errorLine
-from utils.dom_utils import (
-  get_meta_content,
-  get_list_last_page_no
-)
+
 
 def get_list_signature(_listDict) -> dict:
     """

@@ -1,14 +1,8 @@
 from termcolor import colored as ced
-from constants.terminal import (
-  PRE_CMD_MIDDLE_DOT_LIST,
-  PRE_CMD_MIDDLE_DOT,
-  PRE_CMD_INFO
-)
-from constants.project import (
-  SUP_LINE,
-  SUB_LINE
-)
-   
+
+from constants.terminal import PRE_CMD_MIDDLE_DOT_LIST, PRE_CMD_MIDDLE_DOT, PRE_CMD_INFO
+from constants.project import SUP_LINE, SUB_LINE
+
 
 def coloredDictPrint(_coloredDict, _mainTitle=None) -> None:
     """

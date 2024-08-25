@@ -1,13 +1,14 @@
 from termcolor import colored as ced
 from bs4 import BeautifulSoup
-from constants.project import PRE_LOG_INFO
-from constants.terminal import PRE_CMD_CHECK, PRE_CMD_INFO, PRE_BLANK_COUNT
+
+from utils.dom.custom import getMovieCount
+from utils.log.custom import errorLine, txtLog
+
 from utils.hash_utils import getChanges
-from methods.req_ import getMovieCount
-from methods.log_ import(
-    errorLine,
-    txtLog
-)
+
+from constants.terminal import PRE_CMD_CHECK, PRE_CMD_INFO, PRE_BLANK_COUNT
+from constants.project import PRE_LOG_INFO
+
 
 def get_list_last_page_no(current_list_dom: BeautifulSoup, current_url_list_item_detail_page: str) -> int:
     """

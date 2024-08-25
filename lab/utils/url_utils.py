@@ -1,4 +1,4 @@
-from utils.request_utils import fetch_page_dom
+from utils.request import fetch_page_dom
 from utils.dom_utils import check_user_list
     
 

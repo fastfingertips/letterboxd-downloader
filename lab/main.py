@@ -3,19 +3,30 @@ import csv
 
 # -- Local Imports -- #
 
+from utils.request import fetch_page_dom
+from utils.dom.custom import doPullFilms
+
+from utils.set.custom import readSettings
+from utils.dict.custom import listSignature
+from utils.log.custom import startLog, txtLog
+from utils.csv.custom import combineCsv, splitCsv
+from utils.session.custom import startSession, endSession
+
 from utils.time_utils import getRunTime
 from utils.cmd_format import cmdBlink
 from utils.cmd_display import coloredDictPrint
 from utils.url_utils import fix_url
-from utils.request_utils import fetch_page_dom
-from utils.dom_utils import(
+from utils.hash_utils import getChanges, extractObj
+from utils.file_utils import fileCheck, dirCheck
+from utils.terminal_utils import terminalSystem, terminalTitle
+from utils.dom_utils import (
   get_list_last_page_no,
   get_meta_content,
   get_body_content,
   check_user_list
 )
 
-from constants.project import(
+from constants.project import (
     DEFAULT_EXPORT_KEY,
     SPLIT_PARAMETER,
     DEFAULT_LOG_KEY,
@@ -25,49 +36,13 @@ from constants.project import(
     SUP_LINE
 )
 
-from constants.terminal import(
+from constants.terminal import (
     PRE_CMD_UNCHECK,
     SUP_LINE_FILMS,
     PRE_CMD_INPUT,
     PRE_CMD_CHECK,
     PRE_CMD_INFO,
     PRE_CMD_ERR
-)
-
-from methods.req_ import(
-    listSignature,
-    doPullFilms
-)
-
-from methods.log_ import(
-    readSettings,
-    startLog,
-    txtLog
-)
-
-from methods.csv_ import(
-    combineCsv,
-    splitCsv
-)
-
-from methods.session_ import(
-    startSession,
-    endSession
-)
-
-from utils.hash_utils import(
-    getChanges,
-    extractObj
-)
-
-from utils.file_utils import(
-    fileCheck,
-    dirCheck
-)
-
-from utils.terminal_utils import(
-    terminalSystem,
-    terminalTitle
 )
 
 # -- MAIN -- #
