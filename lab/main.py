@@ -11,7 +11,8 @@ from utils.request_utils import fetch_page_dom
 from utils.dom_utils import(
   get_list_last_page_no,
   get_meta_content,
-  get_body_content
+  get_body_content,
+  check_user_list
 )
 
 from constants.project import(
@@ -34,7 +35,6 @@ from constants.terminal import(
 )
 
 from methods.req_ import(
-    check_user_list,
     listSignature,
     doPullFilms
 )

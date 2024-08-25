@@ -1,5 +1,5 @@
 from utils.request_utils import fetch_page_dom
-from methods.req_ import check_user_list
+from utils.dom_utils import check_user_list
     
 
 def fix_url(url_item: str, url_list: list) -> list:
