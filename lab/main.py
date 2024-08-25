@@ -13,7 +13,7 @@ from utils.csv.custom import combineCsv, splitCsv
 from utils.session.custom import startSession, endSession
 
 from utils.time_utils import get_run_time
-from utils.cmd_format import cmdBlink
+from utils.cmd_format import cmd_blink
 from utils.cmd_display import coloredDictPrint
 from utils.url_utils import fix_url
 from utils.hash_utils import getChanges, extractObj
@@ -252,7 +252,7 @@ while True:
         listSignature(listDict) # liste hakkında bilgiler bastırılır.
 
         if listEnterPassOn:
-            listEnter = input(f"{PRE_CMD_INPUT}Press enter to confirm the entered information. ({cmdBlink('Enter', 'green')})")
+            listEnter = input(f"{PRE_CMD_INPUT}Press enter to confirm the entered information. ({cmd_blink('Enter', 'green')})")
 
             if listEnter == "": listEnter, autoEnterMsg = True, '[Manual]'
             elif listEnter == ".":
@@ -289,7 +289,7 @@ while True:
 
             # process end
             terminalTitle(f'{processState} completed!') # change title
-            print(f'{PRE_CMD_INFO}{loopCount-1} film {cmdBlink(openCsv,"yellow")} dosyasına aktarıldı.') # print info
+            print(f'{PRE_CMD_INFO}{loopCount-1} film {cmd_blink(openCsv,"yellow")} dosyasına aktarıldı.') # print info
             print(f"{PRE_CMD_INFO}{ced(f'{processState} completed!', 'green')}") # print info
             txtLog(f'{PRE_LOG_INFO}{processState} completed!') # log info
             print(SUB_LINE)
@@ -303,5 +303,5 @@ while True:
     txtLog(f'{PRE_LOG_INFO}Session: {sessionCurrentHash} ended.') # log info
 
     # process end
-    print(f"{PRE_CMD_INFO}Process State: {cmdBlink(processState +' Finish.','green')}")
-    terminalSystem(f"echo {PRE_CMD_INFO}{cmdBlink('Press enter to continue with the new session.','yellow')} & pause >nul")
+    print(f"{PRE_CMD_INFO}Process State: {cmd_blink(processState +' Finish.','green')}")
+    terminalSystem(f"echo {PRE_CMD_INFO}{cmd_blink('Press enter to continue with the new session.','yellow')} & pause >nul")

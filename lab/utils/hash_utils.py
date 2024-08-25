@@ -1,5 +1,5 @@
 from termcolor import colored as ced
-from utils.cmd_format import cmdBlink
+from utils.cmd_format import cmd_blink
 
 def getChanges(_key1, _key2) -> str:
     """
@@ -8,7 +8,7 @@ def getChanges(_key1, _key2) -> str:
     return ''.join(
         ced(_key2[i], color="yellow")
         if _key1[i] == _key2[i]
-        else cmdBlink(_key2[i], 'green')
+        else cmd_blink(_key2[i], 'green')
         for i in range(len(_key1))
     )
 
