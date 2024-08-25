@@ -6,7 +6,11 @@ import csv
 from utils.time_utils import getRunTime
 from utils.cmd_format import cmdBlink
 from utils.cmd_display import coloredDictPrint
-from utils.dom_utils import get_list_last_page_no
+from utils.dom_utils import(
+  get_list_last_page_no,
+  get_meta_content,
+  get_body_content
+)
 
 from constants.project import(
     DEFAULT_EXPORT_KEY,
@@ -28,8 +32,6 @@ from constants.terminal import(
 )
 
 from methods.req_ import(
-    get_meta_content,
-    get_body_content,
     check_user_list,
     listSignature,
     doPullFilms,

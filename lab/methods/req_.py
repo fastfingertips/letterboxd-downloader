@@ -10,7 +10,8 @@ from utils.hash_utils import getChanges
 from utils.cmd_format import cmdBlink
 from utils.dom_utils import (
   get_list_last_page_no,
-  get_body_content
+  get_body_content,
+  get_meta_content
 )
 
 from constants.project import(
@@ -34,46 +35,6 @@ from .log_ import(
     txtLog
 )
 
-
-def get_meta_content(dom: BeautifulSoup, property_name: str, attribute_name: str = 'content', raise_on_error: bool = True) -> str:
-    """
-    Retrieves the value of a specified attribute from a <meta> tag with a specified property attribute.
-
-    Args:
-        dom (BeautifulSoup): The parsed DOM structure of a web page.
-        property_name (str): The property attribute value to search for in the <meta> tag.
-        attribute_name (str): The name of the attribute whose value is to be retrieved from the <meta> tag. Defaults to 'content'.
-        raise_on_error (bool): Whether to raise an exception if the <meta> tag or the specified attribute is not found. If False, returns an empty string instead.
-
-    Returns:
-        str: The value of the specified attribute from the <meta> tag, or an empty string if not found and raise_on_error is False.
-        
-    If raise_on_error is True and the <meta> tag or the specified attribute is missing, a ValueError is raised.
-    Otherwise, an empty string is returned and the error is logged.
-
-    Raises:
-        ValueError: If the <meta> tag with the specified property attribute is not found and raise_on_error is True.
-    """
-    try:
-        meta_tag = dom.find('meta', property=property_name)
-        
-        if meta_tag is None:
-            if raise_on_error:
-                raise ValueError(f"Meta tag with property '{property_name}' not found.")
-            return ''
-        
-        if attribute_name not in meta_tag.attrs:
-            if raise_on_error:
-                raise ValueError(f"Attribute '{attribute_name}' not found in meta tag with property '{property_name}'.")
-            return ''
-        
-        return meta_tag.attrs[attribute_name]
-    
-    except Exception as e:
-        txtLog(f"Error retrieving '{attribute_name}' from the meta tag with property '{property_name}'. Error Message: {e}")
-        if raise_on_error:
-            raise
-        return ''
 
 def fix_url(url_item: str, url_list: list) -> list:
     """
