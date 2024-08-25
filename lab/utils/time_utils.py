@@ -1,25 +1,31 @@
 from datetime import datetime
 
-def getRunTime() -> str:
+def get_run_time() -> str:
     """
-    Get the current date and time formatted as 'ddmmyyyyHHMMSS'.
+    Retrieves the current date and time formatted as 'ddmmyyyyHHMMSS'.
 
     Returns:
-        str: The current date and time in the format 'ddmmyyyyHHMMSS'.
+        str: The current date and time formatted as 'ddmmyyyyHHMMSS'.
+
+    Raises:
+        RuntimeError: If there is an error formatting the date and time.
     """
     try:
         return datetime.now().strftime('%d%m%Y%H%M%S')
     except Exception as e:
-        raise RuntimeError("Failed to get run time") from e
+        raise RuntimeError("Failed to retrieve run time.") from e
 
-def getLogTime() -> str:
+def get_log_time() -> str:
     """
-    Get the current date and time formatted as 'dd/mm/yyyy HH:MM:SS'.
+    Retrieves the current date and time formatted as 'dd/mm/yyyy HH:MM:SS'.
 
     Returns:
-        str: The current date and time in the format 'dd/mm/yyyy HH:MM:SS'.
+        str: The current date and time formatted as 'dd/mm/yyyy HH:MM:SS'.
+
+    Raises:
+        RuntimeError: If there is an error formatting the date and time.
     """
     try:
         return datetime.now().strftime('%d/%m/%Y %H:%M:%S')
     except Exception as e:
-        raise RuntimeError("Failed to get log time") from e
+        raise RuntimeError("Failed to retrieve log time.") from e

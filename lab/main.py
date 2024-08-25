@@ -12,7 +12,7 @@ from utils.log.custom import startLog, txtLog
 from utils.csv.custom import combineCsv, splitCsv
 from utils.session.custom import startSession, endSession
 
-from utils.time_utils import getRunTime
+from utils.time_utils import get_run_time
 from utils.cmd_format import cmdBlink
 from utils.cmd_display import coloredDictPrint
 from utils.url_utils import fix_url
@@ -55,11 +55,11 @@ def currentListDomainName(currentUrListItem):
 # user welcome message and screen clear
 terminalSystem(f'color & title Welcome %USERNAME%. & cls')
 
-sessionStartHash =  getRunTime() # generate process hash
+sessionStartHash =  get_run_time() # generate process hash
 pLoop = 0 # program loop
 while True:
     # STARTUP
-    sessionCurrentHash = sessionStartHash if pLoop == 0 else getRunTime() # generate process hash
+    sessionCurrentHash = sessionStartHash if pLoop == 0 else get_run_time() # generate process hash
     startSession(sessionCurrentHash)
     startLog(sessionCurrentHash)
     pLoop += 1
@@ -236,7 +236,7 @@ while True:
             txtLog(f'Liste sahibi bilgisi alınamadı Hata: {e}')
             cListOwner = 'Unknown'
         cListDomainName = currentListDomainName(currentUrListItem) # liste domain ismini düzenleyerek alır.
-        cListRunTime = getRunTime() # liste işlem vaktini al. 
+        cListRunTime = get_run_time() # liste işlem vaktini al. 
 
         listDict = {
             "list_detail_page": currentUrListItemDetailPage, # https://letterboxd.com/{un}/list/{ln}/detail/page/

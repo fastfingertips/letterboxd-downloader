@@ -4,7 +4,7 @@ import os
 # -- Local Imports -- #
 
 from utils.set.custom import readSettings
-from utils.time_utils import getLogTime
+from utils.time_utils import get_log_time
 from utils.file_utils import fileExists
 from utils.json_utils import loadJsonFile
 
@@ -69,7 +69,7 @@ def startLog(_appId) -> bool:
         else: # If the log file does not exist, it is created.
             try:
                 with open(logFullPath, 'w') as logFile:
-                    logFile.write(f'{PRE_LOG_INFO}Log file created. {getLogTime()}')
+                    logFile.write(f'{PRE_LOG_INFO}Log file created. {get_log_time()}')
                 print('successfully.')
                 return True
             except Exception as e:

@@ -1,7 +1,7 @@
 import os
 from constants.terminal import PRE_CMD_INFO
 from utils.cmd_format import cmdBlink
-from utils.time_utils import getRunTime
+from utils.time_utils import get_run_time
 
 def dirCheck(dirs: list) -> None:
     """
@@ -36,7 +36,7 @@ def fileRenamer(old_name, new_name) -> bool:
     """
     Rename a file
     """
-    current_time = getRunTime()
+    current_time = get_run_time()
     new_name = f'{new_name}'.replace('.', f'{current_time}.')
     if os.path.exists(new_name): return False
     os.rename(old_name, new_name)
