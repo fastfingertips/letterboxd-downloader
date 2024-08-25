@@ -4,8 +4,9 @@ import csv
 # -- Local Imports -- #
 
 from utils.request import fetch_page_dom
-from utils.dom.custom import doPullFilms
 
+from utils.url.custom import fix_url
+from utils.dom.custom import doPullFilms
 from utils.set.custom import readSettings
 from utils.dict.custom import listSignature
 from utils.log.custom import startLog, txtLog
@@ -15,7 +16,6 @@ from utils.session.custom import startSession, endSession
 from utils.time_utils import get_run_time
 from utils.cmd_format import cmd_blink
 from utils.cmd_display import coloredDictPrint
-from utils.url_utils import fix_url
 from utils.hash_utils import getChanges, extractObj
 from utils.file_utils import fileCheck, dirCheck
 from utils.terminal_utils import execute_terminal_command, set_terminal_title
