@@ -1,7 +1,5 @@
-from methods.req_ import (
-  check_user_list,
-  read_page
-)
+from utils.request_utils import fetch_page_dom
+from methods.req_ import check_user_list
     
 
 def fix_url(url_item: str, url_list: list) -> list:
@@ -20,7 +18,7 @@ def fix_url(url_item: str, url_list: list) -> list:
     2. Checks if the user list is available in the DOM and retrieves the validated URL.
     3. Appends the validated URL to the url_list if it's not already present.
     """
-    dom = read_page(url_item)
+    dom = fetch_page_dom(url_item)
     is_available, validated_url = check_user_list(dom, url_item)
     
     if is_available and validated_url not in url_list:

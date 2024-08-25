@@ -7,6 +7,7 @@ from utils.time_utils import getRunTime
 from utils.cmd_format import cmdBlink
 from utils.cmd_display import coloredDictPrint
 from utils.url_utils import fix_url
+from utils.request_utils import fetch_page_dom
 from utils.dom_utils import(
   get_list_last_page_no,
   get_meta_content,
@@ -35,8 +36,7 @@ from constants.terminal import(
 from methods.req_ import(
     check_user_list,
     listSignature,
-    doPullFilms,
-    read_page
+    doPullFilms
 )
 
 from methods.log_ import(
@@ -163,7 +163,7 @@ while True:
                         x += -1
                 else: endList = 'Not specified.' # Son liste için bir parametre belirtilmezse.
                 searchList = f'{SITE_DOMAIN}/search/lists/{urlListItem}/'
-                searchListPreviewDom = read_page(searchList)
+                searchListPreviewDom = fetch_page_dom(searchList)
 
                 searchMetaTitle = get_meta_content(searchListPreviewDom,'og:title') # getting og:title
                 searchLMetaUrl = get_meta_content(searchListPreviewDom,'og:url') #: Getting og:url
@@ -196,7 +196,7 @@ while True:
                 for i in range(int(searchListsQLastsPage)):
                     sayfa += 1
                     connectionPage = f'{searchList}page/{sayfa}'
-                    searchListDom = read_page(connectionPage)
+                    searchListDom = fetch_page_dom(connectionPage)
                     listsUrls = searchListDom.find_all('a', attrs={'class':'list-link'}) # okunmuş sayfadaki tüm listelerin adresleri.
 
                     queryPage = {
@@ -215,7 +215,7 @@ while True:
                         liste += 1
                         print(f'{PRE_CMD_INFO}List page/rank: {ced(sayfa, "blue")}/{ced(liste, "blue")}')
                         urlListItem = SITE_DOMAIN+listsUrl.get('href') #: https://letterboxd.com + /user_name/list/list_name
-                        userListAvailable, approvedListUrl = check_user_list(read_page(urlListItem), urlListItem)
+                        userListAvailable, approvedListUrl = check_user_list(fetch_page_dom(urlListItem), urlListItem)
                         if approvedListUrl not in urlList:
                             if userListAvailable:
                                 urlList.append(approvedListUrl)
@@ -230,7 +230,7 @@ while True:
 
             if '/detail' in urlListItem: urlListItem = urlListItem.replace('/detail','') # if url is detail page, remove detail part.
 
-            urlListItemDom = read_page(urlListItem) # sayfa dom'u alınır.
+            urlListItemDom = fetch_page_dom(urlListItem) # sayfa dom'u alınır.
             userListAvailable, approvedListUrl = check_user_list(urlListItemDom, urlListItem) # liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
             if userListAvailable: # liste kullanıma uygunsa..
                 if approvedListUrl not in urlList: #> doğrulanmış URL daha önce URL Listesine eklenmediyse..
@@ -253,7 +253,7 @@ while True:
         processState = f'[{processLoopNo}/{len(urlList)}]'
         currentUrListItemDetail = f'{currentUrListItem}detail/' # url'e detail eklendi.
         currentUrListItemDetailPage = f'{currentUrListItemDetail}page/' # detaylı url'e sayfa gezintisi için parametre eklendi.
-        cListDom = read_page(currentUrListItemDetail) # şu anki liste sayfasını oku.
+        cListDom = fetch_page_dom(currentUrListItemDetail) # şu anki liste sayfasını oku.
 
         try: cListOwner = get_body_content(cListDom,'data-owner') # liste sahibini al.
         except Exception as e:
@@ -308,7 +308,7 @@ while True:
                 print(SUP_LINE_FILMS, end='')
                 for x in range(int(lastPageNo)): # sayfa sayısı kadar döngü oluştur.
                     txtLog(f'{PRE_LOG_INFO}Connecting to {currentUrListItemDetailPage}{str(x+1)}') # sayfa numarasını log dosyasına yaz.
-                    currentDom = read_page(f'{currentUrListItemDetailPage}{str(x+1)}') # sayfa dom'u alınır.
+                    currentDom = fetch_page_dom(f'{currentUrListItemDetailPage}{str(x+1)}') # sayfa dom'u alınır.
                     loopCount = doPullFilms(loopCount, currentDom, writer) # filmleri al.
                 csvFile.close() # açtığımız dosyayı manuel kapattık
 
