@@ -6,6 +6,7 @@ import csv
 from utils.time_utils import getRunTime
 from utils.cmd_format import cmdBlink
 from utils.cmd_display import coloredDictPrint
+from utils.url_utils import fix_url
 from utils.dom_utils import(
   get_list_last_page_no,
   get_meta_content,
@@ -35,8 +36,7 @@ from methods.req_ import(
     check_user_list,
     listSignature,
     doPullFilms,
-    read_page,
-    fix_url
+    read_page
 )
 
 from methods.log_ import(
