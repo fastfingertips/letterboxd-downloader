@@ -18,7 +18,7 @@ from utils.cmd_display import coloredDictPrint
 from utils.url_utils import fix_url
 from utils.hash_utils import getChanges, extractObj
 from utils.file_utils import fileCheck, dirCheck
-from utils.terminal_utils import terminalSystem, terminalTitle
+from utils.terminal_utils import execute_terminal_command, set_terminal_title
 from utils.dom_utils import (
   get_list_last_page_no,
   get_meta_content,
@@ -53,7 +53,7 @@ def currentListDomainName(currentUrListItem):
 
 # system color start end reset
 # user welcome message and screen clear
-terminalSystem(f'color & title Welcome %USERNAME%. & cls')
+execute_terminal_command(f'color & title Welcome %USERNAME%. & cls')
 
 sessionStartHash =  get_run_time() # generate process hash
 pLoop = 0 # program loop
@@ -288,7 +288,7 @@ while True:
                 csvFile.close() # açtığımız dosyayı manuel kapattık
 
             # process end
-            terminalTitle(f'{processState} completed!') # change title
+            set_terminal_title(f'{processState} completed!') # change title
             print(f'{PRE_CMD_INFO}{loopCount-1} film {cmd_blink(openCsv,"yellow")} dosyasına aktarıldı.') # print info
             print(f"{PRE_CMD_INFO}{ced(f'{processState} completed!', 'green')}") # print info
             txtLog(f'{PRE_LOG_INFO}{processState} completed!') # log info
@@ -298,10 +298,10 @@ while True:
 
     # session end
     endSession(sessionCurrentHash)
-    terminalTitle(f'Session: {sessionCurrentHash} ended!') # change title
+    set_terminal_title(f'Session: {sessionCurrentHash} ended!') # change title
     print(f"{PRE_CMD_INFO}{ced(f'Session: {sessionCurrentHash} ended.', 'green')}") # print info
     txtLog(f'{PRE_LOG_INFO}Session: {sessionCurrentHash} ended.') # log info
 
     # process end
     print(f"{PRE_CMD_INFO}Process State: {cmd_blink(processState +' Finish.','green')}")
-    terminalSystem(f"echo {PRE_CMD_INFO}{cmd_blink('Press enter to continue with the new session.','yellow')} & pause >nul")
+    execute_terminal_command(f"echo {PRE_CMD_INFO}{cmd_blink('Press enter to continue with the new session.','yellow')} & pause >nul")
