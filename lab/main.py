@@ -6,7 +6,7 @@ import csv
 from utils.request import fetch_page_dom
 
 from utils.url.custom import fix_url
-from utils.color.custom import cmd_blink
+from utils.color.custom import blink_text
 from utils.set.custom import readSettings
 from utils.time.custom import get_run_time
 from utils.dict.custom import listSignature
@@ -252,7 +252,7 @@ while True:
         listSignature(listDict) # liste hakkında bilgiler bastırılır.
 
         if listEnterPassOn:
-            listEnter = input(f"{PRE_CMD_INPUT}Press enter to confirm the entered information. ({cmd_blink('Enter', 'green')})")
+            listEnter = input(f"{PRE_CMD_INPUT}Press enter to confirm the entered information. ({blink_text('Enter', 'green')})")
 
             if listEnter == "": listEnter, autoEnterMsg = True, '[Manual]'
             elif listEnter == ".":
@@ -289,7 +289,7 @@ while True:
 
             # process end
             set_terminal_title(f'{processState} completed!') # change title
-            print(f'{PRE_CMD_INFO}{loopCount-1} film {cmd_blink(openCsv,"yellow")} dosyasına aktarıldı.') # print info
+            print(f'{PRE_CMD_INFO}{loopCount-1} film {blink_text(openCsv,"yellow")} dosyasına aktarıldı.') # print info
             print(f"{PRE_CMD_INFO}{ced(f'{processState} completed!', 'green')}") # print info
             txtLog(f'{PRE_LOG_INFO}{processState} completed!') # log info
             print(SUB_LINE)
@@ -303,5 +303,5 @@ while True:
     txtLog(f'{PRE_LOG_INFO}Session: {sessionCurrentHash} ended.') # log info
 
     # process end
-    print(f"{PRE_CMD_INFO}Process State: {cmd_blink(processState +' Finish.','green')}")
-    execute_terminal_command(f"echo {PRE_CMD_INFO}{cmd_blink('Press enter to continue with the new session.','yellow')} & pause >nul")
+    print(f"{PRE_CMD_INFO}Process State: {blink_text(processState +' Finish.','green')}")
+    execute_terminal_command(f"echo {PRE_CMD_INFO}{blink_text('Press enter to continue with the new session.','yellow')} & pause >nul")
