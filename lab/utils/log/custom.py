@@ -5,7 +5,7 @@ import os
 
 from utils.set.custom import readSettings
 from utils.time.custom import get_log_time
-from utils.file_utils import fileExists
+from utils.file import file_exists
 from utils.json_utils import loadJsonFile
 
 from constants.project import(
@@ -31,7 +31,7 @@ def getLogFilePath() -> str:
     """
     Returns the log file path.
     """
-    if fileExists(SETTINGS_FILE_NAME):
+    if file_exists(SETTINGS_FILE_NAME):
         settingDict = readSettings()
         logDirName = settingDict[DEFAULT_LOG_KEY]
         if checkLogDir():
@@ -100,7 +100,7 @@ def checkLogDir() -> bool:
     """
     Checks if the log directory exists.
     """
-    if fileExists(SETTINGS_FILE_NAME):
+    if file_exists(SETTINGS_FILE_NAME):
         settingDict = readSettings()
         logDirName = settingDict[DEFAULT_LOG_KEY]
 

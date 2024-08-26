@@ -1,6 +1,8 @@
 import json
 
 # -- Local Imports -- #
+from utils.file import file_exists
+from utils.file.custom import clean_filename, is_valid_filename
 
 from constants.project import(
     SETTINGS_FILE_NAME,
@@ -14,11 +16,6 @@ from constants.terminal import(
     PRE_CMD_ERR
 )   
 
-from utils.file_utils import(
-    cleanFilename,
-    checkFilename,
-    fileExists
-)
 
 from utils.json_utils import(
     dumpJsonFile,
@@ -37,12 +34,12 @@ def createSettings() -> None:
         logDirName = input(f'{PRE_CMD_INPUT}Log directory Name: ').strip()
         exportDirName = input(f'{PRE_CMD_INPUT}Export directory Name: ').strip()
 
-        if not checkFilename(logDirName):
-            logDirName = cleanFilename(logDirName)
+        if not is_valid_filename(logDirName):
+            logDirName = clean_filename(logDirName)
             print(f'{PRE_CMD_INFO}Log directory name cleaned: "{logDirName}"')
 
-        if not checkFilename(exportDirName):
-            exportDirName = cleanFilename(exportDirName)
+        if not is_valid_filename(exportDirName):
+            exportDirName = clean_filename(exportDirName)
             print(f'{PRE_CMD_INFO}Export directory name cleaned: "{exportDirName}"')
 
         userAgree = input(f'{PRE_CMD_INPUT}Do you agree with the information you entered? (y/n): ')
@@ -65,7 +62,7 @@ def readSettings() -> dict:
     """
     Reads the settings file and returns the data.
     """
-    if fileExists(SETTINGS_FILE_NAME):
+    if file_exists(SETTINGS_FILE_NAME):
         # If the file exists
         try:
             # If the file is not empty, it will return the file.

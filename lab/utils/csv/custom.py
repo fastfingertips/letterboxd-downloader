@@ -6,7 +6,7 @@ import glob
 
 from utils.log.custom import txtLog
 
-from utils.file_utils import dirCheck
+from utils.file.custom import ensure_directories_exist
 
 from constants.terminal import PRE_CMD_INFO
 from constants.project import(
@@ -29,7 +29,7 @@ def splitCsv(_csvPath: str, _exportDirName: str, _currenSessionHash: int) -> Non
     if csvMovies > SPLIT_LIMIT: # file's line count is bigger than limit
         splitsPath = f'{_exportDirName}/Splits'
         splitCsvName = f'{splitsPath}/{_currenSessionHash}'
-        dirCheck([splitsPath]) # split dir check
+        ensure_directories_exist([splitsPath]) # split dir check
         defaultCsvCount = 1000 # optimal transfer count
         defaultPartition = 2 # starts from partition 2.
         splitFileNo = defaultPartition-1
@@ -67,7 +67,7 @@ def combineCsv(_urlList, _exportDirName, _currenSessionHash, _exportsPath) -> No
         noDuplicateCsvFile = f'{_currenSessionHash}_NoDuplicate-Combined.csv' # NoDuplicate file name
         combineCsvPath = combineDir + combineCsvFile # path to the combine file.
         noDuplicateCsvPath = combineDir + noDuplicateCsvFile # NoDuplciate file path
-        dirCheck([combineDir]) # combine dir check
+        ensure_directories_exist([combineDir]) # combine dir check
         txtLog(f'{PRE_LOG_INFO}Lists will be combined because more than one list is being worked on.') # process logger
 
         try:

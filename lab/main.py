@@ -17,7 +17,7 @@ from utils.session.custom import startSession, endSession
 from utils.cmd_format import cmd_blink
 from utils.cmd_display import coloredDictPrint
 from utils.hash_utils import getChanges, extractObj
-from utils.file_utils import fileCheck, dirCheck
+from utils.file.custom import ensure_files_exist, ensure_directories_exist
 from utils.terminal_utils import execute_terminal_command, set_terminal_title
 from utils.dom_utils import (
   get_list_last_page_no,
@@ -68,7 +68,7 @@ while True:
     settings = readSettings()
     logDirName = settings[DEFAULT_LOG_KEY]
     exportDirName = settings[DEFAULT_EXPORT_KEY]
-    dirCheck([logDirName, exportDirName]) # check directories
+    ensure_directories_exist([logDirName, exportDirName]) # check directories
 
     exportsPath = ''.join([exportDirName, '/', sessionCurrentHash, '/']) # exports/000000000/
 
@@ -271,8 +271,8 @@ while True:
 
             lastPageNo = get_list_last_page_no(cListDom, currentUrListItemDetailPage)
             openCsv = ''.join([exportsPath, cListOwner, '_', cListDomainName, '_', cListRunTime, '.csv'])
-            dirCheck([exportsPath]) # export klasörünün kontrolü.
-            fileCheck([openCsv]) # csv dosyasının kontrolü.
+            ensure_directories_exist([exportsPath]) # export klasörünün kontrolü.
+            ensure_files_exist([openCsv]) # csv dosyasının kontrolü.
 
             with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: # konumda Export klasörü yoksa dosya oluşturmayacaktır.
                 writer = csv.writer(csvFile)
