@@ -1,12 +1,12 @@
-from termcolor import colored as ced
 import arrow
 
-from utils.log.custom import txtLog, errorLine
-from utils.dom.custom import getMovieCount
-from utils.color.custom import blink_text
-
 from utils.terminal import set_terminal_title
-from utils.dom_utils import get_meta_content, get_list_last_page_no
+
+from utils.log.custom import txtLog, errorLine
+from utils.color.custom import blink_text
+from utils.dom.custom import getMovieCount
+from utils.color.custom import colored_text
+from utils.dom.custom import get_meta_content, get_list_last_page_no
 
 from constants.project import PRE_LOG_ERR, PRE_LOG_INFO, SUP_LINE
 from constants.terminal import PRE_CMD_INFO, PRE_CMD_MIDDLE_DOT, PRE_CMD_MIDDLE_DOT_LIST
@@ -93,21 +93,21 @@ def listSignature(_listDict) -> None:
         signList = [
             f"\n{PRE_CMD_INFO}Process State: {blink_text(_listDict['process_state'],'green')}",
             SUP_LINE,
-            f"{PRE_CMD_INFO}{ced('List info;', color='yellow')}",
-            f"{PRE_CMD_MIDDLE_DOT}List by {ced(listSign['list_by'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Updated: {ced(listSign['list_update_time_humanize'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Published: {ced(listSign['list_publication_time_humanize'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}List title: {ced(listSign['list_title'], 'blue', attrs=['bold'])}",
+            f"{PRE_CMD_INFO}{colored_text('List info;', color='yellow')}",
+            f"{PRE_CMD_MIDDLE_DOT}List by {colored_text(listSign['list_by'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Updated: {colored_text(listSign['list_update_time_humanize'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Published: {colored_text(listSign['list_publication_time_humanize'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}List title: {colored_text(listSign['list_title'], 'blue', attrs=['bold'])}",
             f"{PRE_CMD_MIDDLE_DOT}Filters;",
-            f"{PRE_CMD_MIDDLE_DOT_LIST}Filtered as {ced(listSign['list_selected_decade_year'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Filtered as {ced(listSign['list_selected_genre'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Movies sorted by {ced(listSign['list_selected_sort_by'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}List hash: {ced(_listDict['list_run_time'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Sayfa sayısı: {ced(listSign['list_last_page'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Number of movies: {ced(listSign['list_movie_count'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}List domain name: {ced(_listDict['list_domain_name'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}List URL: {ced(_listDict['list_url'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Process URL: {ced(_listDict['list_detail_url'],'blue', attrs=['bold'])}"
+            f"{PRE_CMD_MIDDLE_DOT_LIST}Filtered as {colored_text(listSign['list_selected_decade_year'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Filtered as {colored_text(listSign['list_selected_genre'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Movies sorted by {colored_text(listSign['list_selected_sort_by'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}List hash: {colored_text(_listDict['list_run_time'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Sayfa sayısı: {colored_text(listSign['list_last_page'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Number of movies: {colored_text(listSign['list_movie_count'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}List domain name: {colored_text(_listDict['list_domain_name'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}List URL: {colored_text(_listDict['list_url'],'blue', attrs=['bold'])}",
+            f"{PRE_CMD_MIDDLE_DOT}Process URL: {colored_text(_listDict['list_detail_url'],'blue', attrs=['bold'])}"
         ]
 
         print('\n'.join(signList))
