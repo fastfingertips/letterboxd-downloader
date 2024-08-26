@@ -53,13 +53,13 @@ def currentListDomainName(currentUrListItem):
 # user welcome message and screen clear
 execute_terminal_command(f'color & title Welcome %USERNAME%. & cls')
 
-session_start_hash = get_run_time() # generate process hash
-program_loop = 0 # program loop
+session_start_hash = get_run_time()
+program_loop = 0
 while True:
     # STARTUP
-    sessionCurrentHash = get_run_time() if program_loop else session_start_hash
-    startSession(sessionCurrentHash)
-    startLog(sessionCurrentHash)
+    session_current_hash = get_run_time() if program_loop else session_start_hash
+    startSession(session_current_hash)
+    startLog(session_current_hash)
     program_loop += 1
 
     # SETTINGS
@@ -68,11 +68,11 @@ while True:
     exportDirName = settings[DEFAULT_EXPORT_KEY]
     ensure_directories_exist([logDirName, exportDirName]) # check directories
 
-    exportsPath = ''.join([exportDirName, '/', sessionCurrentHash, '/']) # exports/000000000/
+    exportsPath = ''.join([exportDirName, '/', session_current_hash, '/']) # exports/000000000/
 
     #> every session has a different name for the start.
-    hashChanges = highlight_changes(session_start_hash, sessionCurrentHash)
-    print(f"{ICON_INFO}Session Hash: {session_start_hash}{'' if session_start_hash == sessionCurrentHash else ' -> ' + hashChanges}") 
+    hashChanges = highlight_changes(session_start_hash, session_current_hash)
+    print(f"{ICON_INFO}Session Hash: {session_start_hash}{'' if session_start_hash == session_current_hash else ' -> ' + hashChanges}") 
 
     #> while initializing
     listEnterPassOn = True
@@ -86,7 +86,7 @@ while True:
 
             #> input starts with split parameter
             if urlListItem[0:len(SPLIT_PARAMETER)] == SPLIT_PARAMETER: 
-                splitCsv(urlListItem[len(SPLIT_PARAMETER):], exportDirName, sessionCurrentHash)
+                splitCsv(urlListItem[len(SPLIT_PARAMETER):], exportDirName, session_current_hash)
                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                 continue
 
@@ -293,13 +293,13 @@ while True:
             txtLog(f'{PRE_LOG_INFO}{processState} completed!') # log info
             print(SUB_LINE)
 
-    combineCsv(urlList, exportDirName, sessionCurrentHash, exportsPath) # merge csv files
+    combineCsv(urlList, exportDirName, session_current_hash, exportsPath) # merge csv files
 
     # session end
-    endSession(sessionCurrentHash)
-    set_terminal_title(f'Session: {sessionCurrentHash} ended!') # change title
-    print(f"{ICON_INFO}{colored(f'Session: {sessionCurrentHash} ended.', 'green')}") # print info
-    txtLog(f'{PRE_LOG_INFO}Session: {sessionCurrentHash} ended.') # log info
+    endSession(session_current_hash)
+    set_terminal_title(f'Session: {session_current_hash} ended!') # change title
+    print(f"{ICON_INFO}{colored(f'Session: {session_current_hash} ended.', 'green')}") # print info
+    txtLog(f'{PRE_LOG_INFO}Session: {session_current_hash} ended.') # log info
 
     # process end
     print(f"{ICON_INFO}Process State: {blink_text(processState +' Finish.','green')}")
