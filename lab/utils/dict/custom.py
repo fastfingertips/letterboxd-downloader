@@ -1,7 +1,7 @@
 from termcolor import colored as ced
 
 from utils.log.custom import txtLog, errorLine
-from utils.color.custom import cmd_blink
+from utils.color.custom import blink_text
 
 from utils.dict_utils import get_list_signature
 from utils.terminal import set_terminal_title
@@ -21,7 +21,7 @@ def listSignature(_listDict) -> None:
         set_terminal_title(f"{_listDict['process_state']} Process: @{_listDict['list_owner']}.")
 
         signList = [
-            f"\n{PRE_CMD_INFO}Process State: {cmd_blink(_listDict['process_state'],'green')}",
+            f"\n{PRE_CMD_INFO}Process State: {blink_text(_listDict['process_state'],'green')}",
             SUP_LINE,
             f"{PRE_CMD_INFO}{ced('List info;', color='yellow')}",
             f"{PRE_CMD_MIDDLE_DOT}List by {ced(listSign['list_by'],'blue', attrs=['bold'])}",
