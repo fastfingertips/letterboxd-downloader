@@ -3,8 +3,7 @@ from bs4 import BeautifulSoup
 
 from utils.dom.custom import getMovieCount
 from utils.log.custom import errorLine, txtLog
-
-from utils.hash_utils import highlight_changes
+from utils.text.custom import highlight_changes
 
 from constants.terminal import PRE_CMD_CHECK, PRE_CMD_INFO, PRE_BLANK_COUNT
 from constants.project import PRE_LOG_INFO
