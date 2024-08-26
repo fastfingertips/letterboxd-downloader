@@ -1,5 +1,6 @@
 from termcolor import colored as ced
 from utils.cmd_format import cmd_blink
+from utils.log.custom import txtLog
 
 def highlight_changes(original_text: str, modified_text: str) -> str:
     """
@@ -22,15 +23,22 @@ def highlight_changes(original_text: str, modified_text: str) -> str:
         for i in range(len(original_text))
     )
 
-def extractObj(_job, _obj) -> str:
+def trim_end(text: str, char_to_remove: str) -> str:
     """
-    Deletes 'obj' from the end of 'job'
+    Removes all instances of a specified character from the end of a string.
+
+    Args:
+        text (str): The string from which to remove the trailing characters.
+        char_to_remove (str): The character to remove from the end of the string.
+
+    Returns:
+        str: The string with the specified trailing character removed.
     """
     try:
-        #> while _job ends with _obj..
-        while _job[-1] == _obj:
-            #> deletes _obj from the end of _job every time.
-            _job = _job[:-1]
-    except: 
-        pass
-    return _job
+        # Continue removing the character while it is present at the end of the string.
+        while text.endswith(char_to_remove):
+            text = text[:-1]
+    except Exception as e: 
+        # Log the error if necessary or handle it appropriately.
+        txtLog(f"Error while trimming characters: {e}")
+    return text

@@ -17,7 +17,7 @@ from utils.file.custom import ensure_files_exist, ensure_directories_exist
 
 from utils.cmd_format import cmd_blink
 from utils.cmd_display import coloredDictPrint
-from utils.hash_utils import highlight_changes, extractObj
+from utils.hash_utils import highlight_changes, trim_end
 from utils.terminal import execute_terminal_command, set_terminal_title
 from utils.dom_utils import (
   get_list_last_page_no,
@@ -115,7 +115,7 @@ while True:
                         if not urlListItem[0] == '?':
                             try:
                                 urlListItem = urlListItem.replace('?','')
-                                urlListItem = extractObj(urlListItem,'.')
+                                urlListItem = trim_end(urlListItem,'.')
                                 urlList = fix_url(urlListItem, urlList)
                                 break
                             except:
@@ -123,7 +123,7 @@ while True:
                                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                                 continue
 
-                urlListItem = extractObj(urlListItem,'.') #: Liste url'i parçalama.
+                urlListItem = trim_end(urlListItem,'.') #: Liste url'i parçalama.
 
             if urlListItem[0] == '?': 
                 print(f'{PRE_CMD_INFO}Paremetre tanındı: Liste arama modu.')
