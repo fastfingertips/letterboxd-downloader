@@ -1,6 +1,6 @@
 from utils.request import fetch_page_dom
 from utils.dom.custom import check_user_list
-    
+
 
 def fix_url(url_item: str, url_list: list) -> list:
     """
@@ -25,3 +25,21 @@ def fix_url(url_item: str, url_list: list) -> list:
         url_list.append(validated_url)
     
     return url_list
+
+def extract_list_domain_name(url: str) -> str:
+    """
+    Extracts the domain name or identifier from a given URL after the '/list/' segment.
+
+    Args:
+        url (str): The URL string to process.
+
+    Returns:
+        str: The extracted domain name or identifier. If '/list/' is not found, returns an empty string.
+    """
+    segment = '/list/'
+    try:
+        start_index = url.index(segment) + len(segment)
+        return url[start_index:].replace('/', "")
+    except ValueError:
+        # If '/list/' is not found in the URL, return an empty string
+        return ""
