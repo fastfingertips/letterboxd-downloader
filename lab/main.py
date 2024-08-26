@@ -6,18 +6,17 @@ import csv
 from utils.request import fetch_page_dom
 
 from utils.url.custom import fix_url
-from utils.dom.custom import extract_and_write_films
+from utils.color.custom import cmd_blink
 from utils.set.custom import readSettings
 from utils.time.custom import get_run_time
 from utils.dict.custom import listSignature
 from utils.log.custom import startLog, txtLog
 from utils.csv.custom import combineCsv, splitCsv
+from utils.dom.custom import extract_and_write_films
 from utils.session.custom import startSession, endSession
 from utils.text.custom import highlight_changes, trim_end
 from utils.file.custom import ensure_files_exist, ensure_directories_exist
 
-
-from utils.cmd_format import cmd_blink
 from utils.cmd_display import coloredDictPrint
 from utils.terminal import execute_terminal_command, set_terminal_title
 from utils.dom_utils import (

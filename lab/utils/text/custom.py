@@ -1,5 +1,5 @@
 from termcolor import colored as ced
-from utils.cmd_format import cmd_blink
+from utils.color.custom import cmd_blink
 from utils.log.custom import txtLog
 
 def highlight_changes(original_text: str, modified_text: str) -> str:

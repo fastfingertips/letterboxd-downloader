@@ -1,7 +1,9 @@
 import os
-from constants.terminal import PRE_CMD_INFO
-from utils.cmd_format import cmd_blink
+
+from utils.color.custom import cmd_blink
 from utils.time.custom import get_run_time
+
+from constants.terminal import PRE_CMD_INFO
 
 
 def ensure_directories_exist(dirs: list) -> None:

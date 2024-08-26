@@ -1,5 +1,5 @@
 from termcolor import colored as ced
-from utils.cmd_format import cmd_pre
+from utils.color.custom import cmd_pre
 from constants.project import CMD_PRINT_FILMS, SUP_LINE
 
 # --- CONSTANTS ---
