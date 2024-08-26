@@ -1,9 +1,10 @@
 import json
 from utils.log.custom import txtLog
+from utils.json.base import load_json_file, dump_json_file
 
-def load_json_file(file_path: str) -> dict:
+def load_json_file_with_logging(file_path: str) -> dict:
     """
-    Loads a JSON file from the specified file path and returns its content as a dictionary.
+    Loads a JSON file from the specified path and returns its content as a dictionary.
     
     Args:
         file_path (str): The path to the JSON file that needs to be loaded.
@@ -13,12 +14,10 @@ def load_json_file(file_path: str) -> dict:
         
     Raises:
         FileNotFoundError: If the specified file does not exist.
-        json.JSONDecodeError: If the file is not valid JSON.
+        json.JSONDecodeError: If the file contains invalid JSON.
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as json_file:
-            data = json.load(json_file)
-            return data
+        return load_json_file(file_path)
     except FileNotFoundError:
         txtLog(f"File not found: {file_path}")
         raise
@@ -26,21 +25,19 @@ def load_json_file(file_path: str) -> dict:
         txtLog(f"Error decoding JSON from file: {file_path}. Error: {e}")
         raise
 
-
-def dump_json_file(file_path: str, data: dict) -> None:
+def dump_json_file_with_logging(file_path: str, data: dict) -> None:
     """
-    Dumps a dictionary to a JSON file at the specified file path.
+    Serializes a dictionary to JSON and writes it to the specified file path.
     
     Args:
         file_path (str): The path where the JSON file will be saved.
-        data (dict): The dictionary data to be saved as a JSON file.
+        data (dict): The dictionary data to be serialized and saved as a JSON file.
         
     Raises:
         TypeError: If the provided data is not serializable to JSON.
     """
     try:
-        with open(file_path, 'w', encoding='utf-8') as json_file:
-            json.dump(data, json_file, indent=2)
+        dump_json_file(file_path, data)
     except TypeError as e:
         txtLog(f"Error serializing data to JSON for file: {file_path}. Error: {e}")
         raise
