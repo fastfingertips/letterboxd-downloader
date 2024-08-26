@@ -2,6 +2,9 @@ import json
 import os
 
 # -- Local Imports -- #
+from utils.json.custom import load_json_file_with_logging, dump_json_file_with_logging
+from utils.file.custom import rename_file_with_timestamp
+from utils.file import file_exists
 
 from constants.project import (
     SESSION_PROCESSES_KEY,
@@ -15,14 +18,6 @@ from constants.project import (
 from constants.terminal import (
     PRE_CMD_INFO,
     PRE_CMD_ERR
-)
-
-from utils.file import file_exists
-from utils.file.custom import rename_file_with_timestamp
-
-from utils.json_utils import (
-  loadJsonFile,
-  dumpJsonFile
 )
 
 current_pid = str(os.getpid())
@@ -76,7 +71,7 @@ def newSession(_hash) -> None:
     """
     This function creates a new session file or updates the existing one.
     """
-    sessionRecords = loadJsonFile(SESSIONS_FILE_NAME)
+    sessionRecords = load_json_file_with_logging(SESSIONS_FILE_NAME)
     if current_pid in sessionRecords[SESSION_DICT_KEY]:
         # if the process is already in the session file, the session is updated.
         updateSession(_hash)
@@ -91,7 +86,7 @@ def newSession(_hash) -> None:
                 }
             }
         }
-        dumpJsonFile(SESSIONS_FILE_NAME, sessionRecords)
+        dump_json_file_with_logging(SESSIONS_FILE_NAME, sessionRecords)
 
 # -- METHODS --
 
@@ -112,22 +107,22 @@ def createSession(_hash) -> None:
             }
         }
     }
-    dumpJsonFile(SESSIONS_FILE_NAME, jsonObject)
+    dump_json_file_with_logging(SESSIONS_FILE_NAME, jsonObject)
 
 def endSession(_hash) -> None:
     """
     This function ends the session file.
     """
     # current process is marked as finished.
-    sessionRecords = loadJsonFile(SESSIONS_FILE_NAME)
+    sessionRecords = load_json_file_with_logging(SESSIONS_FILE_NAME)
     sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_PROCESSES_KEY][_hash][SESSION_FINISHED_KEY] = True
-    dumpJsonFile(SESSIONS_FILE_NAME, sessionRecords)
+    dump_json_file_with_logging(SESSIONS_FILE_NAME, sessionRecords)
 
 def updateSession(_currentSession) -> None:
     """
     This function updates the session file.
     """
-    sessionRecords = loadJsonFile(SESSIONS_FILE_NAME)
+    sessionRecords = load_json_file_with_logging(SESSIONS_FILE_NAME)
     sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_LAST_KEY] = _currentSession
     sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_PROCESSES_KEY] |= {
         _currentSession: {
@@ -135,7 +130,7 @@ def updateSession(_currentSession) -> None:
             }
         }
 
-    dumpJsonFile(SESSIONS_FILE_NAME, sessionRecords)
+    load_json_file_with_logging(SESSIONS_FILE_NAME, sessionRecords)
 
 def sessionBackup() -> None:
     """

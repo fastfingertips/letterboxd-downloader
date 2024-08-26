@@ -1,8 +1,9 @@
 import json
 
 # -- Local Imports -- #
-from utils.file import file_exists
+from utils.json.custom import load_json_file_with_logging, dump_json_file_with_logging
 from utils.file.custom import clean_filename, is_valid_filename
+from utils.file import file_exists
 
 from constants.project import(
     SETTINGS_FILE_NAME,
@@ -15,12 +16,6 @@ from constants.terminal import(
     PRE_CMD_INFO,
     PRE_CMD_ERR
 )   
-
-
-from utils.json_utils import(
-    dumpJsonFile,
-    loadJsonFile
-)
 
 # -- SETTINGS --
 
@@ -52,7 +47,7 @@ def createSettings() -> None:
                 DEFAULT_EXPORT_KEY: exportDirName
             }
 
-            dumpJsonFile(SETTINGS_FILE_NAME, default_settings)
+            dump_json_file_with_logging(SETTINGS_FILE_NAME, default_settings)
             break
         else:
             print(f'{PRE_CMD_ERR}Invalid input. Please try again.')
@@ -66,7 +61,7 @@ def readSettings() -> dict:
         # If the file exists
         try:
             # If the file is not empty, it will return the file.
-            return loadJsonFile(SETTINGS_FILE_NAME)
+            return load_json_file_with_logging(SETTINGS_FILE_NAME)
         except json.decoder.JSONDecodeError: pass
 
     createSettings()

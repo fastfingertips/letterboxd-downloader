@@ -3,10 +3,10 @@ import os
 
 # -- Local Imports -- #
 
-from utils.set.custom import readSettings
+from utils.json.custom import load_json_file_with_logging
 from utils.time.custom import get_log_time
+from utils.set.custom import readSettings
 from utils.file import file_exists
-from utils.json_utils import loadJsonFile
 
 from constants.project import(
     SETTINGS_FILE_NAME,
@@ -35,7 +35,7 @@ def getLogFilePath() -> str:
         settingDict = readSettings()
         logDirName = settingDict[DEFAULT_LOG_KEY]
         if checkLogDir():
-            sessionRecords = loadJsonFile(SESSIONS_FILE_NAME)
+            sessionRecords = load_json_file_with_logging(SESSIONS_FILE_NAME)
             lastKey = sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_LAST_KEY]
             log_path = f'{logDirName}/{lastKey}.txt'
             return log_path
