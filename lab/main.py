@@ -6,7 +6,6 @@ from utils.request import fetch_page_dom
 
 from utils.terminal import execute_terminal_command, set_terminal_title
 
-from utils.url.custom import fix_url
 from utils.set.custom import readSettings
 from utils.time.custom import get_run_time
 from utils.dict.custom import listSignature
@@ -14,6 +13,7 @@ from utils.log.custom import startLog, txtLog
 from utils.csv.custom import combineCsv, splitCsv
 from utils.dom.custom import extract_and_write_films
 from utils.session.custom import startSession, endSession
+from utils.url.custom import fix_url, extract_list_domain_name
 from utils.text.custom import highlight_changes, trim_end, remove_substring
 from utils.file.custom import ensure_files_exist, ensure_directories_exist
 from utils.color.custom import colored, print_colored_dict, blink_text
@@ -44,10 +44,6 @@ from constants.terminal import (
 )
 
 # -- MAIN -- #
-
-def currentListDomainName(currentUrListItem):
-    _f_ = '/list/'
-    return currentUrListItem[currentUrListItem.index(_f_)+len(_f_):].replace('/',"")
 
 # system color start end reset
 # user welcome message and screen clear
@@ -238,7 +234,7 @@ while True:
             print(f'{ICON_ERROR}Liste sahibi bilgisi alınamadı')
             txtLog(f'Liste sahibi bilgisi alınamadı Hata: {e}')
             cListOwner = 'Unknown'
-        cListDomainName = currentListDomainName(currentUrListItem) # liste domain ismini düzenleyerek alır.
+        cListDomainName = extract_list_domain_name(currentUrListItem) # liste domain ismini düzenleyerek alır.
         cListRunTime = get_run_time() # liste işlem vaktini al. 
 
         listSignature({
