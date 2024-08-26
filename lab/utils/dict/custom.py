@@ -3,7 +3,7 @@ from termcolor import colored as ced
 from utils.log.custom import txtLog, errorLine
 
 from utils.dict_utils import get_list_signature
-from utils.terminal_utils import set_terminal_title
+from utils.terminal import set_terminal_title
 from utils.cmd_format import cmd_blink
 
 from constants.project import PRE_LOG_ERR, PRE_LOG_INFO, SUP_LINE
