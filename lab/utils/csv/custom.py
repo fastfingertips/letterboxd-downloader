@@ -1,11 +1,10 @@
-from termcolor import colored as ced
 import pandas as pd
 import glob
 
 # -- Local Imports -- #
 
 from utils.log.custom import txtLog
-
+from utils.color.custom import colored_text
 from utils.file.custom import ensure_directories_exist
 
 from constants.terminal import PRE_CMD_INFO
@@ -61,7 +60,7 @@ def combineCsv(_urlList, _exportDirName, _currenSessionHash, _exportsPath) -> No
     """
     if len(_urlList) > 1:
         print(SUP_LINE)
-        print(f"{PRE_CMD_INFO}{ced('Merge process info;', color='yellow')}")
+        print(f"{PRE_CMD_INFO}{colored_text('Merge process info;', color='yellow')}")
         combineDir = f'{_exportDirName}/Combined/' # folder containing the combined lists
         combineCsvFile = f'{_currenSessionHash}_Normal-Combined.csv' # the name of the combine file.
         noDuplicateCsvFile = f'{_currenSessionHash}_NoDuplicate-Combined.csv' # NoDuplicate file name
