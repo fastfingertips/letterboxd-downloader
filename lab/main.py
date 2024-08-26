@@ -273,11 +273,11 @@ while True:
         cListDom = fetch_page_dom(current_url_detail) # şu anki liste sayfasını oku.
 
         try:
-            cListOwner = get_body_content(cListDom,'data-owner') # liste sahibini al.
+            current_list_owner = get_body_content(cListDom,'data-owner') # liste sahibini al.
         except Exception as e:
             print(f'{ICON_ERROR}Liste sahibi bilgisi alınamadı')
             txtLog(f'Liste sahibi bilgisi alınamadı Hata: {e}')
-            cListOwner = 'Unknown'
+            current_list_owner = 'Unknown'
 
         current_list_domain = extract_list_domain_name(current_url) # liste domain ismini düzenleyerek alır.
         current_list_runtime = get_run_time() # liste işlem vaktini al. 
@@ -289,7 +289,7 @@ while True:
             "process_state": process_state, #  [1/1]
             "list_run_time": current_list_runtime, # 14072023022401
             "list_url": current_url, # https://letterboxd.com/{un}/list/{ln}
-            "list_owner": cListOwner, # {un}
+            "list_owner": current_list_owner, # {un}
             "list_dom": cListDom # <html>...</html>
         }) # liste hakkında bilgiler bastırılır.
 
@@ -312,7 +312,12 @@ while True:
             print(f"{ICON_INFO}{colored(f'List confirmed. {autoEnterMsg}', color='green')}")
 
             last_page_no = get_list_last_page_no(cListDom, current_url_detail_page)
-            csv_path = ''.join([exports_path, cListOwner, '_', current_list_domain, '_', current_list_runtime, '.csv'])
+            csv_path = ''.join([
+                exports_path,
+                current_list_owner, '_',
+                current_list_domain, '_',
+                current_list_runtime, '.csv'
+            ])
 
             ensure_directories_exist([exports_path]) # export klasörünün kontrolü.
             ensure_files_exist([csv_path]) # csv dosyasının kontrolü.
