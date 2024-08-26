@@ -44,6 +44,26 @@ from constants.terminal import (
 )
 
 
+def export_films_to_csv(csv_path: str, last_page_no: int, detail_page_url: str) -> None:
+    with open(csv_path, 'w', newline='', encoding="utf-8") as file: # konumda Export klasörü yoksa dosya oluşturmayacaktır.
+        writer = csv.writer(file)
+        header = ['Year', 'Title', 'LetterboxdURI']
+        writer.writerow(header) # csv açıldıktan sonra en üste yazılacak başlıklar.
+
+        loop_count = 1
+        print(SUP_LINE_FILMS, end='')
+        for x in range(int(last_page_no)): # sayfa sayısı kadar döngü oluştur.
+            txtLog(f'{PRE_LOG_INFO}Connecting to {detail_page_url}{str(x+1)}') # sayfa numarasını log dosyasına yaz.
+            current_dom = fetch_page_dom(f'{detail_page_url}{str(x+1)}') # sayfa dom'u alınır.
+            loop_count = extract_and_write_films(loop_count, current_dom, writer) # filmleri al.
+        file.close() # açtığımız dosyayı manuel kapattık
+
+    context = {
+        'count': loop_count
+    }
+
+    return context
+
 def print_session_hash(session_start_hash: str, session_current_hash: str) -> None:
     """
     Compares the session start hash with the current session hash and prints the result.
@@ -114,7 +134,8 @@ while True:
                 if url_list_item[-1] == '.' or url_list_item == '.': # Giriş nokta ile bitiyor veya tek nokta ise..
                     breakLoop = True #: Url alımını sonlandıracak bilgi.
 
-                    if not url_list_item[0] == '?': print(f'{ICON_INFO}Parametre tanındı, liste alım işlemi sonlandırıldı.')
+                    if not url_list_item[0] == '?':
+                        print(f'{ICON_INFO}Parametre tanındı, liste alım işlemi sonlandırıldı.')
 
                     if url_list_item[0] == '?' or url_list_item == ".." or url_list_item[-2:] == "..": 
                         print(f'{ICON_INFO}Ek parametre tanındı, liste arama sonrası tüm listeler otomatik onaylanacak.')
@@ -148,24 +169,28 @@ while True:
                             endList = int(url_list_item[x:])
                             url_list_item = url_list_item[:x-1]
                         x += -1
-                else: endList = 'Not specified.' # Son liste için bir parametre belirtilmezse.
+                else:
+                    endList = 'Not specified.' # Son liste için bir parametre belirtilmezse.
+
                 searchList = f'{SITE_DOMAIN}/search/lists/{url_list_item}/'
                 searchListPreviewDom = fetch_page_dom(searchList)
-
                 searchMetaTitle = get_meta_content(searchListPreviewDom,'og:title') # getting og:title
                 searchLMetaUrl = get_meta_content(searchListPreviewDom,'og:url') #: Getting og:url
 
                 try:
-                    searchListsQCountMsg = searchListPreviewDom.find('h2', attrs={'class':'section-heading'}).text #: Kaç liste bulunduğu hakkında bilgi veren mesaj.
+                    #: Kaç liste bulunduğu hakkında bilgi veren mesaj.
+                    searchListsQCountMsg = searchListPreviewDom.find('h2', attrs={'class':'section-heading'}).text
                 except AttributeError:
                     print(f"{ICON_ERROR}Bir etiketten 'arama karşılama mesajı' alınamadı.")
                     txtLog(f"Bir etiketten 'arama karşılama mesajı' alınamadı. Hata Mesajı: {AttributeError}")
                     searchListsQCountMsg = ''
 
                 try:
-                    searchListsQLastsPage = searchListPreviewDom.find_all('li',attrs={'class':'paginate-page'})[-1].text #: Son sayfayı alıyoruz.
+                    # Son sayfayı alıyoruz.
+                    searchListsQLastsPage = searchListPreviewDom.find_all('li',attrs={'class':'paginate-page'})[-1].text
                 except:
-                    searchListsQLastsPage = 1 #: Alınamazsa sayfada tek sayfa olduğu varsayılır.
+                    # Alınamazsa sayfada tek sayfa olduğu varsayılır.
+                    searchListsQLastsPage = 1
                 finally:
                     # Request response summary
                     print_colored_dict({
@@ -187,7 +212,8 @@ while True:
                     sayfa += 1
                     connectionPage = f'{searchList}page/{sayfa}'
                     searchListDom = fetch_page_dom(connectionPage)
-                    listsUrls = searchListDom.find_all('a', attrs={'class':'list-link'}) # okunmuş sayfadaki tüm listelerin adresleri.
+                    # Okunmuş sayfadaki tüm listelerin adresleri.
+                    listsUrls = searchListDom.find_all('a', attrs={'class':'list-link'})
 
                     # Query page summary
                     print_colored_dict({
@@ -239,28 +265,30 @@ while True:
     print(f"{ICON_INFO}List address acquisition terminated.") # liste url alımı sona erdğinde mesaj bastırılır.
 
     processLoopNo = 0 # for döngüne ait 
-    for currentUrListItem in url_list:
+    for current_url in url_list:
         processLoopNo += 1
-        processState = f'[{processLoopNo}/{len(url_list)}]'
-        currentUrListItemDetail = f'{currentUrListItem}detail/' # url'e detail eklendi.
-        currentUrListItemDetailPage = f'{currentUrListItemDetail}page/' # detaylı url'e sayfa gezintisi için parametre eklendi.
-        cListDom = fetch_page_dom(currentUrListItemDetail) # şu anki liste sayfasını oku.
+        process_state = f'[{processLoopNo}/{len(url_list)}]'
+        current_url_detail = f'{current_url}detail/' # url'e detail eklendi.
+        current_url_detail_page = f'{current_url_detail}page/' # detaylı url'e sayfa gezintisi için parametre eklendi.
+        cListDom = fetch_page_dom(current_url_detail) # şu anki liste sayfasını oku.
 
-        try: cListOwner = get_body_content(cListDom,'data-owner') # liste sahibini al.
+        try:
+            cListOwner = get_body_content(cListDom,'data-owner') # liste sahibini al.
         except Exception as e:
             print(f'{ICON_ERROR}Liste sahibi bilgisi alınamadı')
             txtLog(f'Liste sahibi bilgisi alınamadı Hata: {e}')
             cListOwner = 'Unknown'
-        cListDomainName = extract_list_domain_name(currentUrListItem) # liste domain ismini düzenleyerek alır.
-        cListRunTime = get_run_time() # liste işlem vaktini al. 
+
+        current_list_domain = extract_list_domain_name(current_url) # liste domain ismini düzenleyerek alır.
+        current_list_runtime = get_run_time() # liste işlem vaktini al. 
 
         listSignature({
-            "list_detail_page": currentUrListItemDetailPage, # https://letterboxd.com/{un}/list/{ln}/detail/page/
-            "list_detail_url": currentUrListItemDetail, # https://letterboxd.com/{un}/list/{ln}/detail/
-            "list_domain_name": cListDomainName, # {ln}
-            "process_state": processState, #  [1/1]
-            "list_run_time": cListRunTime, # 14072023022401
-            "list_url": currentUrListItem, # https://letterboxd.com/{un}/list/{ln}
+            "list_detail_page": current_url_detail_page, # https://letterboxd.com/{un}/list/{ln}/detail/page/
+            "list_detail_url": current_url_detail, # https://letterboxd.com/{un}/list/{ln}/detail/
+            "list_domain_name": current_list_domain, # {ln}
+            "process_state": process_state, #  [1/1]
+            "list_run_time": current_list_runtime, # 14072023022401
+            "list_url": current_url, # https://letterboxd.com/{un}/list/{ln}
             "list_owner": cListOwner, # {un}
             "list_dom": cListDom # <html>...</html>
         }) # liste hakkında bilgiler bastırılır.
@@ -268,7 +296,8 @@ while True:
         if listEnterPassOn:
             listEnter = input(f"{ICON_INPUT}Press enter to confirm the entered information. ({blink_text('Enter', 'green')})")
 
-            if listEnter == "": listEnter, autoEnterMsg = True, '[Manual]'
+            if listEnter == "":
+                listEnter, autoEnterMsg = True, '[Manual]'
             elif listEnter == ".":
                 listEnter, autoEnterMsg = True, '[Auto]'
                 listEnterPassOn = False
@@ -279,33 +308,22 @@ while True:
                 txtLog(f'{PRE_LOG_INFO}The session was canceled because you did not verify the information.')
 
         if listEnter:
-            txtLog(f'{PRE_LOG_INFO}Şimdiki listeye erişim başlatılıyor.')
             print(SUP_LINE)
             print(f"{ICON_INFO}{colored(f'List confirmed. {autoEnterMsg}', color='green')}")
 
-            lastPageNo = get_list_last_page_no(cListDom, currentUrListItemDetailPage)
-            openCsv = ''.join([exports_path, cListOwner, '_', cListDomainName, '_', cListRunTime, '.csv'])
+            last_page_no = get_list_last_page_no(cListDom, current_url_detail_page)
+            csv_path = ''.join([exports_path, cListOwner, '_', current_list_domain, '_', current_list_runtime, '.csv'])
+
             ensure_directories_exist([exports_path]) # export klasörünün kontrolü.
-            ensure_files_exist([openCsv]) # csv dosyasının kontrolü.
+            ensure_files_exist([csv_path]) # csv dosyasının kontrolü.
 
-            with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: # konumda Export klasörü yoksa dosya oluşturmayacaktır.
-                writer = csv.writer(csvFile)
-                header = ['Year', 'Title', 'LetterboxdURI']
-                writer.writerow(header) # csv açıldıktan sonra en üste yazılacak başlıklar.
-
-                loopCount = 1
-                print(SUP_LINE_FILMS, end='')
-                for x in range(int(lastPageNo)): # sayfa sayısı kadar döngü oluştur.
-                    txtLog(f'{PRE_LOG_INFO}Connecting to {currentUrListItemDetailPage}{str(x+1)}') # sayfa numarasını log dosyasına yaz.
-                    currentDom = fetch_page_dom(f'{currentUrListItemDetailPage}{str(x+1)}') # sayfa dom'u alınır.
-                    loopCount = extract_and_write_films(loopCount, currentDom, writer) # filmleri al.
-                csvFile.close() # açtığımız dosyayı manuel kapattık
+            loop_count = export_films_to_csv(csv_path, last_page_no, current_url_detail_page)
 
             # process end
-            set_terminal_title(f'{processState} completed!') # change title
-            print(f'{ICON_INFO}{loopCount-1} film {blink_text(openCsv,"yellow")} dosyasına aktarıldı.') # print info
-            print(f"{ICON_INFO}{colored(f'{processState} completed!', 'green')}") # print info
-            txtLog(f'{PRE_LOG_INFO}{processState} completed!') # log info
+            print(f'{ICON_INFO}{loop_count-1} film {blink_text(csv_path,"yellow")} dosyasına aktarıldı.') # print info
+            print(f"{ICON_INFO}{colored(f'{process_state} completed!', 'green')}") # print info
+            set_terminal_title(f'{process_state} completed!') # change title
+            txtLog(f'{PRE_LOG_INFO}{process_state} completed!') # log info
             print(SUB_LINE)
 
     combineCsv(url_list, export_directory_name, session_current_hash, exports_path) # merge csv files
@@ -317,5 +335,5 @@ while True:
     txtLog(f'{PRE_LOG_INFO}Session: {session_current_hash} ended.') # log info
 
     # process end
-    print(f"{ICON_INFO}Process State: {blink_text(processState +' Finish.','green')}")
+    print(f"{ICON_INFO}Process State: {blink_text(process_state +' Finish.','green')}")
     execute_terminal_command(f"echo {ICON_INFO}{blink_text('Press enter to continue with the new session.','yellow')} & pause >nul")
