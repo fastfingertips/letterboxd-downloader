@@ -17,7 +17,7 @@ from utils.file.custom import ensure_files_exist, ensure_directories_exist
 
 from utils.cmd_format import cmd_blink
 from utils.cmd_display import coloredDictPrint
-from utils.hash_utils import getChanges, extractObj
+from utils.hash_utils import highlight_changes, extractObj
 from utils.terminal import execute_terminal_command, set_terminal_title
 from utils.dom_utils import (
   get_list_last_page_no,
@@ -73,7 +73,7 @@ while True:
     exportsPath = ''.join([exportDirName, '/', sessionCurrentHash, '/']) # exports/000000000/
 
     #> every session has a different name for the start.
-    hashChanges = getChanges(sessionStartHash, sessionCurrentHash)
+    hashChanges = highlight_changes(sessionStartHash, sessionCurrentHash)
     print(f"{PRE_CMD_INFO}Session Hash: {sessionStartHash}{'' if sessionStartHash == sessionCurrentHash else ' -> ' + hashChanges}") 
 
     #> while initializing

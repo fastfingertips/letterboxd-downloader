@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from utils.dom.custom import getMovieCount
 from utils.log.custom import errorLine, txtLog
 
-from utils.hash_utils import getChanges
+from utils.hash_utils import highlight_changes
 
 from constants.terminal import PRE_CMD_CHECK, PRE_CMD_INFO, PRE_BLANK_COUNT
 from constants.project import PRE_LOG_INFO
@@ -164,7 +164,7 @@ def check_user_list(_urlListItemDom, _urlListItem) -> tuple:
                     msgMetaOgUrlChange = ced(metaOgUrl.replace(_urlListItem,""), color="green")
                 else:
                     msgInputUrl = ''
-                    msgMetaOgUrlChange = getChanges(_urlListItem, metaOgUrl)
+                    msgMetaOgUrlChange = highlight_changes(_urlListItem, metaOgUrl)
 
                 print(f'{PRE_BLANK_COUNT}({ced("+", "green")}): {msgInputUrl}{msgMetaOgUrlChange} as the corrected URL.')
             txtLog(f'{PRE_LOG_INFO}List "{metaOgTitle}" found for {_urlListItem}')

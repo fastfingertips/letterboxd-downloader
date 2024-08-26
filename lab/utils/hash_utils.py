@@ -1,15 +1,25 @@
 from termcolor import colored as ced
 from utils.cmd_format import cmd_blink
 
-def getChanges(_key1, _key2) -> str:
+def highlight_changes(original_text: str, modified_text: str) -> str:
     """
-    Returns a string with the changes between two keys
+    Highlights the changes between two strings by comparing them character by character.
+
+    Characters that remain the same between the two strings are highlighted in yellow.
+    Characters that differ are highlighted in green with a blinking effect.
+
+    Args:
+        original_text (str): The original string to compare.
+        modified_text (str): The modified string to compare.
+
+    Returns:
+        str: A string with highlighted differences.
     """
     return ''.join(
-        ced(_key2[i], color="yellow")
-        if _key1[i] == _key2[i]
-        else cmd_blink(_key2[i], 'green')
-        for i in range(len(_key1))
+        ced(modified_text[i], color="yellow")
+        if original_text[i] == modified_text[i]
+        else cmd_blink(modified_text[i], 'green')
+        for i in range(len(original_text))
     )
 
 def extractObj(_job, _obj) -> str:
