@@ -1,4 +1,3 @@
-from termcolor import colored as ced
 import csv
 
 # -- Local Imports -- #
@@ -16,10 +15,9 @@ from utils.dom.custom import extract_and_write_films
 from utils.session.custom import startSession, endSession
 from utils.text.custom import highlight_changes, trim_end
 from utils.file.custom import ensure_files_exist, ensure_directories_exist
-
-from utils.cmd_display import print_colored_dict
+from utils.color.custom import colored_text, print_colored_dict
 from utils.terminal import execute_terminal_command, set_terminal_title
-from utils.dom_utils import (
+from utils.dom.custom import (
   get_list_last_page_no,
   get_meta_content,
   get_body_content,
@@ -185,16 +183,16 @@ while True:
 
                     for listsUrl in listsUrls:
                         if liste == endList:
-                            print(f"{PRE_CMD_INFO}Liste sayısı belirlenen sayıya ({ced(liste,'blue')}) ulaştı.")
+                            print(f"{PRE_CMD_INFO}Liste sayısı belirlenen sayıya ({colored_text(liste,'blue')}) ulaştı.")
                             break
                         liste += 1
-                        print(f'{PRE_CMD_INFO}List page/rank: {ced(sayfa, "blue")}/{ced(liste, "blue")}')
+                        print(f'{PRE_CMD_INFO}List page/rank: {colored_text(sayfa, "blue")}/{colored_text(liste, "blue")}')
                         urlListItem = SITE_DOMAIN+listsUrl.get('href') #: https://letterboxd.com + /user_name/list/list_name
                         userListAvailable, approvedListUrl = check_user_list(fetch_page_dom(urlListItem), urlListItem)
                         if approvedListUrl not in urlList:
                             if userListAvailable:
                                 urlList.append(approvedListUrl)
-                                print(f"{PRE_CMD_CHECK}{ced('Eklendi.','green')}")
+                                print(f"{PRE_CMD_CHECK}{colored_text('Eklendi.','green')}")
                         else:
                             print(f'{PRE_CMD_UNCHECK}Bu listeyi daha önce eklemişiz.')
                             liste -= 1
@@ -261,13 +259,13 @@ while True:
                 print(f'{PRE_CMD_INFO}Listeler otomatik olarak onaylanacak şekilde ayarlandı.')
             else:
                 listEnter = False
-                print(f"{PRE_CMD_INFO}The {ced('session was canceled','red', attrs=['dark'])} because you did not verify the information.")
+                print(f"{PRE_CMD_INFO}The {colored_text('session was canceled','red', attrs=['dark'])} because you did not verify the information.")
                 txtLog(f'{PRE_LOG_INFO}The session was canceled because you did not verify the information.')
 
         if listEnter:
             txtLog(f'{PRE_LOG_INFO}Şimdiki listeye erişim başlatılıyor.')
             print(SUP_LINE)
-            print(f"{PRE_CMD_INFO}{ced(f'List confirmed. {autoEnterMsg}', color='green')}")
+            print(f"{PRE_CMD_INFO}{colored_text(f'List confirmed. {autoEnterMsg}', color='green')}")
 
             lastPageNo = get_list_last_page_no(cListDom, currentUrListItemDetailPage)
             openCsv = ''.join([exportsPath, cListOwner, '_', cListDomainName, '_', cListRunTime, '.csv'])
@@ -290,7 +288,7 @@ while True:
             # process end
             set_terminal_title(f'{processState} completed!') # change title
             print(f'{PRE_CMD_INFO}{loopCount-1} film {blink_text(openCsv,"yellow")} dosyasına aktarıldı.') # print info
-            print(f"{PRE_CMD_INFO}{ced(f'{processState} completed!', 'green')}") # print info
+            print(f"{PRE_CMD_INFO}{colored_text(f'{processState} completed!', 'green')}") # print info
             txtLog(f'{PRE_LOG_INFO}{processState} completed!') # log info
             print(SUB_LINE)
 
@@ -299,7 +297,7 @@ while True:
     # session end
     endSession(sessionCurrentHash)
     set_terminal_title(f'Session: {sessionCurrentHash} ended!') # change title
-    print(f"{PRE_CMD_INFO}{ced(f'Session: {sessionCurrentHash} ended.', 'green')}") # print info
+    print(f"{PRE_CMD_INFO}{colored_text(f'Session: {sessionCurrentHash} ended.', 'green')}") # print info
     txtLog(f'{PRE_LOG_INFO}Session: {sessionCurrentHash} ended.') # log info
 
     # process end
