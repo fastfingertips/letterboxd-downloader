@@ -1,5 +1,4 @@
-from termcolor import colored as ced
-from utils.color.custom import format_command_message
+from utils.color.custom import format_command_message, colored_text
 from constants.project import CMD_PRINT_FILMS, SUP_LINE
 
 # --- CONSTANTS ---
@@ -16,6 +15,6 @@ PRE_CMD_MIDDLE_DOT_LIST = format_command_message(u' \u00B7', 'cyan')  # Middle d
 
 # Conditional assignment for movies on the list
 SUP_LINE_FILMS = (
-    f'{SUP_LINE}\n{PRE_CMD_INFO}{ced("Movies on the list;", color="yellow")}\n'
+    f'{SUP_LINE}\n{PRE_CMD_INFO}{colored_text("Movies on the list;", color="yellow")}\n'
     if CMD_PRINT_FILMS else ''
 )
