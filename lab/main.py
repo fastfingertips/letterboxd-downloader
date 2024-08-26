@@ -79,64 +79,64 @@ while True:
     listEnterPassOn = True
     breakLoop = False
     inputLoopNo = 0
-    urlList = []
+    url_list = []
     while True:
         inputLoopNo += 1 #: Başlangıçta döngü değerini artırıyoruz.
-        urlListItem = str(input(f'{ICON_INPUT}List URL[{inputLoopNo}]: ')).lower() #: Kullanıcıdan liste url'i alınması ve düzenlenmesi.
-        if len(urlListItem) > 0: ## Giriş boş değilse..
+        url_list_item = str(input(f'{ICON_INPUT}List URL[{inputLoopNo}]: ')).lower() #: Kullanıcıdan liste url'i alınması ve düzenlenmesi.
+        if len(url_list_item) > 0: ## Giriş boş değilse..
 
             #> input starts with split parameter
-            if urlListItem[0:len(SPLIT_PARAMETER)] == SPLIT_PARAMETER: 
-                splitCsv(urlListItem[len(SPLIT_PARAMETER):], export_directory_name, session_current_hash)
+            if url_list_item[0:len(SPLIT_PARAMETER)] == SPLIT_PARAMETER: 
+                splitCsv(url_list_item[len(SPLIT_PARAMETER):], export_directory_name, session_current_hash)
                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                 continue
 
-            if urlListItem[-1] == '.' and urlListItem[0] != '?':
+            if url_list_item[-1] == '.' and url_list_item[0] != '?':
                 if not inputLoopNo > 1:
                     print(f"{ICON_INFO}To finish, you must first specify a list.") 
                     inputLoopNo -= 1
                     continue
 
-            if '.' in urlListItem: # Girişte nokta varsa..
-                if urlListItem[-1] == '.' or urlListItem == '.': # Giriş nokta ile bitiyor veya tek nokta ise..
+            if '.' in url_list_item: # Girişte nokta varsa..
+                if url_list_item[-1] == '.' or url_list_item == '.': # Giriş nokta ile bitiyor veya tek nokta ise..
                     breakLoop = True #: Url alımını sonlandıracak bilgi.
 
-                    if not urlListItem[0] == '?': print(f'{ICON_INFO}Parametre tanındı, liste alım işlemi sonlandırıldı.')
+                    if not url_list_item[0] == '?': print(f'{ICON_INFO}Parametre tanındı, liste alım işlemi sonlandırıldı.')
 
-                    if urlListItem[0] == '?' or urlListItem == ".." or urlListItem[-2:] == "..": 
+                    if url_list_item[0] == '?' or url_list_item == ".." or url_list_item[-2:] == "..": 
                         print(f'{ICON_INFO}Ek parametre tanındı, liste arama sonrası tüm listeler otomatik onaylanacak.')
                         listEnterPassOn, listEnter, autoEnterMsg = False , True, '[Auto]' # Otomatik onaylama yapacak bilgi.
 
-                    if len(urlList) > 0: #: URL listesi boş değilse
-                        print(f'{ICON_INFO}Liste arama işlemi sonlandırıldı, Toplam {len(urlList)} liste girişi yapıldı.')
+                    if len(url_list) > 0: #: URL listesi boş değilse
+                        print(f'{ICON_INFO}Liste arama işlemi sonlandırıldı, Toplam {len(url_list)} liste girişi yapıldı.')
                         break
                     else:
-                        if not urlListItem[0] == '?':
+                        if not url_list_item[0] == '?':
                             try:
-                                urlListItem = urlListItem.replace('?','')
-                                urlListItem = trim_end(urlListItem,'.')
-                                urlList = fix_url(urlListItem, urlList)
+                                url_list_item = url_list_item.replace('?','')
+                                url_list_item = trim_end(url_list_item,'.')
+                                url_list = fix_url(url_list_item, url_list)
                                 break
                             except:
                                 print(f"{ICON_INFO}To finish, you must first specify a list.") 
                                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                                 continue
 
-                urlListItem = trim_end(urlListItem,'.') #: Liste url'i parçalama.
+                url_list_item = trim_end(url_list_item, '.') #: Liste url'i parçalama.
 
-            if urlListItem[0] == '?': 
+            if url_list_item[0] == '?': 
                 print(f'{ICON_INFO}Paremetre tanındı: Liste arama modu.')
-                urlListItem = urlListItem[1:] #: Başlangıçdaki soru işaret kaldırıldı.
+                url_list_item = url_list_item[1:] #: Başlangıçdaki soru işaret kaldırıldı.
 
-                if "!" in urlListItem: #: Son liste belirleyicisi
+                if "!" in url_list_item: #: Son liste belirleyicisi
                     x = -1
                     for i in range(3): #: Sona en fazla 3 rakam girilebilir. letterboxd'da max bulubilen liste sayısı 250
-                        if urlListItem[x-1] == "!":
-                            endList = int(urlListItem[x:])
-                            urlListItem = urlListItem[:x-1]
+                        if url_list_item[x-1] == "!":
+                            endList = int(url_list_item[x:])
+                            url_list_item = url_list_item[:x-1]
                         x += -1
                 else: endList = 'Not specified.' # Son liste için bir parametre belirtilmezse.
-                searchList = f'{SITE_DOMAIN}/search/lists/{urlListItem}/'
+                searchList = f'{SITE_DOMAIN}/search/lists/{url_list_item}/'
                 searchListPreviewDom = fetch_page_dom(searchList)
 
                 searchMetaTitle = get_meta_content(searchListPreviewDom,'og:title') # getting og:title
@@ -157,7 +157,7 @@ while True:
                     # Request response summary
                     print_colored_dict({
                     "Request": {
-                        "Query": urlListItem},
+                        "Query": url_list_item},
                     "Response": {
                         "Last list": endList,
                         "Last Page": searchListsQLastsPage,
@@ -191,11 +191,11 @@ while True:
                             break
                         liste += 1
                         print(f'{ICON_INFO}List page/rank: {colored(sayfa, "blue")}/{colored(liste, "blue")}')
-                        urlListItem = SITE_DOMAIN+listsUrl.get('href') #: https://letterboxd.com + /user_name/list/list_name
-                        userListAvailable, approvedListUrl = check_user_list(fetch_page_dom(urlListItem), urlListItem)
-                        if approvedListUrl not in urlList:
+                        url_list_item = SITE_DOMAIN+listsUrl.get('href') #: https://letterboxd.com + /user_name/list/list_name
+                        userListAvailable, approvedListUrl = check_user_list(fetch_page_dom(url_list_item), url_list_item)
+                        if approvedListUrl not in url_list:
                             if userListAvailable:
-                                urlList.append(approvedListUrl)
+                                url_list.append(approvedListUrl)
                                 print(f"{ICON_CHECK}{colored('Eklendi.','green')}")
                         else:
                             print(f'{ICON_UNCHECK}Bu listeyi daha önce eklemişiz.')
@@ -206,13 +206,13 @@ while True:
                 break
             
             # if url is detail page, remove detail part.
-            urlListItem = remove_substring(urlListItem, '/detail') 
+            url_list_item = remove_substring(url_list_item, '/detail') 
 
-            urlListItemDom = fetch_page_dom(urlListItem) # sayfa dom'u alınır.
-            userListAvailable, approvedListUrl = check_user_list(urlListItemDom, urlListItem) # liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
+            urlListItemDom = fetch_page_dom(url_list_item) # sayfa dom'u alınır.
+            userListAvailable, approvedListUrl = check_user_list(urlListItemDom, url_list_item) # liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
             if userListAvailable: # liste kullanıma uygunsa..
-                if approvedListUrl not in urlList: #> doğrulanmış URL daha önce URL Listesine eklenmediyse..
-                    urlList.append(approvedListUrl) # doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
+                if approvedListUrl not in url_list: #> doğrulanmış URL daha önce URL Listesine eklenmediyse..
+                    url_list.append(approvedListUrl) # doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
                     if breakLoop: break # kullanıcı URL sonunda nokta belirttiyse.. URL alımını sonlandırıyoruz.
                 else: #> doğrulanmış URL daha önce işlem görecek URL listine eklenmiş ise..
                     print(f'{ICON_ERROR}You have already entered this address list.') #: URL'in daha önce girildiğini ekrana yazdırıyoruz.
@@ -226,9 +226,9 @@ while True:
     print(f"{ICON_INFO}List address acquisition terminated.") # liste url alımı sona erdğinde mesaj bastırılır.
 
     processLoopNo = 0 # for döngüne ait 
-    for currentUrListItem in urlList:
+    for currentUrListItem in url_list:
         processLoopNo += 1
-        processState = f'[{processLoopNo}/{len(urlList)}]'
+        processState = f'[{processLoopNo}/{len(url_list)}]'
         currentUrListItemDetail = f'{currentUrListItem}detail/' # url'e detail eklendi.
         currentUrListItemDetailPage = f'{currentUrListItemDetail}page/' # detaylı url'e sayfa gezintisi için parametre eklendi.
         cListDom = fetch_page_dom(currentUrListItemDetail) # şu anki liste sayfasını oku.
@@ -295,7 +295,7 @@ while True:
             txtLog(f'{PRE_LOG_INFO}{processState} completed!') # log info
             print(SUB_LINE)
 
-    combineCsv(urlList, export_directory_name, session_current_hash, exports_path) # merge csv files
+    combineCsv(url_list, export_directory_name, session_current_hash, exports_path) # merge csv files
 
     # session end
     endSession(session_current_hash)
