@@ -1,11 +1,11 @@
 import csv
 
 from bs4 import BeautifulSoup
-from termcolor import colored as ced
 
 from utils.request import fetch_page_dom
 
 from utils.dom.custom import getMovieCount
+from utils.color.custom import colored_text
 from utils.log.custom import txtLog, errorLine
 from utils.text.custom import highlight_changes
 
@@ -266,7 +266,7 @@ def check_user_list(_urlListItemDom, _urlListItem) -> tuple:
             bodyDataOwner = get_body_content(_urlListItemDom,'data-owner')
 
             #> print the list owner's username and the list title.
-            print(f'{PRE_CMD_CHECK}{ced("Found it: ", color="green")}@{ced(bodyDataOwner,"yellow")} "{ced(metaOgTitle,"yellow")}"')
+            print(f'{PRE_CMD_CHECK}{colored_text("Found it: ", color="green")}@{colored_text(bodyDataOwner,"yellow")} "{colored_text(metaOgTitle,"yellow")}"')
 
             #> if the entered URL matches the meta URL...
             if _urlListItem == metaOgUrl or f'{_urlListItem}/' == metaOgUrl:
@@ -274,16 +274,16 @@ def check_user_list(_urlListItemDom, _urlListItem) -> tuple:
             else: # Girilen URL Meta ile uyuşmuyorsa..
                 print(f'{PRE_CMD_INFO}The list URL you entered contains redirects.')
                 print(f'{PRE_BLANK_COUNT}The list title was likely changed recently or you entered it incorrectly.')
-                print(f'{PRE_BLANK_COUNT}({ced("+", "red")}): {ced(_urlListItem, color="yellow")}')
+                print(f'{PRE_BLANK_COUNT}({colored_text("+", "red")}): {colored_text(_urlListItem, color="yellow")}')
                 
                 if _urlListItem in metaOgUrl:
-                    msgInputUrl = ced(_urlListItem, color="yellow")
-                    msgMetaOgUrlChange = ced(metaOgUrl.replace(_urlListItem,""), color="green")
+                    msgInputUrl = colored_text(_urlListItem, color="yellow")
+                    msgMetaOgUrlChange = colored_text(metaOgUrl.replace(_urlListItem,""), color="green")
                 else:
                     msgInputUrl = ''
                     msgMetaOgUrlChange = highlight_changes(_urlListItem, metaOgUrl)
 
-                print(f'{PRE_BLANK_COUNT}({ced("+", "green")}): {msgInputUrl}{msgMetaOgUrlChange} as the corrected URL.')
+                print(f'{PRE_BLANK_COUNT}({colored_text("+", "green")}): {msgInputUrl}{msgMetaOgUrlChange} as the corrected URL.')
             txtLog(f'{PRE_LOG_INFO}List "{metaOgTitle}" found for {_urlListItem}')
 
             currentListAvaliable = True
