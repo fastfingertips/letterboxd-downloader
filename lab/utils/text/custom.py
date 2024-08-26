@@ -1,4 +1,4 @@
-from utils.color.custom import colored_text, blink_text
+from utils.color.custom import colored, blink_text
 from utils.log.custom import txtLog
 
 def highlight_changes(original_text: str, modified_text: str) -> str:
@@ -16,7 +16,7 @@ def highlight_changes(original_text: str, modified_text: str) -> str:
         str: A string with highlighted differences.
     """
     return ''.join(
-        colored_text(modified_text[i], color="yellow")
+        colored(modified_text[i], color="yellow")
         if original_text[i] == modified_text[i]
         else blink_text(modified_text[i], 'green')
         for i in range(len(original_text))
@@ -41,3 +41,18 @@ def trim_end(text: str, char_to_remove: str) -> str:
         # Log the error if necessary or handle it appropriately.
         txtLog(f"Error while trimming characters: {e}")
     return text
+
+def remove_substring(main_string: str, substring: str) -> str:
+    """
+    Removes the specified substring from the main string if it exists.
+
+    Args:
+        main_string (str): The string from which to remove the substring.
+        substring (str): The substring to remove from the main string.
+
+    Returns:
+        str: The modified string with the substring removed if it was found, otherwise the original string.
+    """
+    if substring in main_string:
+        return main_string.replace(substring, "")
+    return main_string
