@@ -4,8 +4,9 @@ import csv
 
 from utils.request import fetch_page_dom
 
+from utils.terminal import execute_terminal_command, set_terminal_title
+
 from utils.url.custom import fix_url
-from utils.color.custom import blink_text
 from utils.set.custom import readSettings
 from utils.time.custom import get_run_time
 from utils.dict.custom import listSignature
@@ -15,8 +16,7 @@ from utils.dom.custom import extract_and_write_films
 from utils.session.custom import startSession, endSession
 from utils.text.custom import highlight_changes, trim_end
 from utils.file.custom import ensure_files_exist, ensure_directories_exist
-from utils.color.custom import colored_text, print_colored_dict
-from utils.terminal import execute_terminal_command, set_terminal_title
+from utils.color.custom import colored, print_colored_dict, blink_text
 from utils.dom.custom import (
   get_list_last_page_no,
   get_meta_content,
@@ -35,12 +35,12 @@ from constants.project import (
 )
 
 from constants.terminal import (
-    PRE_CMD_UNCHECK,
-    SUP_LINE_FILMS,
-    PRE_CMD_INPUT,
-    PRE_CMD_CHECK,
-    PRE_CMD_INFO,
-    PRE_CMD_ERR
+    ICON_UNCHECK,
+    ICON_INPUT,
+    ICON_CHECK,
+    ICON_ERROR,
+    ICON_INFO,
+    SUP_LINE_FILMS
 )
 
 # -- MAIN -- #
@@ -72,7 +72,7 @@ while True:
 
     #> every session has a different name for the start.
     hashChanges = highlight_changes(sessionStartHash, sessionCurrentHash)
-    print(f"{PRE_CMD_INFO}Session Hash: {sessionStartHash}{'' if sessionStartHash == sessionCurrentHash else ' -> ' + hashChanges}") 
+    print(f"{ICON_INFO}Session Hash: {sessionStartHash}{'' if sessionStartHash == sessionCurrentHash else ' -> ' + hashChanges}") 
 
     #> while initializing
     listEnterPassOn = True
@@ -81,7 +81,7 @@ while True:
     urlList = []
     while True:
         inputLoopNo += 1 #: Başlangıçta döngü değerini artırıyoruz.
-        urlListItem = str(input(f'{PRE_CMD_INPUT}List URL[{inputLoopNo}]: ')).lower() #: Kullanıcıdan liste url'i alınması ve düzenlenmesi.
+        urlListItem = str(input(f'{ICON_INPUT}List URL[{inputLoopNo}]: ')).lower() #: Kullanıcıdan liste url'i alınması ve düzenlenmesi.
         if len(urlListItem) > 0: ## Giriş boş değilse..
 
             #> input starts with split parameter
@@ -92,7 +92,7 @@ while True:
 
             if urlListItem[-1] == '.' and urlListItem[0] != '?':
                 if not inputLoopNo > 1:
-                    print(f"{PRE_CMD_INFO}To finish, you must first specify a list.") 
+                    print(f"{ICON_INFO}To finish, you must first specify a list.") 
                     inputLoopNo -= 1
                     continue
 
@@ -100,14 +100,14 @@ while True:
                 if urlListItem[-1] == '.' or urlListItem == '.': # Giriş nokta ile bitiyor veya tek nokta ise..
                     breakLoop = True #: Url alımını sonlandıracak bilgi.
 
-                    if not urlListItem[0] == '?': print(f'{PRE_CMD_INFO}Parametre tanındı, liste alım işlemi sonlandırıldı.')
+                    if not urlListItem[0] == '?': print(f'{ICON_INFO}Parametre tanındı, liste alım işlemi sonlandırıldı.')
 
                     if urlListItem[0] == '?' or urlListItem == ".." or urlListItem[-2:] == "..": 
-                        print(f'{PRE_CMD_INFO}Ek parametre tanındı, liste arama sonrası tüm listeler otomatik onaylanacak.')
+                        print(f'{ICON_INFO}Ek parametre tanındı, liste arama sonrası tüm listeler otomatik onaylanacak.')
                         listEnterPassOn, listEnter, autoEnterMsg = False , True, '[Auto]' # Otomatik onaylama yapacak bilgi.
 
                     if len(urlList) > 0: #: URL listesi boş değilse
-                        print(f'{PRE_CMD_INFO}Liste arama işlemi sonlandırıldı, Toplam {len(urlList)} liste girişi yapıldı.')
+                        print(f'{ICON_INFO}Liste arama işlemi sonlandırıldı, Toplam {len(urlList)} liste girişi yapıldı.')
                         break
                     else:
                         if not urlListItem[0] == '?':
@@ -117,14 +117,14 @@ while True:
                                 urlList = fix_url(urlListItem, urlList)
                                 break
                             except:
-                                print(f"{PRE_CMD_INFO}To finish, you must first specify a list.") 
+                                print(f"{ICON_INFO}To finish, you must first specify a list.") 
                                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                                 continue
 
                 urlListItem = trim_end(urlListItem,'.') #: Liste url'i parçalama.
 
             if urlListItem[0] == '?': 
-                print(f'{PRE_CMD_INFO}Paremetre tanındı: Liste arama modu.')
+                print(f'{ICON_INFO}Paremetre tanındı: Liste arama modu.')
                 urlListItem = urlListItem[1:] #: Başlangıçdaki soru işaret kaldırıldı.
 
                 if "!" in urlListItem: #: Son liste belirleyicisi
@@ -143,7 +143,7 @@ while True:
 
                 try: searchListsQCountMsg = searchListPreviewDom.find('h2', attrs={'class':'section-heading'}).text #: Kaç liste bulunduğu hakkında bilgi veren mesaj.
                 except AttributeError:
-                    print(f"{PRE_CMD_ERR}Bir etiketten 'arama karşılama mesajı' alınamadı.")
+                    print(f"{ICON_ERROR}Bir etiketten 'arama karşılama mesajı' alınamadı.")
                     txtLog(f"Bir etiketten 'arama karşılama mesajı' alınamadı. Hata Mesajı: {AttributeError}")
                     searchListsQCountMsg = ''
 
@@ -163,7 +163,7 @@ while True:
                         }
                     })
 
-                print(f"{PRE_CMD_INFO}Starting list search..")
+                print(f"{ICON_INFO}Starting list search..")
 
                 sayfa, liste = 0, 0
                 for i in range(int(searchListsQLastsPage)):
@@ -183,18 +183,18 @@ while True:
 
                     for listsUrl in listsUrls:
                         if liste == endList:
-                            print(f"{PRE_CMD_INFO}Liste sayısı belirlenen sayıya ({colored_text(liste,'blue')}) ulaştı.")
+                            print(f"{ICON_INFO}Liste sayısı belirlenen sayıya ({colored(liste,'blue')}) ulaştı.")
                             break
                         liste += 1
-                        print(f'{PRE_CMD_INFO}List page/rank: {colored_text(sayfa, "blue")}/{colored_text(liste, "blue")}')
+                        print(f'{ICON_INFO}List page/rank: {colored(sayfa, "blue")}/{colored(liste, "blue")}')
                         urlListItem = SITE_DOMAIN+listsUrl.get('href') #: https://letterboxd.com + /user_name/list/list_name
                         userListAvailable, approvedListUrl = check_user_list(fetch_page_dom(urlListItem), urlListItem)
                         if approvedListUrl not in urlList:
                             if userListAvailable:
                                 urlList.append(approvedListUrl)
-                                print(f"{PRE_CMD_CHECK}{colored_text('Eklendi.','green')}")
+                                print(f"{ICON_CHECK}{colored('Eklendi.','green')}")
                         else:
-                            print(f'{PRE_CMD_UNCHECK}Bu listeyi daha önce eklemişiz.')
+                            print(f'{ICON_UNCHECK}Bu listeyi daha önce eklemişiz.')
                             liste -= 1
                     else: continue
                     print(SUB_LINE)
@@ -210,15 +210,15 @@ while True:
                     urlList.append(approvedListUrl) # doğrulanmış URL, işlem görecek URL Listesine ekleniyor.
                     if breakLoop: break # kullanıcı URL sonunda nokta belirttiyse.. URL alımını sonlandırıyoruz.
                 else: #> doğrulanmış URL daha önce işlem görecek URL listine eklenmiş ise..
-                    print(f'{PRE_CMD_ERR}You have already entered this address list.') #: URL'in daha önce girildiğini ekrana yazdırıyoruz.
+                    print(f'{ICON_ERROR}You have already entered this address list.') #: URL'in daha önce girildiğini ekrana yazdırıyoruz.
                     inputLoopNo -= 1 # başarısız girişlerde döngü sayısının normale çevrilmesi.
             else: #> kullanıcının girdiği URL doğrulanmazsa..
-                print(f"{PRE_CMD_INFO}You did not enter a valid url.")
+                print(f"{ICON_INFO}You did not enter a valid url.")
                 inputLoopNo -= 1 # başarısız girişlerde döngü sayısının normale çevrilmesi.
         else: #> kullanıcı genişliğe sahip bir değer girmez ise..
-            print(f"{PRE_CMD_INFO}Just enter a period to move on to the next steps. You can also add it at the end of the URL.")
+            print(f"{ICON_INFO}Just enter a period to move on to the next steps. You can also add it at the end of the URL.")
             inputLoopNo -= 1 # başarısız girişlerde döngü sayısının normale çevrilmesi.
-    print(f"{PRE_CMD_INFO}List address acquisition terminated.") # liste url alımı sona erdğinde mesaj bastırılır.
+    print(f"{ICON_INFO}List address acquisition terminated.") # liste url alımı sona erdğinde mesaj bastırılır.
 
     processLoopNo = 0 # for döngüne ait 
     for currentUrListItem in urlList:
@@ -230,13 +230,13 @@ while True:
 
         try: cListOwner = get_body_content(cListDom,'data-owner') # liste sahibini al.
         except Exception as e:
-            print(f'{PRE_CMD_ERR}Liste sahibi bilgisi alınamadı')
+            print(f'{ICON_ERROR}Liste sahibi bilgisi alınamadı')
             txtLog(f'Liste sahibi bilgisi alınamadı Hata: {e}')
             cListOwner = 'Unknown'
         cListDomainName = currentListDomainName(currentUrListItem) # liste domain ismini düzenleyerek alır.
         cListRunTime = get_run_time() # liste işlem vaktini al. 
 
-        listDict = {
+        listSignature({
             "list_detail_page": currentUrListItemDetailPage, # https://letterboxd.com/{un}/list/{ln}/detail/page/
             "list_detail_url": currentUrListItemDetail, # https://letterboxd.com/{un}/list/{ln}/detail/
             "list_domain_name": cListDomainName, # {ln}
@@ -245,27 +245,25 @@ while True:
             "list_url": currentUrListItem, # https://letterboxd.com/{un}/list/{ln}
             "list_owner": cListOwner, # {un}
             "list_dom": cListDom # <html>...</html>
-        }
-
-        listSignature(listDict) # liste hakkında bilgiler bastırılır.
+        }) # liste hakkında bilgiler bastırılır.
 
         if listEnterPassOn:
-            listEnter = input(f"{PRE_CMD_INPUT}Press enter to confirm the entered information. ({blink_text('Enter', 'green')})")
+            listEnter = input(f"{ICON_INPUT}Press enter to confirm the entered information. ({blink_text('Enter', 'green')})")
 
             if listEnter == "": listEnter, autoEnterMsg = True, '[Manual]'
             elif listEnter == ".":
                 listEnter, autoEnterMsg = True, '[Auto]'
                 listEnterPassOn = False
-                print(f'{PRE_CMD_INFO}Listeler otomatik olarak onaylanacak şekilde ayarlandı.')
+                print(f'{ICON_INFO}Listeler otomatik olarak onaylanacak şekilde ayarlandı.')
             else:
                 listEnter = False
-                print(f"{PRE_CMD_INFO}The {colored_text('session was canceled','red', attrs=['dark'])} because you did not verify the information.")
+                print(f"{ICON_INFO}The {colored('session was canceled','red', attrs=['dark'])} because you did not verify the information.")
                 txtLog(f'{PRE_LOG_INFO}The session was canceled because you did not verify the information.')
 
         if listEnter:
             txtLog(f'{PRE_LOG_INFO}Şimdiki listeye erişim başlatılıyor.')
             print(SUP_LINE)
-            print(f"{PRE_CMD_INFO}{colored_text(f'List confirmed. {autoEnterMsg}', color='green')}")
+            print(f"{ICON_INFO}{colored(f'List confirmed. {autoEnterMsg}', color='green')}")
 
             lastPageNo = get_list_last_page_no(cListDom, currentUrListItemDetailPage)
             openCsv = ''.join([exportsPath, cListOwner, '_', cListDomainName, '_', cListRunTime, '.csv'])
@@ -287,8 +285,8 @@ while True:
 
             # process end
             set_terminal_title(f'{processState} completed!') # change title
-            print(f'{PRE_CMD_INFO}{loopCount-1} film {blink_text(openCsv,"yellow")} dosyasına aktarıldı.') # print info
-            print(f"{PRE_CMD_INFO}{colored_text(f'{processState} completed!', 'green')}") # print info
+            print(f'{ICON_INFO}{loopCount-1} film {blink_text(openCsv,"yellow")} dosyasına aktarıldı.') # print info
+            print(f"{ICON_INFO}{colored(f'{processState} completed!', 'green')}") # print info
             txtLog(f'{PRE_LOG_INFO}{processState} completed!') # log info
             print(SUB_LINE)
 
@@ -297,9 +295,9 @@ while True:
     # session end
     endSession(sessionCurrentHash)
     set_terminal_title(f'Session: {sessionCurrentHash} ended!') # change title
-    print(f"{PRE_CMD_INFO}{colored_text(f'Session: {sessionCurrentHash} ended.', 'green')}") # print info
+    print(f"{ICON_INFO}{colored(f'Session: {sessionCurrentHash} ended.', 'green')}") # print info
     txtLog(f'{PRE_LOG_INFO}Session: {sessionCurrentHash} ended.') # log info
 
     # process end
-    print(f"{PRE_CMD_INFO}Process State: {blink_text(processState +' Finish.','green')}")
-    execute_terminal_command(f"echo {PRE_CMD_INFO}{blink_text('Press enter to continue with the new session.','yellow')} & pause >nul")
+    print(f"{ICON_INFO}Process State: {blink_text(processState +' Finish.','green')}")
+    execute_terminal_command(f"echo {ICON_INFO}{blink_text('Press enter to continue with the new session.','yellow')} & pause >nul")
