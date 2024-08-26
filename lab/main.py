@@ -53,14 +53,14 @@ def currentListDomainName(currentUrListItem):
 # user welcome message and screen clear
 execute_terminal_command(f'color & title Welcome %USERNAME%. & cls')
 
-sessionStartHash =  get_run_time() # generate process hash
-pLoop = 0 # program loop
+session_start_hash = get_run_time() # generate process hash
+program_loop = 0 # program loop
 while True:
     # STARTUP
-    sessionCurrentHash = sessionStartHash if pLoop == 0 else get_run_time() # generate process hash
+    sessionCurrentHash = get_run_time() if program_loop else session_start_hash
     startSession(sessionCurrentHash)
     startLog(sessionCurrentHash)
-    pLoop += 1
+    program_loop += 1
 
     # SETTINGS
     settings = readSettings()
@@ -71,8 +71,8 @@ while True:
     exportsPath = ''.join([exportDirName, '/', sessionCurrentHash, '/']) # exports/000000000/
 
     #> every session has a different name for the start.
-    hashChanges = highlight_changes(sessionStartHash, sessionCurrentHash)
-    print(f"{ICON_INFO}Session Hash: {sessionStartHash}{'' if sessionStartHash == sessionCurrentHash else ' -> ' + hashChanges}") 
+    hashChanges = highlight_changes(session_start_hash, sessionCurrentHash)
+    print(f"{ICON_INFO}Session Hash: {session_start_hash}{'' if session_start_hash == sessionCurrentHash else ' -> ' + hashChanges}") 
 
     #> while initializing
     listEnterPassOn = True
@@ -141,14 +141,17 @@ while True:
                 searchMetaTitle = get_meta_content(searchListPreviewDom,'og:title') # getting og:title
                 searchLMetaUrl = get_meta_content(searchListPreviewDom,'og:url') #: Getting og:url
 
-                try: searchListsQCountMsg = searchListPreviewDom.find('h2', attrs={'class':'section-heading'}).text #: Kaç liste bulunduğu hakkında bilgi veren mesaj.
+                try:
+                    searchListsQCountMsg = searchListPreviewDom.find('h2', attrs={'class':'section-heading'}).text #: Kaç liste bulunduğu hakkında bilgi veren mesaj.
                 except AttributeError:
                     print(f"{ICON_ERROR}Bir etiketten 'arama karşılama mesajı' alınamadı.")
                     txtLog(f"Bir etiketten 'arama karşılama mesajı' alınamadı. Hata Mesajı: {AttributeError}")
                     searchListsQCountMsg = ''
 
-                try:    searchListsQLastsPage = searchListPreviewDom.find_all('li',attrs={'class':'paginate-page'})[-1].text #: Son sayfayı alıyoruz.
-                except: searchListsQLastsPage = 1 #: Alınamazsa sayfada tek sayfa olduğu varsayılır.
+                try:
+                    searchListsQLastsPage = searchListPreviewDom.find_all('li',attrs={'class':'paginate-page'})[-1].text #: Son sayfayı alıyoruz.
+                except:
+                    searchListsQLastsPage = 1 #: Alınamazsa sayfada tek sayfa olduğu varsayılır.
                 finally:
                     # Request response summary
                     print_colored_dict({
