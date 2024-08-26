@@ -1,6 +1,6 @@
 from termcolor import colored as ced
 
-def cmd_pre(msg: str, color: str) -> str:
+def format_command_message(msg: str, color: str) -> str:
     """
     Formats a message with the specified color and adds surrounding formatting based on the message's content.
 
@@ -23,7 +23,7 @@ def cmd_pre(msg: str, color: str) -> str:
     else:
         return ced(msg, color=color)
 
-def cmd_blink(msg: str, color: str) -> str:
+def blink_text(msg: str, color: str) -> str:
     """
     Formats a message with a blinking effect and the specified color.
 
