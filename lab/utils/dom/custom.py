@@ -1,3 +1,5 @@
+import csv
+from bs4 import BeautifulSoup
 from utils.request import fetch_page_dom
 from utils.log.custom import txtLog, errorLine
 
@@ -38,59 +40,83 @@ def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage) -
             errorLine(e)
             txtLog(f'{PRE_LOG_ERR}An error occurred while obtaining the number of movies on the list last page.')
 
-def doPullFilms(_loopCount, _currentDom, _writer) -> None:
+def extract_and_write_films(loop_count: int, current_dom: BeautifulSoup, writer: csv.writer) -> int:
     """
-    This function pulls the films on the list page and writes them to the csv file.
+    Extracts film information from the given BeautifulSoup DOM and writes it to a CSV file.
+    
+    Args:
+        loop_count (int): The current iteration count for logging.
+        current_dom (BeautifulSoup): The BeautifulSoup object representing the page's DOM.
+        writer (csv.writer): CSV writer object used to write data to a CSV file.
+        
+    Returns:
+        int: The updated loop count after processing the films.
+        
+    Raises:
+        Exception: If an error occurs while retrieving film information.
     """
     try:
-        #> getting' films/posters container (<ul> element)
-        filmDetailsList = _currentDom.find('ul', attrs={'class': 'js-list-entries poster-list -p70 film-list clear film-details-list'})
+        # Attempt to locate the films/posters container (<ul> element) using primary selector.
+        film_details_list = current_dom.find('ul', attrs={'class': 'js-list-entries poster-list -p70 film-list clear film-details-list'})
 
-        #> above line is tryin' to get container, if it's None, tryin' alternative ways to get it
-        for currentAlternative in ['ul.film-list', 'ul.poster-list', 'ul.film-details-list']:
-            if filmDetailsList is None: filmDetailsList = _currentDom.select_one(currentAlternative)
-            else:
-                print(f'{PRE_CMD_INFO}{_loopCount} and after film/poster container pulled without alternative help.')
-                break
+        # Try alternative selectors if primary selector fails.
+        if film_details_list:
+            # Primary selector succeeded.
+            txtLog(f'{PRE_CMD_INFO}{loop_count}: Film/poster container found using primary selector.')
         else:
-            if filmDetailsList is None:
-                print(f'{PRE_CMD_INFO}{_loopCount} and after film/poster container could not be pulled.')
+            # Primary selector failed, try alternative selectors.
+            for alternative_selector in ['ul.film-list', 'ul.poster-list', 'ul.film-details-list']:
+                film_details_list = current_dom.select_one(alternative_selector)
+                if film_details_list:
+                    # Alternative selector succeeded.
+                    txtLog(f'{PRE_CMD_INFO}{loop_count}: Film/poster container found using alternative selector: {alternative_selector}')
+                    break
             else:
-                print(f'{PRE_CMD_INFO}{_loopCount} and after film/poster container pulled with alternative help.')
+                # All selectors failed.
+                txtLog(f'{PRE_CMD_INFO}{loop_count}: Film/poster container could not be found using any selector.')
+                raise Exception('Film/poster container could not be found using any selector.')
 
-        #> getting' container's all films/posters (<li> elements)
-        filmDetails = filmDetailsList.find_all("li")
+        # Extract film details (<li> elements) from the container.
+        film_details = film_details_list.find_all("li")
 
-        #> printing and writing films to file operations
-        currentPageMoviesData = []
-        for currentFilmDetail in filmDetails:
-            #> pulling container of movie name and year
-            movieHeadlineElement = currentFilmDetail.find('h2', attrs={'class': 'headline-2 prettify'}) 
-            movieLinkElement = movieHeadlineElement.find('a')
-            movieName = movieLinkElement.text # Pulling movie name from link element
+        # Prepare a list to store current page's movie data.
+        current_page_movies_data = []
+        for film_detail in film_details:
+            # Extract movie name and link.
+            movie_headline_element = film_detail.find('h2', attrs={'class': 'headline-2 prettify'}) 
+            movie_link_element = movie_headline_element.find('a')
+            # Pulling movie name from link element
+            movie_name = movie_link_element.text
 
-            #> pulling movie link from link element https://letterboxd.com(SITE_DOMAIN) + /film/white-zombie/
-            movieLink = SITE_DOMAIN + movieLinkElement.get('href') 
+            # Pulling movie link from link element
+            # https://letterboxd.com(SITE_DOMAIN) + /film/white-zombie/
+            movie_link = SITE_DOMAIN + movie_link_element.get('href') 
 
-            #> pulling and checking the movie year from the container and taking precautions against the possibility of being empty
-            try:
-                movieYear = movieHeadlineElement.find('small').text
-            except:
-                movieYear = ''
-                txtLog(f'{PRE_LOG_ERR}Movie year could not be pulled. Link: {movieLink}')
+            # Extract movie year, default to empty if not found.
+            movie_year = ''
+            year_element = movie_headline_element.find('small')
+            if year_element:
+                movie_year = year_element.text
+            else:
+                txtLog(f'{PRE_LOG_ERR}Movie year could not be retrieved. Link: {movie_link}')
 
-            if CMD_PRINT_FILMS: # if user want to print films to console, this line will check it
-                print(f"{_loopCount}: {movieYear:4}, {movieName}, {movieLink}")
+            # Print film information if enabled.
+            if CMD_PRINT_FILMS:
+                print(f"{loop_count}: {movie_year:4}, {movie_name}, {movie_link}")
 
-            currentMovieData = [movieYear, movieName, movieLink] # 1973, World on a Wire, https://letterboxd.com/film/world-on-a-wire/
-            currentPageMoviesData.append(currentMovieData)
-            _loopCount += 1
+            # Append movie data to list
+            # 1973, World on a Wire, https://letterboxd.com/film/world-on-a-wire/
+            current_movie_data = [movie_year, movie_name, movie_link]
+            current_page_movies_data.append(current_movie_data)
+            loop_count += 1
 
-        #> Pulled data is written to the file.
-        #> if you want to write the data one by one, you can use writer.writerow(currentMovieData) in for.
-        _writer.writerows(currentPageMoviesData)
+        # Write collected movie data to the CSV file. If you want to write the data
+        # ... one by one, you can use writer.writerow(current_movie_data) in for.
+        writer.writerows(current_page_movies_data)
 
-        return _loopCount # the number of movies belonging to the current page is returned.
+        # The number of movies belonging to the current page is returned.
+        return loop_count
     except Exception as e:
         errorLine(e)
-        txtLog('An error was encountered while obtaining movie information.')
+        txtLog('An error occurred while retrieving film information.')
+        raise
