@@ -1,5 +1,5 @@
 from termcolor import colored as ced
-from utils.color.custom import cmd_blink
+from utils.color.custom import blink_text
 from utils.log.custom import txtLog
 
 def highlight_changes(original_text: str, modified_text: str) -> str:
@@ -19,7 +19,7 @@ def highlight_changes(original_text: str, modified_text: str) -> str:
     return ''.join(
         ced(modified_text[i], color="yellow")
         if original_text[i] == modified_text[i]
-        else cmd_blink(modified_text[i], 'green')
+        else blink_text(modified_text[i], 'green')
         for i in range(len(original_text))
     )
 
