@@ -14,7 +14,7 @@ from utils.log.custom import startLog, txtLog
 from utils.csv.custom import combineCsv, splitCsv
 from utils.dom.custom import extract_and_write_films
 from utils.session.custom import startSession, endSession
-from utils.text.custom import highlight_changes, trim_end
+from utils.text.custom import highlight_changes, trim_end, remove_substring
 from utils.file.custom import ensure_files_exist, ensure_directories_exist
 from utils.color.custom import colored, print_colored_dict, blink_text
 from utils.dom.custom import (
@@ -64,11 +64,12 @@ while True:
 
     # SETTINGS
     settings = readSettings()
-    logDirName = settings[DEFAULT_LOG_KEY]
-    exportDirName = settings[DEFAULT_EXPORT_KEY]
-    ensure_directories_exist([logDirName, exportDirName]) # check directories
-
-    exportsPath = ''.join([exportDirName, '/', session_current_hash, '/']) # exports/000000000/
+    log_directory_name = settings[DEFAULT_LOG_KEY]
+    export_directory_name = settings[DEFAULT_EXPORT_KEY]
+    # Check directories
+    ensure_directories_exist([log_directory_name, export_directory_name])
+    # exports/000000000/
+    exports_path = ''.join([export_directory_name, '/', session_current_hash, '/']) 
 
     #> every session has a different name for the start.
     hashChanges = highlight_changes(session_start_hash, session_current_hash)
@@ -86,7 +87,7 @@ while True:
 
             #> input starts with split parameter
             if urlListItem[0:len(SPLIT_PARAMETER)] == SPLIT_PARAMETER: 
-                splitCsv(urlListItem[len(SPLIT_PARAMETER):], exportDirName, session_current_hash)
+                splitCsv(urlListItem[len(SPLIT_PARAMETER):], export_directory_name, session_current_hash)
                 inputLoopNo -= 1 #: Başarısız girişlerde döngü sayısının normale çevrilmesi.
                 continue
 
@@ -203,8 +204,9 @@ while True:
                     print(SUB_LINE)
                     break
                 break
-
-            if '/detail' in urlListItem: urlListItem = urlListItem.replace('/detail','') # if url is detail page, remove detail part.
+            
+            # if url is detail page, remove detail part.
+            urlListItem = remove_substring(urlListItem, '/detail') 
 
             urlListItemDom = fetch_page_dom(urlListItem) # sayfa dom'u alınır.
             userListAvailable, approvedListUrl = check_user_list(urlListItemDom, urlListItem) # liste kullanılabilirliği ve Doğrulanmış URL adresi elde edilir.
@@ -269,8 +271,8 @@ while True:
             print(f"{ICON_INFO}{colored(f'List confirmed. {autoEnterMsg}', color='green')}")
 
             lastPageNo = get_list_last_page_no(cListDom, currentUrListItemDetailPage)
-            openCsv = ''.join([exportsPath, cListOwner, '_', cListDomainName, '_', cListRunTime, '.csv'])
-            ensure_directories_exist([exportsPath]) # export klasörünün kontrolü.
+            openCsv = ''.join([exports_path, cListOwner, '_', cListDomainName, '_', cListRunTime, '.csv'])
+            ensure_directories_exist([exports_path]) # export klasörünün kontrolü.
             ensure_files_exist([openCsv]) # csv dosyasının kontrolü.
 
             with open(openCsv, 'w', newline='', encoding="utf-8") as csvFile: # konumda Export klasörü yoksa dosya oluşturmayacaktır.
@@ -293,7 +295,7 @@ while True:
             txtLog(f'{PRE_LOG_INFO}{processState} completed!') # log info
             print(SUB_LINE)
 
-    combineCsv(urlList, exportDirName, session_current_hash, exportsPath) # merge csv files
+    combineCsv(urlList, export_directory_name, session_current_hash, exports_path) # merge csv files
 
     # session end
     endSession(session_current_hash)
