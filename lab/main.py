@@ -43,6 +43,25 @@ from constants.terminal import (
     SUP_LINE_FILMS
 )
 
+
+def print_session_hash(session_start_hash: str, session_current_hash: str) -> None:
+    """
+    Compares the session start hash with the current session hash and prints the result.
+
+    Args:
+        session_start_hash (str): The initial hash of the session.
+        session_current_hash (str): The current hash of the session.
+
+    The function performs the following:
+    1. Checks if the session start hash is the same as the current session hash.
+    2. Highlights the differences between the hashes if they are not the same.
+    3. Prints the session hash comparison, showing the changes if any.
+    """
+    is_same_hash = session_start_hash == session_current_hash
+    hash_changes = highlight_changes(session_start_hash, session_current_hash)
+    
+    print(f"{ICON_INFO}Session Hash: {session_start_hash}{'' if is_same_hash else ' -> ' + hash_changes}")
+
 # -- MAIN -- #
 
 # system color start end reset
@@ -67,9 +86,7 @@ while True:
     # exports/000000000/
     exports_path = ''.join([export_directory_name, '/', session_current_hash, '/']) 
 
-    #> every session has a different name for the start.
-    hashChanges = highlight_changes(session_start_hash, session_current_hash)
-    print(f"{ICON_INFO}Session Hash: {session_start_hash}{'' if session_start_hash == session_current_hash else ' -> ' + hashChanges}") 
+    print_session_hash(session_start_hash, session_current_hash)
 
     #> while initializing
     listEnterPassOn = True
