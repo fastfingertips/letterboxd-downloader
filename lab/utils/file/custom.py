@@ -1,6 +1,6 @@
 import os
 
-from utils.color.custom import cmd_blink
+from utils.color.custom import blink_text
 from utils.time.custom import get_run_time
 
 from constants.terminal import PRE_CMD_INFO
@@ -16,10 +16,10 @@ def ensure_directories_exist(dirs: list) -> None:
     for directory in dirs:
         if directory:
             if os.path.exists(directory):
-                print(f'{PRE_CMD_INFO}Directory checked: {cmd_blink(directory, "yellow")}')
+                print(f'{PRE_CMD_INFO}Directory checked: {blink_text(directory, "yellow")}')
             else:
                 os.makedirs(directory)
-                print(f'{PRE_CMD_INFO}Directory created: {cmd_blink(directory, "yellow")}')
+                print(f'{PRE_CMD_INFO}Directory created: {blink_text(directory, "yellow")}')
 
 def ensure_files_exist(files: list) -> None:
     """
@@ -31,14 +31,14 @@ def ensure_files_exist(files: list) -> None:
     for file in files:
         if file:
             if os.path.exists(file): 
-                print(f'{PRE_CMD_INFO}File checked: {cmd_blink(file, "yellow")}')
+                print(f'{PRE_CMD_INFO}File checked: {blink_text(file, "yellow")}')
             else:
                 with open(file, 'w') as f:
                     if file.endswith('.json'): 
-                        print(f'{PRE_CMD_INFO}JSON file created: {cmd_blink(file, "yellow")}')
+                        print(f'{PRE_CMD_INFO}JSON file created: {blink_text(file, "yellow")}')
                         f.write('{}')
                     elif file.endswith('.csv'): 
-                        print(f'{PRE_CMD_INFO}CSV file created: {cmd_blink(file, "yellow")}')
+                        print(f'{PRE_CMD_INFO}CSV file created: {blink_text(file, "yellow")}')
                     else:
                         f.write('')
 
