@@ -130,7 +130,7 @@ def updateSession(_currentSession) -> None:
             }
         }
 
-    load_json_file_with_logging(SESSIONS_FILE_NAME, sessionRecords)
+    dump_json_file_with_logging(SESSIONS_FILE_NAME, sessionRecords)
 
 def sessionBackup() -> None:
     """
