@@ -17,7 +17,7 @@ from utils.session.custom import startSession, endSession
 from utils.text.custom import highlight_changes, trim_end
 from utils.file.custom import ensure_files_exist, ensure_directories_exist
 
-from utils.cmd_display import coloredDictPrint
+from utils.cmd_display import print_colored_dict
 from utils.terminal import execute_terminal_command, set_terminal_title
 from utils.dom_utils import (
   get_list_last_page_no,
@@ -152,7 +152,8 @@ while True:
                 try:    searchListsQLastsPage = searchListPreviewDom.find_all('li',attrs={'class':'paginate-page'})[-1].text #: Son sayfayı alıyoruz.
                 except: searchListsQLastsPage = 1 #: Alınamazsa sayfada tek sayfa olduğu varsayılır.
                 finally:
-                    coloredDict = {
+                    # Request response summary
+                    print_colored_dict({
                     "Request": {
                         "Query": urlListItem},
                     "Response": {
@@ -162,8 +163,7 @@ while True:
                         "Meta Title": searchMetaTitle,
                         "Meta Description": searchListsQCountMsg
                         }
-                    }
-                    coloredDictPrint(coloredDict) # print process info
+                    })
 
                 print(f"{PRE_CMD_INFO}Starting list search..")
 
@@ -174,15 +174,15 @@ while True:
                     searchListDom = fetch_page_dom(connectionPage)
                     listsUrls = searchListDom.find_all('a', attrs={'class':'list-link'}) # okunmuş sayfadaki tüm listelerin adresleri.
 
-                    queryPage = {
+                    # Query page summary
+                    print_colored_dict({
                         "Process": {
                             "Current Page": sayfa,
                             "Page URL": connectionPage,
                             "Lists Count": len(listsUrls)
                         }
-                    }
+                    })
 
-                    coloredDictPrint(queryPage)
                     for listsUrl in listsUrls:
                         if liste == endList:
                             print(f"{PRE_CMD_INFO}Liste sayısı belirlenen sayıya ({ced(liste,'blue')}) ulaştı.")
