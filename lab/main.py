@@ -219,7 +219,7 @@ while True:
 
                 print(f"{ICON_INFO}Starting list search..")
 
-                """ XXX """
+                """ Start: Page Iteration and List Extraction """
 
                 sayfa, liste = 0, 0
                 for i in range(int(searchListsQLastsPage)):
@@ -259,7 +259,7 @@ while True:
                     """ End: Processing and Validating URL Lists """
                     print(SUB_LINE)
                     break
-                """ XXX """
+                """ End: Page Iteration and List Extraction """
                 break
             # If url is detail page, remove detail part.
             url_list_item = remove_substring(url_list_item, '/detail') 
