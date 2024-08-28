@@ -1,9 +1,9 @@
+import logging
 import json
 from utils.json.base import load_json_file, dump_json_file
 
 
 def load_json_file_with_logging(file_path: str) -> dict:
-    from utils.log.custom import txtLog
     """
     Loads a JSON file from the specified path and returns its content as a dictionary.
     
@@ -20,14 +20,13 @@ def load_json_file_with_logging(file_path: str) -> dict:
     try:
         return load_json_file(file_path)
     except FileNotFoundError:
-        txtLog(f"File not found: {file_path}")
+        logging.error(f"File not found: {file_path}")
         raise
     except json.JSONDecodeError as e:
-        txtLog(f"Error decoding JSON from file: {file_path}. Error: {e}")
+        logging.error(f"Error decoding JSON from file: {file_path}. Error: {e}")
         raise
 
 def dump_json_file_with_logging(file_path: str, data: dict) -> None:
-    from utils.log.custom import txtLog
     """
     Serializes a dictionary to JSON and writes it to the specified file path.
     
@@ -41,5 +40,5 @@ def dump_json_file_with_logging(file_path: str, data: dict) -> None:
     try:
         dump_json_file(file_path, data)
     except TypeError as e:
-        txtLog(f"Error serializing data to JSON for file: {file_path}. Error: {e}")
+        logging.error(f"Error serializing data to JSON for file: {file_path}. Error: {e}")
         raise
