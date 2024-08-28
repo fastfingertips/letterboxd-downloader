@@ -33,25 +33,28 @@ def startSession(_hash) -> None:
     if file_exists(SESSIONS_FILE_NAME):
         # if the session file exists, the session is started.
         print(f'successfully.') # checking successfully
-        addSession(_hash)
+        add_session(_hash)
     else:
         print(f'failed.') # checking failed
         session_creator(_hash)
 
-def addSession(_hash) -> None:
+def add_session(session_hash: str) -> None:
     """
-    This function adds a new session to the session file.
+    Adds a new session to the session file.
+
+    If the session file is broken or empty, it will be backed up and a new one will be created.
     """
     try:
-        # add new session
-        print(f'{ICON_INFO}Starting new session...', end=' ')
-        newSession(_hash)
-        print(f'successfully.') # add new session successfully
-    except json.decoder.JSONDecodeError: 
-        # if the file is broken or empty, the file will be backed up and a new one will be created.
-        print(f'failed.') # add new session failed
+        # Attempt to start a new session
+        logging.info("Starting a new session...")
+        newSession(session_hash)
+        logging.info("Session started successfully.")
+
+    except json.decoder.JSONDecodeError:
+        # Handle the case where the session file is broken or empty
+        logging.warning("Failed to start session due to JSON decode error. Attempting to back up and create a new session.")
         session_backup()
-        session_creator(_hash)
+        session_creator(session_hash)
 
 def session_creator(session_hash: str) -> None:
     """
