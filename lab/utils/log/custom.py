@@ -1,8 +1,6 @@
 import logging
-from inspect import currentframe #: PMI
+from inspect import currentframe
 import os
-
-# -- Local Imports -- #
 
 from utils.json.custom import load_json_file_with_logging
 from utils.time.custom import get_log_time
@@ -15,13 +13,7 @@ from constants.project import(
     SESSION_DICT_KEY,
     SESSION_LAST_KEY,
     DEFAULT_LOG_KEY,
-    PRE_LOG_INFO,
-    PRE_LOG_ERR
-)
-
-from constants.terminal import(
-    ICON_INFO,
-    ICON_ERROR
+    PRE_LOG_INFO
 )
 
 current_pid = str(os.getpid())
