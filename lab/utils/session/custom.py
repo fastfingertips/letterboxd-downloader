@@ -141,7 +141,7 @@ def end_session(session_hash: str) -> None:
         logging.error(f"Failed to end session {session_hash}: {e}")
         raise RuntimeError(f"Could not mark session {session_hash} as finished.") from e
 
-def update_session(current_session: str) -> None:
+def update_session(session_hash: str) -> None:
     """
     Updates the session file with the current session.
     
@@ -155,22 +155,22 @@ def update_session(current_session: str) -> None:
         if current_pid in session_records.get(SESSION_DICT_KEY, {}):
             logging.info("Updating the session file with the current session.")
 
-            session_records[SESSION_DICT_KEY][current_pid][SESSION_LAST_KEY] = current_session
+            session_records[SESSION_DICT_KEY][current_pid][SESSION_LAST_KEY] = session_hash
             session_records[SESSION_DICT_KEY][current_pid][SESSION_PROCESSES_KEY] |= {
-                current_session: {
+                session_hash: {
                     SESSION_FINISHED_KEY: False
                 }
             }
 
             dump_json_file_with_logging(SESSIONS_FILE_NAME, session_records)
-            logging.info(f"Session file updated with the current session: {current_session}.")
+            logging.info(f"Session file updated with the current session: {session_hash}.")
         else:
             logging.warning(f"Process ID {current_pid} not found in session records.")
             raise KeyError(f"Process ID {current_pid} not found in session records.")
             
     except (KeyError, json.JSONDecodeError) as e:
         logging.error(f"Failed to update session file: {e}")
-        raise RuntimeError(f"Could not update the session file for session {current_session}.") from e
+        raise RuntimeError(f"Could not update the session file for session {session_hash}.") from e
 
 def session_backup() -> None:
     """
