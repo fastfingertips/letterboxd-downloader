@@ -73,7 +73,7 @@ def newSession(_hash) -> None:
     sessionRecords = load_json_file_with_logging(SESSIONS_FILE_NAME)
     if current_pid in sessionRecords[SESSION_DICT_KEY]:
         # if the process is already in the session file, the session is updated.
-        updateSession(_hash)
+        update_session(_hash)
     else:
         # if the process is not in the session file, a new session is created.
         sessionRecords[SESSION_DICT_KEY] |= {
@@ -117,19 +117,36 @@ def endSession(_hash) -> None:
     sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_PROCESSES_KEY][_hash][SESSION_FINISHED_KEY] = True
     dump_json_file_with_logging(SESSIONS_FILE_NAME, sessionRecords)
 
-def updateSession(_currentSession) -> None:
+def update_session(current_session: str) -> None:
     """
-    This function updates the session file.
+    Updates the session file with the current session.
+    
+    This function modifies the session file to set the last active session
+    and adds the new session to the session processes. If the update fails,
+    it logs the error and raises an exception.
     """
-    sessionRecords = load_json_file_with_logging(SESSIONS_FILE_NAME)
-    sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_LAST_KEY] = _currentSession
-    sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_PROCESSES_KEY] |= {
-        _currentSession: {
-            SESSION_FINISHED_KEY: False
-            }
-        }
+    try:
+        session_records = load_json_file_with_logging(SESSIONS_FILE_NAME)
 
-    dump_json_file_with_logging(SESSIONS_FILE_NAME, sessionRecords)
+        if current_pid in session_records.get(SESSION_DICT_KEY, {}):
+            logging.info("Updating the session file with the current session.")
+
+            session_records[SESSION_DICT_KEY][current_pid][SESSION_LAST_KEY] = current_session
+            session_records[SESSION_DICT_KEY][current_pid][SESSION_PROCESSES_KEY] |= {
+                current_session: {
+                    SESSION_FINISHED_KEY: False
+                }
+            }
+
+            dump_json_file_with_logging(SESSIONS_FILE_NAME, session_records)
+            logging.info(f"Session file updated with the current session: {current_session}.")
+        else:
+            logging.warning(f"Process ID {current_pid} not found in session records.")
+            raise KeyError(f"Process ID {current_pid} not found in session records.")
+            
+    except (KeyError, json.JSONDecodeError) as e:
+        logging.error(f"Failed to update session file: {e}")
+        raise RuntimeError(f"Could not update the session file for session {current_session}.") from e
 
 def session_backup() -> None:
     """
