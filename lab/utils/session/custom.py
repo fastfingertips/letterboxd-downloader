@@ -36,7 +36,7 @@ def startSession(_hash) -> None:
         addSession(_hash)
     else:
         print(f'failed.') # checking failed
-        sessionCreator(_hash)
+        session_creator(_hash)
 
 def addSession(_hash) -> None:
     """
@@ -51,20 +51,26 @@ def addSession(_hash) -> None:
         # if the file is broken or empty, the file will be backed up and a new one will be created.
         print(f'failed.') # add new session failed
         session_backup()
-        sessionCreator(_hash)
+        session_creator(_hash)
 
-def sessionCreator(_hash) -> None:
+def session_creator(session_hash: str) -> None:
     """
-    This function creates a new session file.
+    Creates a new session file if it does not already exist.
+
+    This function attempts to create a new session file using the provided
+    session hash. If the session file creation fails, an error is logged
+    and a RuntimeError is raised.
     """
     try:
-        # if the file does not exist, it will create a new one.
-        print(f'{ICON_INFO}New session file creating...', end=' ')
-        create_session(_hash)
-        print(f'successfully.')
-    except:
-        print(f'failed.')
-        raise Exception(f'{ICON_INFO}Session file could not be created.')
+        # Attempt to create the session file
+        logging.info("Attempting to create a new session file...")
+        create_session(session_hash)
+        logging.info("Session file created successfully.")
+
+    except Exception as e:
+        # Log the failure and raise an exception
+        logging.error(f"Failed to create session file: {e}")
+        raise RuntimeError("Session file could not be created.") from e
 
 def newSession(_hash) -> None:
     """
