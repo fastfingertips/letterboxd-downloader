@@ -27,7 +27,7 @@ PRE_LOG_ERR = "Error: "  # Prefix for log error messages
 # Command Lines
 SUP_LINE = '_' * 80  # Upper line length
 SUB_LINE = '¯' * 80  # Lower line length
-CMD_PRINT_FILMS = True  # Print the movies after every request?
+CMD_PRINT_FILMS = False  # Print the movies after every request?
 SPLIT_PARAMETER = "split:"
 
 # Session Keys
