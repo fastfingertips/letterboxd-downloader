@@ -16,8 +16,8 @@ from constants.project import (
 )
 
 from constants.terminal import (
-    PRE_CMD_INFO,
-    PRE_CMD_ERR
+    ICON_INFO,
+    ICON_ERROR
 )
 
 current_pid = str(os.getpid())
@@ -30,7 +30,7 @@ def startSession(_hash) -> None:
     """
     This function checks whether the session file exists.
     """
-    print(f'{PRE_CMD_INFO}Session file checking...', end=' ')
+    print(f'{ICON_INFO}Session file checking...', end=' ')
     if file_exists(SESSIONS_FILE_NAME):
         # if the session file exists, the session is started.
         print(f'successfully.') # checking successfully
@@ -45,7 +45,7 @@ def addSession(_hash) -> None:
     """
     try:
         # add new session
-        print(f'{PRE_CMD_INFO}Starting new session...', end=' ')
+        print(f'{ICON_INFO}Starting new session...', end=' ')
         newSession(_hash)
         print(f'successfully.') # add new session successfully
     except json.decoder.JSONDecodeError: 
@@ -60,12 +60,12 @@ def sessionCreator(_hash) -> None:
     """
     try:
         # if the file does not exist, it will create a new one.
-        print(f'{PRE_CMD_INFO}New session file creating...', end=' ')
+        print(f'{ICON_INFO}New session file creating...', end=' ')
         createSession(_hash)
         print(f'successfully.')
     except:
         print(f'failed.')
-        raise Exception(f'{PRE_CMD_ERR}Session file could not be created.')
+        raise Exception(f'{ICON_INFO}Session file could not be created.')
 
 def newSession(_hash) -> None:
     """
@@ -138,9 +138,9 @@ def sessionBackup() -> None:
     """
     try:
         # last session file backup
-        print(f'{PRE_CMD_INFO}Session file backup...', end=' ')
+        print(f'{ICON_INFO}Session file backup...', end=' ')
         rename_file_with_timestamp(SESSIONS_FILE_NAME, f'backup_broken_{SESSIONS_FILE_NAME}')
         print(f'successfully.') # backup successfully
     except:
         print(f'failed.') # backup failed
-        raise Exception(f'{PRE_CMD_ERR}Last session file could not be backup.')
+        raise Exception(f'{ICON_ERROR}Last session file could not be backup.')
