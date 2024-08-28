@@ -1,8 +1,9 @@
 import json
-from utils.log.custom import txtLog
 from utils.json.base import load_json_file, dump_json_file
 
+
 def load_json_file_with_logging(file_path: str) -> dict:
+    from utils.log.custom import txtLog
     """
     Loads a JSON file from the specified path and returns its content as a dictionary.
     
@@ -26,6 +27,7 @@ def load_json_file_with_logging(file_path: str) -> dict:
         raise
 
 def dump_json_file_with_logging(file_path: str, data: dict) -> None:
+    from utils.log.custom import txtLog
     """
     Serializes a dictionary to JSON and writes it to the specified file path.
     
