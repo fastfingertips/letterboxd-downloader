@@ -1,6 +1,6 @@
+import logging
 from bs4 import BeautifulSoup
-from constants.project import PRE_LOG_INFO, PRE_LOG_ERR
-from utils.log.custom import log_error_with_line, txtLog
+from utils.log.custom import log_error_with_line
 from utils.request.base import fetch_page_dom
 
 def fetch_page_dom_with_logging(url: str, timeout: int = 30) -> BeautifulSoup:
@@ -15,22 +15,19 @@ def fetch_page_dom_with_logging(url: str, timeout: int = 30) -> BeautifulSoup:
         BeautifulSoup: The parsed DOM structure of the page.
     """
     try:
-        txtLog(f'{PRE_LOG_INFO}Attempting to connect to [{url}]')
-        
+        logging.info(f'Attempting to retrieve DOM from URL: {url}')
         while True:
             try:
-                dom = fetch_page_dom(url, timeout)  # Use the general fetch function
-                
+                dom = fetch_page_dom(url, timeout)
                 if dom:
-                    return dom  # Returns the page DOM
-                
+                    logging.info(f'Successfully retrieved DOM from {url}.')
+                    return dom
             except Exception as e:
-                txtLog(f'{PRE_LOG_ERR}Error occurred while processing [{url}]')
+                logging.error(f'Error occurred while processing URL: {url}')
                 log_error_with_line(e)
                 continue
-
     except Exception as e:
+        logging.error(f'Error occurred while fetching DOM from URL: {url}')
         log_error_with_line(e)
-        txtLog(f'{PRE_LOG_ERR}Failed to connect to [{url}]')
 
-    return None  # Return None if the process is interrupted or an error occurs
+    return None
