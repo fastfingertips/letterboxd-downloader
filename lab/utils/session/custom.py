@@ -60,7 +60,7 @@ def sessionCreator(_hash) -> None:
     try:
         # if the file does not exist, it will create a new one.
         print(f'{ICON_INFO}New session file creating...', end=' ')
-        createSession(_hash)
+        create_session(_hash)
         print(f'successfully.')
     except:
         print(f'failed.')
@@ -87,26 +87,37 @@ def newSession(_hash) -> None:
         }
         dump_json_file_with_logging(SESSIONS_FILE_NAME, sessionRecords)
 
-# -- METHODS --
+def create_session(session_hash: str) -> None:
+    """
+    Creates a new session file with the given session hash.
 
-def createSession(_hash) -> None:
+    This function initializes a session file with the current process ID,
+    setting up the session structure including the start, last, and process
+    details. If the file creation fails, an error is logged and raised.
     """
-    This function creates the session file.
-    """
-    jsonObject = {
-        SESSION_DICT_KEY: {
-            current_pid: {
-                SESSION_START_KEY: _hash,
-                SESSION_LAST_KEY: _hash,
-                SESSION_PROCESSES_KEY: {
-                    _hash: {
-                        SESSION_FINISHED_KEY: False
+    try:
+        # Prepare the session structure
+        session_data = {
+            SESSION_DICT_KEY: {
+                current_pid: {
+                    SESSION_START_KEY: session_hash,
+                    SESSION_LAST_KEY: session_hash,
+                    SESSION_PROCESSES_KEY: {
+                        session_hash: {
+                            SESSION_FINISHED_KEY: False
+                        }
                     }
                 }
             }
         }
-    }
-    dump_json_file_with_logging(SESSIONS_FILE_NAME, jsonObject)
+
+        # Dump the session data to the session file
+        dump_json_file_with_logging(SESSIONS_FILE_NAME, session_data)
+        logging.info(f"Session file created successfully with session hash {session_hash}.")
+
+    except Exception as e:
+        logging.error(f"Failed to create session file for hash {session_hash}: {e}")
+        raise RuntimeError(f"Could not create session file with hash {session_hash}.") from e
 
 def end_session(session_hash: str) -> None:
     """
@@ -178,9 +189,9 @@ def session_backup() -> None:
     If the backup fails, a critical error is logged and an exception is raised.
     """
     try:
-        logging.info(f"{ICON_INFO} Starting session file backup...")
+        logging.info("Starting session file backup...")
         rename_file_with_timestamp(SESSIONS_FILE_NAME, f'backup_broken_{SESSIONS_FILE_NAME}')
         logging.info("Session file backup completed successfully.")
     except Exception as e:
-        logging.critical(f"{ICON_ERROR} Failed to backup session file: {e}")
+        logging.critical(f"Failed to backup session file: {e}")
         raise RuntimeError("Could not backup the session file.") from e
