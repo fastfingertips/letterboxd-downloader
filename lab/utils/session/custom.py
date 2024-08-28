@@ -1,3 +1,4 @@
+import logging
 import json
 import os
 
@@ -24,8 +25,6 @@ current_pid = str(os.getpid())
 
 # -- SESSIONS --
 
-# -- CALLS --
-
 def startSession(_hash) -> None:
     """
     This function checks whether the session file exists.
@@ -51,7 +50,7 @@ def addSession(_hash) -> None:
     except json.decoder.JSONDecodeError: 
         # if the file is broken or empty, the file will be backed up and a new one will be created.
         print(f'failed.') # add new session failed
-        sessionBackup()
+        session_backup()
         sessionCreator(_hash)
 
 def sessionCreator(_hash) -> None:
@@ -132,15 +131,15 @@ def updateSession(_currentSession) -> None:
 
     dump_json_file_with_logging(SESSIONS_FILE_NAME, sessionRecords)
 
-def sessionBackup() -> None:
+def session_backup() -> None:
     """
-    This function backs up the last session file.
+    Backs up the current session file by renaming it with a timestamp.
+    If the backup fails, a critical error is logged and an exception is raised.
     """
     try:
-        # last session file backup
-        print(f'{ICON_INFO}Session file backup...', end=' ')
+        logging.info(f"{ICON_INFO} Starting session file backup...")
         rename_file_with_timestamp(SESSIONS_FILE_NAME, f'backup_broken_{SESSIONS_FILE_NAME}')
-        print(f'successfully.') # backup successfully
-    except:
-        print(f'failed.') # backup failed
-        raise Exception(f'{ICON_ERROR}Last session file could not be backup.')
+        logging.info("Session file backup completed successfully.")
+    except Exception as e:
+        logging.critical(f"{ICON_ERROR} Failed to backup session file: {e}")
+        raise RuntimeError("Could not backup the session file.") from e
