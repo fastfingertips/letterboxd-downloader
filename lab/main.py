@@ -9,7 +9,7 @@ from utils.terminal import execute_terminal_command, set_terminal_title
 from utils.set.custom import readSettings
 from utils.time.custom import get_run_time
 from utils.dict.custom import listSignature
-from utils.log.custom import setup_logging, startLog, txtLog
+from utils.log.custom import setup_logging, start_log, txtLog
 from utils.csv.custom import combineCsv, splitCsv
 from utils.dom.custom import extract_and_write_films
 from utils.session.custom import start_session, end_session
@@ -202,7 +202,7 @@ while True:
     # STARTUP
     session_current_hash = get_run_time() if program_loop else session_start_hash
     start_session(session_current_hash)
-    startLog(session_current_hash)
+    start_log(session_current_hash)
     program_loop += 1
 
     # SETTINGS

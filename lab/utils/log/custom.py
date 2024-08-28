@@ -66,28 +66,34 @@ def txtLog(_message) -> None:
     with open(getLogFilePath(), 'a') as logFile:
         logFile.write(f'{_message}\n')
 
-def startLog(_appId) -> bool:
+def start_log(app_id: str) -> bool:
     """
-    Creates the log file.
+    Creates a log file for the specified application ID if it does not already exist.
+
+    Parameters:
+    app_id (str): The identifier for the application. This will be used to name the log file.
+
+    Returns:
+    bool: True if the log file was successfully created or already exists, False otherwise.
     """
     if checkLogDir():
-        # If the log file exists, it is checked.
-        logDir = readSettings()[DEFAULT_LOG_KEY]
-        logFullPath = f'{logDir}/{_appId}.txt'
-        print(f'{ICON_INFO}Session log file creating...', end=' ')
-        if checkLogFile(logFullPath):
-            print(f'already exists.')
+        log_dir = readSettings()[DEFAULT_LOG_KEY]
+        log_full_path = os.path.join(log_dir, f'{app_id}.txt')
+        
+        logging.info(f"{ICON_INFO} Checking if log file exists...", end=' ')
+        
+        if checkLogFile(log_full_path):
+            logging.info("Log file already exists.")
             return True
-        else: # If the log file does not exist, it is created.
-            try:
-                with open(logFullPath, 'w') as logFile:
-                    logFile.write(f'{PRE_LOG_INFO}Log file created. {get_log_time()}')
-                print('successfully.')
-                return True
-            except Exception as e:
-                print(f'failed.')
-                print(f'{ICON_ERROR}Log file could not be created. Error Message: {e}')
-                return False
+        
+        try:
+            with open(log_full_path, 'w') as log_file:
+                log_file.write(f'{PRE_LOG_INFO}Log file created. {get_log_time()}')
+            logging.info("Log file created successfully.")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to create log file. Error: {e}")
+            return False
 
 def getCurrentSessionLogPath(_appId) -> str:
     """
