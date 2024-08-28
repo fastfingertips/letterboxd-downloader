@@ -1,3 +1,4 @@
+import logging
 import csv
 
 from bs4 import BeautifulSoup
@@ -5,7 +6,7 @@ from bs4 import BeautifulSoup
 from utils.request import fetch_page_dom
 
 from utils.color.custom import colored
-from utils.log.custom import txtLog, log_error_with_line
+from utils.log.custom import log_error_with_line
 from utils.text.custom import highlight_changes
 
 from constants.project import PRE_LOG_ERR, PRE_LOG_INFO, SITE_DOMAIN, CMD_PRINT_FILMS
@@ -17,7 +18,7 @@ def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage) -
     Get the number of movies on the list.
     """
     try:
-        txtLog(f'{ICON_INFO}Getting the number of movies on the list meta description.')
+        logging.info('Getting the number of movies on the list meta description.')
         # Instead of connecting to the last page and getting the number of movies on the last page, which generates a GET request
         # and slows down the program, an alternative approach is used by getting the meta description of the list page.
         metaDescription = _currentListDom.find('meta', attrs={'name':'description'}).attrs['content']
@@ -31,7 +32,7 @@ def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage) -
         movieCount = metaDescription[:ii]
         return movieCount
     except: # list's last page process
-        txtLog(f'{ICON_INFO}Getting the number of movies on the list last page.')
+        logging.info('Getting the number of movies on the list last page.')
         try:
             lastPageDom = fetch_page_dom(f'{_currentUrlListItemDetailPage}{_lastPageNo}') # Getting lastpage dom.
             #> pulled page codes.
@@ -39,11 +40,11 @@ def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage) -
             lastPageMoviesCount =  len(lastPageArticles) # film count.
             movieCount = ((int(_lastPageNo)-1)*100)+lastPageMoviesCount # total movie count.
             #> after the number of movies is found, it is written to the log file.
-            txtLog(f"{PRE_LOG_INFO}Found list movie count as {movieCount}.")
+            logging.info(f"Found list movie count as {movieCount}.")
             return movieCount # return movie count
         except Exception as e: # in case of possible error. (While getting dom)
             log_error_with_line(e)
-            txtLog(f'{PRE_LOG_ERR}An error occurred while obtaining the number of movies on the list last page.')
+            logging.error('An error occurred while obtaining the number of movies on the list last page.')
 
 def extract_and_write_films(loop_count: int, current_dom: BeautifulSoup, writer: csv.writer) -> int:
     """
@@ -67,18 +68,18 @@ def extract_and_write_films(loop_count: int, current_dom: BeautifulSoup, writer:
         # Try alternative selectors if primary selector fails.
         if film_details_list:
             # Primary selector succeeded.
-            txtLog(f'{ICON_INFO}{loop_count}: Film/poster container found using primary selector.')
+            logging.info(f'{loop_count}: Film/poster container found using primary selector.')
         else:
             # Primary selector failed, try alternative selectors.
             for alternative_selector in ['ul.film-list', 'ul.poster-list', 'ul.film-details-list']:
                 film_details_list = current_dom.select_one(alternative_selector)
                 if film_details_list:
                     # Alternative selector succeeded.
-                    txtLog(f'{ICON_INFO}{loop_count}: Film/poster container found using alternative selector: {alternative_selector}')
+                    logging.info(f'{loop_count}: Film/poster container found using alternative selector: {alternative_selector}')
                     break
             else:
                 # All selectors failed.
-                txtLog(f'{ICON_INFO}{loop_count}: Film/poster container could not be found using any selector.')
+                logging.info(f'{loop_count}: Film/poster container could not be found using any selector.')
                 raise Exception('Film/poster container could not be found using any selector.')
 
         # Extract film details (<li> elements) from the container.
@@ -104,7 +105,7 @@ def extract_and_write_films(loop_count: int, current_dom: BeautifulSoup, writer:
             if year_element:
                 movie_year = year_element.text
             else:
-                txtLog(f'{PRE_LOG_ERR}Movie year could not be retrieved. Link: {movie_link}')
+                logging.error(f'Movie year could not be retrieved. Link: {movie_link}')
 
             # Print film information if enabled.
             if CMD_PRINT_FILMS:
@@ -124,7 +125,7 @@ def extract_and_write_films(loop_count: int, current_dom: BeautifulSoup, writer:
         return loop_count
     except Exception as e:
         log_error_with_line(e)
-        txtLog('An error occurred while retrieving film information.')
+        logging.error('An error occurred while retrieving film information.')
         raise
 
 def get_list_last_page_no(current_list_dom: BeautifulSoup, current_url_list_item_detail_page: str) -> int:
@@ -143,8 +144,8 @@ def get_list_last_page_no(current_list_dom: BeautifulSoup, current_url_list_item
     Logs the process and any errors encountered during the retrieval of the last page number.
     """
     try:
-        txtLog(f'{PRE_LOG_INFO}Checking the number of pages in the list...')
-        
+        logging.info('Retrieving the number of pages in the list...')
+
         # Locate the pagination container and find the last page number
         pagination_div = current_list_dom.find('div', class_='paginate-pages')
         if not pagination_div:
@@ -156,14 +157,14 @@ def get_list_last_page_no(current_list_dom: BeautifulSoup, current_url_list_item
         
         last_page_number = page_items[-1].a.text.strip()
         last_page_number = int(last_page_number)  # Convert to integer
-        
-        txtLog(f'{PRE_LOG_INFO}The list has more than one page (Last page number: {last_page_number}).')
+
+        logging.info(f"The list has more than one page (Last page number: {last_page_number}).")
         
         # Process the movie count on the last page
         getMovieCount(last_page_number, current_list_dom, current_url_list_item_detail_page)
         
     except (AttributeError, ValueError) as e:
-        txtLog(f'{PRE_LOG_INFO}Error determining the number of pages: {e}')
+        logging.error(f'Error determining the number of pages: {e}')
         last_page_number = 1  # Default to 1 if there is an error or single page
         
         # Handle the case with only one page
@@ -174,7 +175,7 @@ def get_list_last_page_no(current_list_dom: BeautifulSoup, current_url_list_item
         last_page_number = 1  # Default to 1 on unexpected exceptions
     
     finally:
-        txtLog(f'{PRE_LOG_INFO}Completed page count check. Last page number is {last_page_number}.')
+        logging.info(f'Completed page count check. Last page number is {last_page_number}.')
         return last_page_number
     
 def get_body_content(dom: BeautifulSoup, attribute: str) -> str:
@@ -239,7 +240,7 @@ def get_meta_content(dom: BeautifulSoup, property_name: str, attribute_name: str
         return meta_tag.attrs[attribute_name]
     
     except Exception as e:
-        txtLog(f"Error retrieving '{attribute_name}' from the meta tag with property '{property_name}'. Error Message: {e}")
+        logging.error(f"Error retrieving '{attribute_name}' from the meta tag with property '{property_name}'. Error Message: {e}")
         if raise_on_error:
             raise
         return ''
@@ -255,7 +256,7 @@ def check_user_list(_urlListItemDom, _urlListItem) -> tuple:
 
         #> check if the meta tag indicates that it's a list.
         if metaOgType == "letterboxd:list":
-            txtLog(f'{PRE_LOG_INFO}Meta content confirmed that the entered address is a list. Meta content: {metaOgType}')
+            logging.info(f'Meta content confirmed that the entered address is a list. Meta content: {metaOgType}')
 
             #> get the URL of the list from the meta tag.
             #> if the URL is not the same as the one entered, it means that the list has been redirected.
@@ -270,7 +271,7 @@ def check_user_list(_urlListItemDom, _urlListItem) -> tuple:
 
             #> if the entered URL matches the meta URL...
             if _urlListItem == metaOgUrl or f'{_urlListItem}/' == metaOgUrl:
-                txtLog(f'{PRE_LOG_INFO}The list URL does not contain any redirects.')
+                logging.info('The list URL does not contain any redirects.')
             else: # Girilen URL Meta ile uyuşmuyorsa..
                 print(f'{ICON_INFO}The list URL you entered contains redirects.')
                 print(f'{PRE_BLANK_COUNT}The list title was likely changed recently or you entered it incorrectly.')
@@ -284,7 +285,7 @@ def check_user_list(_urlListItemDom, _urlListItem) -> tuple:
                     msgMetaOgUrlChange = highlight_changes(_urlListItem, metaOgUrl)
 
                 print(f'{PRE_BLANK_COUNT}({colored("+", "green")}): {msgInputUrl}{msgMetaOgUrlChange} as the corrected URL.')
-            txtLog(f'{PRE_LOG_INFO}List "{metaOgTitle}" found for {_urlListItem}')
+            logging.info(f'List "{metaOgTitle}" found for {_urlListItem}')
 
             currentListAvaliable = True
     except Exception as e:
