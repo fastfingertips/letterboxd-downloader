@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from utils.request import fetch_page_dom
 
 from utils.color.custom import colored
-from utils.log.custom import txtLog, errorLine
+from utils.log.custom import txtLog, log_error_with_line
 from utils.text.custom import highlight_changes
 
 from constants.project import PRE_LOG_ERR, PRE_LOG_INFO, SITE_DOMAIN, CMD_PRINT_FILMS
@@ -42,7 +42,7 @@ def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage) -
             txtLog(f"{PRE_LOG_INFO}Found list movie count as {movieCount}.")
             return movieCount # return movie count
         except Exception as e: # in case of possible error. (While getting dom)
-            errorLine(e)
+            log_error_with_line(e)
             txtLog(f'{PRE_LOG_ERR}An error occurred while obtaining the number of movies on the list last page.')
 
 def extract_and_write_films(loop_count: int, current_dom: BeautifulSoup, writer: csv.writer) -> int:
@@ -123,7 +123,7 @@ def extract_and_write_films(loop_count: int, current_dom: BeautifulSoup, writer:
         # The number of movies belonging to the current page is returned.
         return loop_count
     except Exception as e:
-        errorLine(e)
+        log_error_with_line(e)
         txtLog('An error occurred while retrieving film information.')
         raise
 
@@ -170,7 +170,7 @@ def get_list_last_page_no(current_list_dom: BeautifulSoup, current_url_list_item
         getMovieCount(last_page_number, current_list_dom, current_url_list_item_detail_page)
         
     except Exception as e:
-        errorLine(e)
+        log_error_with_line(e)
         last_page_number = 1  # Default to 1 on unexpected exceptions
     
     finally:
@@ -288,6 +288,6 @@ def check_user_list(_urlListItemDom, _urlListItem) -> tuple:
 
             currentListAvaliable = True
     except Exception as e:
-        errorLine(e)
+        log_error_with_line(e)
     finally:
         return currentListAvaliable, metaOgUrl

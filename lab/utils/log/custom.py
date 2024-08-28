@@ -52,12 +52,17 @@ def getLogFilePath() -> str:
             log_path = f'{logDirName}/{lastKey}.txt'
             return log_path
 
-def errorLine(_e) -> None:
+def log_error_with_line(exception: Exception) -> None:
     """
-    Writes the error line with the error message to the log file.
+    Logs an error message along with the line number where the exception occurred.
+
+    Args:
+    exception (Exception): The exception instance containing the error message.
     """
-    cl = currentframe()
-    txtLog(f'{PRE_LOG_ERR} Error on line {cl.f_back.f_lineno} Exception Message: {_e}')
+    frame = currentframe().f_back
+    line_number = frame.f_lineno
+
+    logging.error(f"Error on line {line_number}. Exception Message: {exception}")
 
 def txtLog(_message) -> None:
     """

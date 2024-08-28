@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from constants.project import PRE_LOG_INFO, PRE_LOG_ERR
-from utils.log.custom import errorLine, txtLog
+from utils.log.custom import log_error_with_line, txtLog
 from utils.request.base import fetch_page_dom
 
 def fetch_page_dom_with_logging(url: str, timeout: int = 30) -> BeautifulSoup:
@@ -26,11 +26,11 @@ def fetch_page_dom_with_logging(url: str, timeout: int = 30) -> BeautifulSoup:
                 
             except Exception as e:
                 txtLog(f'{PRE_LOG_ERR}Error occurred while processing [{url}]')
-                errorLine(e)
+                log_error_with_line(e)
                 continue
 
     except Exception as e:
-        errorLine(e)
+        log_error_with_line(e)
         txtLog(f'{PRE_LOG_ERR}Failed to connect to [{url}]')
 
     return None  # Return None if the process is interrupted or an error occurs

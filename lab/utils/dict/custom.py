@@ -2,7 +2,7 @@ import arrow
 
 from utils.terminal import set_terminal_title
 
-from utils.log.custom import txtLog, errorLine
+from utils.log.custom import txtLog, log_error_with_line
 from utils.color.custom import colored, blink_text
 from utils.dom.custom import getMovieCount, get_meta_content, get_list_last_page_no
 
@@ -57,7 +57,7 @@ def get_list_signature(_listDict) -> dict:
         #> convert the update time to a human-readable format.
         listUT = arrow.get(listUpdateTime).humanize()
     except Exception as e: ## if the update time cannot be obtained...
-        errorLine(e)
+        log_error_with_line(e)
         #> assume that the list has not been edited in case of an error.
         listUT = 'No editing.'
 
@@ -110,5 +110,5 @@ def listSignature(_listDict) -> None:
         print('\n'.join(signList))
         txtLog(f"{PRE_LOG_INFO}List's signature print success.")
     except Exception as e:
-        errorLine(e)
+        log_error_with_line(e)
         txtLog(f'{PRE_LOG_ERR}List signature print error.')
