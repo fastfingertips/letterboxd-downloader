@@ -80,7 +80,7 @@ def start_log(app_id: str) -> bool:
         log_dir = readSettings()[DEFAULT_LOG_KEY]
         log_full_path = os.path.join(log_dir, f'{app_id}.txt')
         
-        logging.info(f"{ICON_INFO} Checking if log file exists...", end=' ')
+        logging.info("Checking if log file exists...")
         
         if checkLogFile(log_full_path):
             logging.info("Log file already exists.")
