@@ -82,7 +82,7 @@ def start_log(app_id: str) -> bool:
         
         logging.info("Checking if log file exists...")
         
-        if checkLogFile(log_full_path):
+        if check_log_file(log_full_path):
             logging.info("Log file already exists.")
             return True
         
@@ -110,7 +110,7 @@ def get_current_session_log_path(app_id: str) -> str:
         log_dir = readSettings()[DEFAULT_LOG_KEY]
         log_full_path = os.path.join(log_dir, f'{app_id}.txt')
         
-        if checkLogFile(log_full_path):
+        if check_log_file(log_full_path):
             return log_full_path
         else:
             logging.warning(f"Log file {log_full_path} does not exist.")
@@ -119,14 +119,25 @@ def get_current_session_log_path(app_id: str) -> str:
         logging.error("Log directory does not exist.")
         return None
 
-def checkLogFile(_logPath) -> bool:
+def check_log_file(log_path: str) -> bool:
     """
-    Checks if the log file exists.
+    Checks if a log file exists at the specified path and has a '.txt' extension.
+
+    Parameters:
+    log_path (str): The path to the log file to check.
+
+    Returns:
+    bool: True if the log file exists and ends with '.txt', False otherwise.
     """
-    logType = '.txt'
-    if _logPath.endswith(logType):
-        if os.path.exists(_logPath): return True
-    else: return False
+    if not os.path.exists(log_path):
+        logging.error(f"Log file '{log_path}' does not exist.")
+        return False
+    
+    if not log_path.endswith('.txt'):
+        logging.warning(f"Log file '{log_path}' does not have a '.txt' extension.")
+        return False
+    
+    return True
 
 def checkLogDir() -> bool:
     """
