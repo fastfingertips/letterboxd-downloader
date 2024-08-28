@@ -3,13 +3,11 @@ import arrow
 from utils.terminal import set_terminal_title
 
 from utils.log.custom import txtLog, errorLine
-from utils.color.custom import blink_text
-from utils.dom.custom import getMovieCount
-from utils.color.custom import colored_text
-from utils.dom.custom import get_meta_content, get_list_last_page_no
+from utils.color.custom import colored, blink_text
+from utils.dom.custom import getMovieCount, get_meta_content, get_list_last_page_no
 
 from constants.project import PRE_LOG_ERR, PRE_LOG_INFO, SUP_LINE
-from constants.terminal import PRE_CMD_INFO, PRE_CMD_MIDDLE_DOT, PRE_CMD_MIDDLE_DOT_LIST
+from constants.terminal import ICON_INFO, ICON_MIDDLE_DOT, ICON_MIDDLE_DOT_LIST
 
 
 def get_list_signature(_listDict) -> dict:
@@ -50,8 +48,7 @@ def get_list_signature(_listDict) -> dict:
         #> get the sorting filter information from the list page.
         domSelectedSortBy = listDom.select(".smenu-subselected")[0].text + '.'
     except Exception as e: ## if there is an error while extracting filter information...
-        txtLog(f'{PRE_LOG_ERR}A problem occurred while retrieving filter information.')
-        print('A problem occurred while retrieving filter information.')
+        txtLog(f'{PRE_LOG_ERR}A problem occurred while retrieving filter information. {e}')
         #> set each filter to 'Unknown' if the filter information cannot be obtained.
         domSelectedDecadeYear, domSelectedGenre, domSelectedSortBy = 3*'Unknown'
 
@@ -91,23 +88,23 @@ def listSignature(_listDict) -> None:
         set_terminal_title(f"{_listDict['process_state']} Process: @{_listDict['list_owner']}.")
 
         signList = [
-            f"\n{PRE_CMD_INFO}Process State: {blink_text(_listDict['process_state'],'green')}",
+            f"\n{ICON_INFO}Process State: {blink_text(_listDict['process_state'],'green')}",
             SUP_LINE,
-            f"{PRE_CMD_INFO}{colored_text('List info;', color='yellow')}",
-            f"{PRE_CMD_MIDDLE_DOT}List by {colored_text(listSign['list_by'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Updated: {colored_text(listSign['list_update_time_humanize'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Published: {colored_text(listSign['list_publication_time_humanize'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}List title: {colored_text(listSign['list_title'], 'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Filters;",
-            f"{PRE_CMD_MIDDLE_DOT_LIST}Filtered as {colored_text(listSign['list_selected_decade_year'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Filtered as {colored_text(listSign['list_selected_genre'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Movies sorted by {colored_text(listSign['list_selected_sort_by'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}List hash: {colored_text(_listDict['list_run_time'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Sayfa sayısı: {colored_text(listSign['list_last_page'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Number of movies: {colored_text(listSign['list_movie_count'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}List domain name: {colored_text(_listDict['list_domain_name'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}List URL: {colored_text(_listDict['list_url'],'blue', attrs=['bold'])}",
-            f"{PRE_CMD_MIDDLE_DOT}Process URL: {colored_text(_listDict['list_detail_url'],'blue', attrs=['bold'])}"
+            f"{ICON_INFO}{colored('List info;', color='yellow')}",
+            f"{ICON_MIDDLE_DOT}List by {colored(listSign['list_by'],'blue', attrs=['bold'])}",
+            f"{ICON_MIDDLE_DOT}Updated: {colored(listSign['list_update_time_humanize'],'blue', attrs=['bold'])}",
+            f"{ICON_MIDDLE_DOT}Published: {colored(listSign['list_publication_time_humanize'],'blue', attrs=['bold'])}",
+            f"{ICON_MIDDLE_DOT}List title: {colored(listSign['list_title'], 'blue', attrs=['bold'])}",
+            f"{ICON_MIDDLE_DOT}Filters;",
+            f"{ICON_MIDDLE_DOT_LIST}Filtered as {colored(listSign['list_selected_decade_year'],'blue', attrs=['bold'])}",
+            f"{ICON_MIDDLE_DOT}Filtered as {colored(listSign['list_selected_genre'],'blue', attrs=['bold'])}",
+            f"{ICON_MIDDLE_DOT}Movies sorted by {colored(listSign['list_selected_sort_by'],'blue', attrs=['bold'])}",
+            f"{ICON_MIDDLE_DOT}List hash: {colored(_listDict['list_run_time'],'blue', attrs=['bold'])}",
+            f"{ICON_MIDDLE_DOT}Sayfa sayısı: {colored(listSign['list_last_page'],'blue', attrs=['bold'])}",
+            f"{ICON_MIDDLE_DOT}Number of movies: {colored(listSign['list_movie_count'],'blue', attrs=['bold'])}",
+            f"{ICON_MIDDLE_DOT}List domain name: {colored(_listDict['list_domain_name'],'blue', attrs=['bold'])}",
+            f"{ICON_MIDDLE_DOT}List URL: {colored(_listDict['list_url'],'blue', attrs=['bold'])}",
+            f"{ICON_MIDDLE_DOT}Process URL: {colored(_listDict['list_detail_url'],'blue', attrs=['bold'])}"
         ]
 
         print('\n'.join(signList))
