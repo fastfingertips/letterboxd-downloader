@@ -1,3 +1,4 @@
+import logging
 from inspect import currentframe #: PMI
 import os
 
@@ -25,7 +26,18 @@ from constants.terminal import(
 
 current_pid = str(os.getpid())
 
-# -- LOGS --
+def setup_logging():
+    """
+    Set up the logging configuration.
+    """
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler('app.log'),
+            # logging.StreamHandler()
+        ]
+    )
 
 def getLogFilePath() -> str:
     """

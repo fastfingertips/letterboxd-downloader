@@ -9,7 +9,7 @@ from utils.terminal import execute_terminal_command, set_terminal_title
 from utils.set.custom import readSettings
 from utils.time.custom import get_run_time
 from utils.dict.custom import listSignature
-from utils.log.custom import startLog, txtLog
+from utils.log.custom import setup_logging, startLog, txtLog
 from utils.csv.custom import combineCsv, splitCsv
 from utils.dom.custom import extract_and_write_films
 from utils.session.custom import start_session, end_session
@@ -43,6 +43,7 @@ from constants.terminal import (
     SUP_LINE_FILMS
 )
 
+setup_logging()
 
 def export_films_to_csv(csv_path: str, last_page_no: int, detail_page_url: str) -> None:
     with open(csv_path, 'w', newline='', encoding="utf-8") as file: # konumda Export klasörü yoksa dosya oluşturmayacaktır.
@@ -119,8 +120,6 @@ def search_mode(url_list_item, url_list):
         searchLMetaUrl = get_meta_content(searchListPreviewDom,'og:url')
     except:
         searchLMetaUrl = "Could not find meta url."
-
-    print(f'TEST: {end_list}')
 
     # Kaç liste bulunduğu hakkında bilgi veren mesaj.
     try:
