@@ -108,14 +108,38 @@ def createSession(_hash) -> None:
     }
     dump_json_file_with_logging(SESSIONS_FILE_NAME, jsonObject)
 
-def endSession(_hash) -> None:
+def end_session(session_hash: str) -> None:
     """
-    This function ends the session file.
+    Marks the current process session as finished in the session file.
+    
+    This function updates the session record for the current process, marking
+    the specified session as finished. If the session or process is not found,
+    an error is logged and raised.
     """
-    # current process is marked as finished.
-    sessionRecords = load_json_file_with_logging(SESSIONS_FILE_NAME)
-    sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_PROCESSES_KEY][_hash][SESSION_FINISHED_KEY] = True
-    dump_json_file_with_logging(SESSIONS_FILE_NAME, sessionRecords)
+    try:
+        session_records = load_json_file_with_logging(SESSIONS_FILE_NAME)
+
+        # Check if the current process ID exists in the session records
+        if current_pid not in session_records.get(SESSION_DICT_KEY, {}):
+            logging.error(f"Process ID {current_pid} not found in session records.")
+            raise KeyError(f"Process ID {current_pid} not found.")
+
+        # Check if the session hash exists for the current process
+        if session_hash not in session_records[SESSION_DICT_KEY][current_pid][SESSION_PROCESSES_KEY]:
+            logging.error(f"Session {session_hash} not found for process {current_pid}.")
+            raise KeyError(f"Session {session_hash} not found.")
+
+        # Mark the session as finished
+        logging.info(f"Marking session {session_hash} as finished for process {current_pid}.")
+        session_records[SESSION_DICT_KEY][current_pid][SESSION_PROCESSES_KEY][session_hash][SESSION_FINISHED_KEY] = True
+
+        # Save the updated session records back to the file
+        dump_json_file_with_logging(SESSIONS_FILE_NAME, session_records)
+        logging.info(f"Session {session_hash} marked as finished successfully.")
+
+    except (KeyError, json.JSONDecodeError) as e:
+        logging.error(f"Failed to end session {session_hash}: {e}")
+        raise RuntimeError(f"Could not mark session {session_hash} as finished.") from e
 
 def update_session(current_session: str) -> None:
     """
