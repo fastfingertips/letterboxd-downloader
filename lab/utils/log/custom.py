@@ -39,18 +39,24 @@ def setup_logging():
         ]
     )
 
-def getLogFilePath() -> str:
+def get_log_file_path() -> str:
     """
-    Returns the log file path.
+    Retrieves the path to the current session log file.
+
+    Returns:
+        str: The path to the log file.
     """
     if file_exists(SETTINGS_FILE_NAME):
-        settingDict = readSettings()
-        logDirName = settingDict[DEFAULT_LOG_KEY]
+        settings = readSettings()
+        log_dir = settings.get(DEFAULT_LOG_KEY)
         if check_log_dir():
-            sessionRecords = load_json_file_with_logging(SESSIONS_FILE_NAME)
-            lastKey = sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_LAST_KEY]
-            log_path = f'{logDirName}/{lastKey}.txt'
-            return log_path
+            sessions = load_json_file_with_logging(SESSIONS_FILE_NAME)
+            last_key = sessions.get(SESSION_DICT_KEY, {}).get(current_pid, {}).get(SESSION_LAST_KEY)
+            if last_key:
+                return os.path.join(log_dir, f'{last_key}.txt')
+            raise FileNotFoundError("Session record for the last key not found.")
+        raise FileNotFoundError("Log directory does not exist.")
+    raise FileNotFoundError("Settings file does not exist.")
 
 def log_error_with_line(exception: Exception) -> None:
     """
@@ -68,7 +74,7 @@ def txtLog(_message) -> None:
     """
     Writes the message to the log file.
     """
-    with open(getLogFilePath(), 'a') as logFile:
+    with open(get_log_file_path(), 'a') as logFile:
         logFile.write(f'{_message}\n')
 
 def start_log(app_id: str) -> bool:
