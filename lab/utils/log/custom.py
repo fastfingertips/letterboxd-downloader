@@ -62,12 +62,30 @@ def log_error_with_line(exception: Exception) -> None:
 
     logging.error(f"Error on line {line_number}. Exception Message: {exception}")
 
-def txtLog(_message) -> None:
+def append_to_log(message: str) -> None:
     """
-    Writes the message to the log file.
+    Appends a message to the current log file.
+
+    Args:
+        message (str): The message to append to the log file.
+
+    Raises:
+        FileNotFoundError: If the log file path is not valid.
+        IOError: If there is an error writing to the log file.
     """
-    with open(get_log_file_path(), 'a') as logFile:
-        logFile.write(f'{_message}\n')
+    try:
+        log_file_path = get_log_file_path()
+        if log_file_path is None:
+            raise FileNotFoundError("Log file path is not available. Ensure that the log file exists and the path is correct.")
+        
+        with open(log_file_path, 'a') as log_file:
+            log_file.write(f'{message}\n')
+    except FileNotFoundError as e:
+        logging.error(f"Failed to locate log file: {e}")
+        raise RuntimeError(f"Log file could not be found or accessed: {e}") from e
+    except IOError as e:
+        logging.error(f"Error writing to log file: {e}")
+        raise RuntimeError(f"An error occurred while writing to the log file: {e}") from e
 
 def start_log(app_id: str) -> bool:
     """
