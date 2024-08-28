@@ -1,9 +1,9 @@
+import logging
 import pandas as pd
 import glob
 
 # -- Local Imports -- #
 
-from utils.log.custom import txtLog
 from utils.color.custom import colored
 from utils.file.custom import ensure_directories_exist
 
@@ -67,7 +67,7 @@ def combineCsv(_urlList, _exportDirName, _currenSessionHash, _exportsPath) -> No
         combineCsvPath = combineDir + combineCsvFile # path to the combine file.
         noDuplicateCsvPath = combineDir + noDuplicateCsvFile # NoDuplciate file path
         ensure_directories_exist([combineDir]) # combine dir check
-        txtLog(f'{PRE_LOG_INFO}Lists will be combined because more than one list is being worked on.') # process logger
+        logging.info('Lists will be combined because more than one list is being worked on.')
 
         try:
             try: allCsvFiles = list(glob.glob(f'{_exportsPath}*.csv')) # exporting all csv files in the specified directory to a variable.
@@ -87,8 +87,10 @@ def combineCsv(_urlList, _exportDirName, _currenSessionHash, _exportsPath) -> No
             print(f'{ICON_INFO}All movies in lists have been saved to {combineCsvPath}.')
             print(f'{ICON_INFO}Only the file with different movies is set to {noDuplicateCsvPath} in the same directory.')
             splitCsv(noDuplicateCsvPath, _exportDirName, _currenSessionHash) # after extraction, we perform transfer splitting if necessary.
-        except Exception as e: txtLog(f'Lists could not be combined. Error: {e}') #rocess logger
+        except Exception as e:
+            logging.error(f'Lists could not be combined. Error: {e}')
         print(SUB_LINE)
-    else: txtLog('The process will not be combined because it is working on a single list.') # process logger
+    else:
+        logging.info('The process will not be combined because it is working on a single list.')
 
 
