@@ -95,15 +95,29 @@ def start_log(app_id: str) -> bool:
             logging.error(f"Failed to create log file. Error: {e}")
             return False
 
-def getCurrentSessionLogPath(_appId) -> str:
+def get_current_session_log_path(app_id: str) -> str:
     """
-    Returns the current session log file path.
+    Returns the path of the current session log file if it exists.
+
+    Parameters:
+    app_id (str): The identifier for the application. This will be used to name the log file.
+
+    Returns:
+    str: The path to the log file if it exists.
+    None: If the log file does not exist.
     """
     if checkLogDir():
-        logDir = readSettings()[DEFAULT_LOG_KEY]
-        logFullPath = f'{logDir}/{_appId}.txt'
-        if checkLogFile(logFullPath): return logFullPath
-        else: return False
+        log_dir = readSettings()[DEFAULT_LOG_KEY]
+        log_full_path = os.path.join(log_dir, f'{app_id}.txt')
+        
+        if checkLogFile(log_full_path):
+            return log_full_path
+        else:
+            logging.warning(f"Log file {log_full_path} does not exist.")
+            return None
+    else:
+        logging.error("Log directory does not exist.")
+        return None
 
 def checkLogFile(_logPath) -> bool:
     """
