@@ -1,3 +1,4 @@
+import logging
 import csv
 
 # -- Local Imports -- #
@@ -9,7 +10,7 @@ from utils.terminal import execute_terminal_command, set_terminal_title
 from utils.set.custom import readSettings
 from utils.time.custom import get_run_time
 from utils.dict.custom import listSignature
-from utils.log.custom import setup_logging, start_log, txtLog
+from utils.log.custom import setup_logging, start_log
 from utils.csv.custom import combineCsv, splitCsv
 from utils.dom.custom import extract_and_write_films
 from utils.session.custom import start_session, end_session
@@ -54,7 +55,7 @@ def export_films_to_csv(csv_path: str, last_page_no: int, detail_page_url: str) 
         count = 1
         print(SUP_LINE_FILMS, end='')
         for x in range(int(last_page_no)): # sayfa sayısı kadar döngü oluştur.
-            txtLog(f'{PRE_LOG_INFO}Connecting to {detail_page_url}{str(x+1)}') # sayfa numarasını log dosyasına yaz.
+            logging.info(f'Connecting to {detail_page_url}{str(x+1)}') # sayfa numarasını log dosyasına yaz.
             current_dom = fetch_page_dom(f'{detail_page_url}{str(x+1)}') # sayfa dom'u alınır.
             count = extract_and_write_films(count, current_dom, writer) # filmleri al.
         file.close() # açtığımız dosyayı manuel kapattık
@@ -326,7 +327,7 @@ while True:
             current_list_owner = get_body_content(current_dom_detail, 'data-owner')
         except Exception as e:
             print(f'{ICON_ERROR}Liste sahibi bilgisi alınamadı')
-            txtLog(f'Liste sahibi bilgisi alınamadı Hata: {e}')
+            logging.info(f'Liste sahibi bilgisi alınamadı Hata: {e}')
             current_list_owner = 'Unknown'
 
         # Liste domain ismini düzenleyerek alır.
@@ -359,7 +360,7 @@ while True:
             else:
                 listEnter = False
                 print(f"{ICON_INFO}The {colored('session was canceled','red', attrs=['dark'])} because you did not verify the information.")
-                txtLog(f'{PRE_LOG_INFO}The session was canceled because you did not verify the information.')
+                logging.info('The session was canceled because you did not verify the information.')
 
         if listEnter:
             print(SUP_LINE)
@@ -385,7 +386,7 @@ while True:
             print(f'{ICON_INFO}{loop_count-1} film exported to {blink_text(csv_path, color="yellow")}.')
             print(f"{ICON_INFO}{colored(f'{process_state} completed!', 'green')}")
             set_terminal_title(f'{process_state} completed!')
-            txtLog(f'{PRE_LOG_INFO}{process_state} completed!')
+            logging.info(f'{process_state} completed!')
             print(SUB_LINE)
 
     """ FOR END """
@@ -394,7 +395,7 @@ while True:
     combineCsv(url_list, export_directory_name, session_current_hash, exports_path)
     end_session(session_current_hash)
     set_terminal_title(f'Session: {session_current_hash} ended!')
-    txtLog(f'{PRE_LOG_INFO}Session: {session_current_hash} ended.')
+    logging.info(f'Session: {session_current_hash} ended.')
     print(f"{ICON_INFO}{colored(f'Session: {session_current_hash} ended.', 'green')}")
     print(f"{ICON_INFO}Process State: {blink_text(process_state +' Finish.','green')}")
     execute_terminal_command(f"echo {ICON_INFO}{blink_text('Press enter to continue with the new session.','yellow')} & pause >nul")
