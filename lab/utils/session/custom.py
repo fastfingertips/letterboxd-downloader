@@ -16,27 +16,26 @@ from constants.project import (
     SESSION_LAST_KEY
 )
 
-from constants.terminal import (
-    ICON_INFO,
-    ICON_ERROR
-)
-
 current_pid = str(os.getpid())
 
-# -- SESSIONS --
+def start_session(session_hash: str) -> None:
+    """
+    Checks whether the session file exists and starts or creates a new session accordingly.
 
-def startSession(_hash) -> None:
+    Parameters:
+    session_hash (str): The hash identifier for the session.
+
+    If the session file exists, a new session is added. If the file does not exist, a new session file is created.
     """
-    This function checks whether the session file exists.
-    """
-    print(f'{ICON_INFO}Session file checking...', end=' ')
+    logging.info("Checking for session file existence...")
     if file_exists(SESSIONS_FILE_NAME):
-        # if the session file exists, the session is started.
-        print(f'successfully.') # checking successfully
-        add_session(_hash)
+        # Session file exists; add a new session
+        logging.info("Session file exists. Adding new session.")
+        add_session(session_hash)
     else:
-        print(f'failed.') # checking failed
-        session_creator(_hash)
+        # Session file does not exist; create a new session file
+        logging.warning("Session file does not exist. Creating a new session file.")
+        session_creator(session_hash)
 
 def add_session(session_hash: str) -> None:
     """
