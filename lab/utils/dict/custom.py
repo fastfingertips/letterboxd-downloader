@@ -1,8 +1,9 @@
+import logging
 import arrow
 
 from utils.terminal import set_terminal_title
 
-from utils.log.custom import txtLog, log_error_with_line
+from utils.log.custom import log_error_with_line
 from utils.color.custom import colored, blink_text
 from utils.dom.custom import getMovieCount, get_meta_content, get_list_last_page_no
 
@@ -48,9 +49,9 @@ def get_list_signature(_listDict) -> dict:
         #> get the sorting filter information from the list page.
         domSelectedSortBy = listDom.select(".smenu-subselected")[0].text + '.'
     except Exception as e: ## if there is an error while extracting filter information...
-        txtLog(f'{PRE_LOG_ERR}A problem occurred while retrieving filter information. {e}')
+        logging.error(f'A problem occurred while retrieving filter information. {e}')
         #> set each filter to 'Unknown' if the filter information cannot be obtained.
-        domSelectedDecadeYear, domSelectedGenre, domSelectedSortBy = 3*'Unknown'
+        domSelectedDecadeYear, domSelectedGenre, domSelectedSortBy = 'Unknown', 'Unknown', 'Unknown'
 
     try: ## get the update time of the list
         listUpdateTime = listDom.select(".updated time")[0].text
@@ -74,6 +75,8 @@ def get_list_signature(_listDict) -> dict:
         'list_selected_genre': domSelectedGenre,
         'list_selected_sort_by': domSelectedSortBy
     }
+
+    print(listSign)
 
     return listSign
 
@@ -108,7 +111,7 @@ def listSignature(_listDict) -> None:
         ]
 
         print('\n'.join(signList))
-        txtLog(f"{PRE_LOG_INFO}List's signature print success.")
+        logging.info("List's signature print success.")
     except Exception as e:
         log_error_with_line(e)
-        txtLog(f'{PRE_LOG_ERR}List signature print error.')
+        logging.error("List signature print error.")
