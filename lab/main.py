@@ -12,7 +12,7 @@ from utils.dict.custom import listSignature
 from utils.log.custom import startLog, txtLog
 from utils.csv.custom import combineCsv, splitCsv
 from utils.dom.custom import extract_and_write_films
-from utils.session.custom import startSession, end_session
+from utils.session.custom import start_session, end_session
 from utils.url.custom import fix_url, extract_list_domain_name
 from utils.text.custom import highlight_changes, trim_end, remove_substring
 from utils.file.custom import ensure_files_exist, ensure_directories_exist
@@ -202,7 +202,7 @@ program_loop = 0
 while True:
     # STARTUP
     session_current_hash = get_run_time() if program_loop else session_start_hash
-    startSession(session_current_hash)
+    start_session(session_current_hash)
     startLog(session_current_hash)
     program_loop += 1
 
