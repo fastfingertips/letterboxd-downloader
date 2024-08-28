@@ -4,13 +4,12 @@ from bs4 import BeautifulSoup
 
 from utils.request import fetch_page_dom
 
-from utils.dom.custom import getMovieCount
-from utils.color.custom import colored_text
+from utils.color.custom import colored
 from utils.log.custom import txtLog, errorLine
 from utils.text.custom import highlight_changes
 
 from constants.project import PRE_LOG_ERR, PRE_LOG_INFO, SITE_DOMAIN, CMD_PRINT_FILMS
-from constants.terminal import PRE_CMD_INFO, PRE_CMD_CHECK, PRE_BLANK_COUNT
+from constants.terminal import ICON_INFO, ICON_CHECK, PRE_BLANK_COUNT
 
 
 def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage) -> int:
@@ -18,7 +17,7 @@ def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage) -
     Get the number of movies on the list.
     """
     try:
-        txtLog(f'{PRE_CMD_INFO}Getting the number of movies on the list meta description.')
+        txtLog(f'{ICON_INFO}Getting the number of movies on the list meta description.')
         # Instead of connecting to the last page and getting the number of movies on the last page, which generates a GET request
         # and slows down the program, an alternative approach is used by getting the meta description of the list page.
         metaDescription = _currentListDom.find('meta', attrs={'name':'description'}).attrs['content']
@@ -32,7 +31,7 @@ def getMovieCount(_lastPageNo, _currentListDom, _currentUrlListItemDetailPage) -
         movieCount = metaDescription[:ii]
         return movieCount
     except: # list's last page process
-        txtLog(f'{PRE_CMD_INFO}Getting the number of movies on the list last page.')
+        txtLog(f'{ICON_INFO}Getting the number of movies on the list last page.')
         try:
             lastPageDom = fetch_page_dom(f'{_currentUrlListItemDetailPage}{_lastPageNo}') # Getting lastpage dom.
             #> pulled page codes.
@@ -68,18 +67,18 @@ def extract_and_write_films(loop_count: int, current_dom: BeautifulSoup, writer:
         # Try alternative selectors if primary selector fails.
         if film_details_list:
             # Primary selector succeeded.
-            txtLog(f'{PRE_CMD_INFO}{loop_count}: Film/poster container found using primary selector.')
+            txtLog(f'{ICON_INFO}{loop_count}: Film/poster container found using primary selector.')
         else:
             # Primary selector failed, try alternative selectors.
             for alternative_selector in ['ul.film-list', 'ul.poster-list', 'ul.film-details-list']:
                 film_details_list = current_dom.select_one(alternative_selector)
                 if film_details_list:
                     # Alternative selector succeeded.
-                    txtLog(f'{PRE_CMD_INFO}{loop_count}: Film/poster container found using alternative selector: {alternative_selector}')
+                    txtLog(f'{ICON_INFO}{loop_count}: Film/poster container found using alternative selector: {alternative_selector}')
                     break
             else:
                 # All selectors failed.
-                txtLog(f'{PRE_CMD_INFO}{loop_count}: Film/poster container could not be found using any selector.')
+                txtLog(f'{ICON_INFO}{loop_count}: Film/poster container could not be found using any selector.')
                 raise Exception('Film/poster container could not be found using any selector.')
 
         # Extract film details (<li> elements) from the container.
@@ -87,6 +86,7 @@ def extract_and_write_films(loop_count: int, current_dom: BeautifulSoup, writer:
 
         # Prepare a list to store current page's movie data.
         current_page_movies_data = []
+        
         for film_detail in film_details:
             # Extract movie name and link.
             movie_headline_element = film_detail.find('h2', attrs={'class': 'headline-2 prettify'}) 
@@ -266,24 +266,24 @@ def check_user_list(_urlListItemDom, _urlListItem) -> tuple:
             bodyDataOwner = get_body_content(_urlListItemDom,'data-owner')
 
             #> print the list owner's username and the list title.
-            print(f'{PRE_CMD_CHECK}{colored_text("Found it: ", color="green")}@{colored_text(bodyDataOwner,"yellow")} "{colored_text(metaOgTitle,"yellow")}"')
+            print(f'{ICON_CHECK}{colored("Found it: ", color="green")}@{colored(bodyDataOwner,"yellow")} "{colored(metaOgTitle,"yellow")}"')
 
             #> if the entered URL matches the meta URL...
             if _urlListItem == metaOgUrl or f'{_urlListItem}/' == metaOgUrl:
                 txtLog(f'{PRE_LOG_INFO}The list URL does not contain any redirects.')
             else: # Girilen URL Meta ile uyuşmuyorsa..
-                print(f'{PRE_CMD_INFO}The list URL you entered contains redirects.')
+                print(f'{ICON_INFO}The list URL you entered contains redirects.')
                 print(f'{PRE_BLANK_COUNT}The list title was likely changed recently or you entered it incorrectly.')
-                print(f'{PRE_BLANK_COUNT}({colored_text("+", "red")}): {colored_text(_urlListItem, color="yellow")}')
+                print(f'{PRE_BLANK_COUNT}({colored("+", "red")}): {colored(_urlListItem, color="yellow")}')
                 
                 if _urlListItem in metaOgUrl:
-                    msgInputUrl = colored_text(_urlListItem, color="yellow")
-                    msgMetaOgUrlChange = colored_text(metaOgUrl.replace(_urlListItem,""), color="green")
+                    msgInputUrl = colored(_urlListItem, color="yellow")
+                    msgMetaOgUrlChange = colored(metaOgUrl.replace(_urlListItem,""), color="green")
                 else:
                     msgInputUrl = ''
                     msgMetaOgUrlChange = highlight_changes(_urlListItem, metaOgUrl)
 
-                print(f'{PRE_BLANK_COUNT}({colored_text("+", "green")}): {msgInputUrl}{msgMetaOgUrlChange} as the corrected URL.')
+                print(f'{PRE_BLANK_COUNT}({colored("+", "green")}): {msgInputUrl}{msgMetaOgUrlChange} as the corrected URL.')
             txtLog(f'{PRE_LOG_INFO}List "{metaOgTitle}" found for {_urlListItem}')
 
             currentListAvaliable = True
