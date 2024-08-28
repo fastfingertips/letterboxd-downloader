@@ -46,7 +46,7 @@ def getLogFilePath() -> str:
     if file_exists(SETTINGS_FILE_NAME):
         settingDict = readSettings()
         logDirName = settingDict[DEFAULT_LOG_KEY]
-        if checkLogDir():
+        if check_log_dir():
             sessionRecords = load_json_file_with_logging(SESSIONS_FILE_NAME)
             lastKey = sessionRecords[SESSION_DICT_KEY][current_pid][SESSION_LAST_KEY]
             log_path = f'{logDirName}/{lastKey}.txt'
@@ -76,7 +76,7 @@ def start_log(app_id: str) -> bool:
     Returns:
     bool: True if the log file was successfully created or already exists, False otherwise.
     """
-    if checkLogDir():
+    if check_log_dir():
         log_dir = readSettings()[DEFAULT_LOG_KEY]
         log_full_path = os.path.join(log_dir, f'{app_id}.txt')
         
@@ -106,7 +106,7 @@ def get_current_session_log_path(app_id: str) -> str:
     str: The path to the log file if it exists.
     None: If the log file does not exist.
     """
-    if checkLogDir():
+    if check_log_dir():
         log_dir = readSettings()[DEFAULT_LOG_KEY]
         log_full_path = os.path.join(log_dir, f'{app_id}.txt')
         
@@ -139,19 +139,28 @@ def check_log_file(log_path: str) -> bool:
     
     return True
 
-def checkLogDir() -> bool:
+def check_log_dir() -> bool:
     """
-    Checks if the log directory exists.
+    Checks if the log directory exists and creates it if it doesn't.
+
+    Returns:
+    bool: True if the log directory exists or was successfully created, False otherwise.
     """
     if file_exists(SETTINGS_FILE_NAME):
-        settingDict = readSettings()
-        logDirName = settingDict[DEFAULT_LOG_KEY]
+        try:
+            settings_dict = readSettings()
+            log_dir_name = settings_dict[DEFAULT_LOG_KEY]
 
-        if os.path.exists(logDirName): return True
-        else:
-            try:
-                os.makedirs(logDirName)
+            if os.path.exists(log_dir_name):
+                logging.info(f"Log directory '{log_dir_name}' already exists.")
                 return True
-            except Exception as e:
-                return False
-    else: return False
+            else:
+                os.makedirs(log_dir_name)
+                logging.info(f"Log directory '{log_dir_name}' created successfully.")
+                return True
+        except Exception as e:
+            logging.error(f"Failed to create log directory '{log_dir_name}'. Error: {e}")
+            return False
+    else:
+        logging.error(f"Settings file '{SETTINGS_FILE_NAME}' does not exist.")
+        return False
