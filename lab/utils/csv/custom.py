@@ -4,10 +4,10 @@ import glob
 # -- Local Imports -- #
 
 from utils.log.custom import txtLog
-from utils.color.custom import colored_text
+from utils.color.custom import colored
 from utils.file.custom import ensure_directories_exist
 
-from constants.terminal import PRE_CMD_INFO
+from constants.terminal import ICON_INFO
 from constants.project import(
     PARTITION_LIMIT,
     PRE_LOG_INFO,
@@ -32,12 +32,12 @@ def splitCsv(_csvPath: str, _exportDirName: str, _currenSessionHash: int) -> Non
         defaultCsvCount = 1000 # optimal transfer count
         defaultPartition = 2 # starts from partition 2.
         splitFileNo = defaultPartition-1
-        print(f'{PRE_CMD_INFO}Separation will be applied because there is movie({csvMovies}) over {SPLIT_LIMIT} in the file.')
+        print(f'{ICON_INFO}Separation will be applied because there is movie({csvMovies}) over {SPLIT_LIMIT} in the file.')
         while True: # calculate how many partitions the file will be divided into.
             linesPerCsv = csvMovies/defaultPartition
             if (linesPerCsv <= defaultCsvCount and csvMovies % defaultPartition == 0):
                 linesPerCsv = int(linesPerCsv) # we convert to int if remainder is zero.
-                print(f'{PRE_CMD_INFO}{csvMovies} movie is splitting into {defaultPartition} parts.')
+                print(f'{ICON_INFO}{csvMovies} movie is splitting into {defaultPartition} parts.')
                 break
             defaultPartition += 1
 
@@ -47,12 +47,12 @@ def splitCsv(_csvPath: str, _exportDirName: str, _currenSessionHash: int) -> Non
                     splitCsvLines.insert(lineNo+linesPerCsv,splitCsvLines[0]) #: keep header
                     open(f'{splitCsvName}-{splitFileNo}.csv', 'w+', encoding="utf8").writelines(splitCsvLines[lineNo:lineNo+linesPerCsv])
                     splitFileNo += 1
-            print(f'{PRE_CMD_INFO}Ayrım işlemi {splitCsvName} adresinde sona erdi. Bölüm: [{defaultPartition}][{linesPerCsv}]')
+            print(f'{ICON_INFO}Ayrım işlemi {splitCsvName} adresinde sona erdi. Bölüm: [{defaultPartition}][{linesPerCsv}]')
         else:
             # if the separation limit is exceeded
-            print(f'{PRE_CMD_INFO}Separation failed. Separation limit [{defaultPartition}/{PARTITION_LIMIT}] exceeded.')
+            print(f'{ICON_INFO}Separation failed. Separation limit [{defaultPartition}/{PARTITION_LIMIT}] exceeded.')
     else:
-        print(f'{PRE_CMD_INFO}There is a line/film({csvMovies}) under {SPLIT_LIMIT} in your file, the separation process will not be applied.')
+        print(f'{ICON_INFO}There is a line/film({csvMovies}) under {SPLIT_LIMIT} in your file, the separation process will not be applied.')
 
 def combineCsv(_urlList, _exportDirName, _currenSessionHash, _exportsPath) -> None:
     """
@@ -60,7 +60,7 @@ def combineCsv(_urlList, _exportDirName, _currenSessionHash, _exportsPath) -> No
     """
     if len(_urlList) > 1:
         print(SUP_LINE)
-        print(f"{PRE_CMD_INFO}{colored_text('Merge process info;', color='yellow')}")
+        print(f"{ICON_INFO}{colored('Merge process info;', color='yellow')}")
         combineDir = f'{_exportDirName}/Combined/' # folder containing the combined lists
         combineCsvFile = f'{_currenSessionHash}_Normal-Combined.csv' # the name of the combine file.
         noDuplicateCsvFile = f'{_currenSessionHash}_NoDuplicate-Combined.csv' # NoDuplicate file name
@@ -84,8 +84,8 @@ def combineCsv(_urlList, _exportDirName, _currenSessionHash, _exportsPath) -> No
                     seen.add(line)
                     out_file.write(line)
 
-            print(f'{PRE_CMD_INFO}All movies in lists have been saved to {combineCsvPath}.')
-            print(f'{PRE_CMD_INFO}Only the file with different movies is set to {noDuplicateCsvPath} in the same directory.')
+            print(f'{ICON_INFO}All movies in lists have been saved to {combineCsvPath}.')
+            print(f'{ICON_INFO}Only the file with different movies is set to {noDuplicateCsvPath} in the same directory.')
             splitCsv(noDuplicateCsvPath, _exportDirName, _currenSessionHash) # after extraction, we perform transfer splitting if necessary.
         except Exception as e: txtLog(f'Lists could not be combined. Error: {e}') #rocess logger
         print(SUB_LINE)
