@@ -1,5 +1,5 @@
+import logging
 from utils.color.custom import colored, blink_text
-from utils.log.custom import txtLog
 
 def highlight_changes(original_text: str, modified_text: str) -> str:
     """
@@ -39,7 +39,7 @@ def trim_end(text: str, char_to_remove: str) -> str:
             text = text[:-1]
     except Exception as e: 
         # Log the error if necessary or handle it appropriately.
-        txtLog(f"Error while trimming characters: {e}")
+        logging.error(f"Error while trimming characters: {e}")
     return text
 
 def remove_substring(main_string: str, substring: str) -> str:
