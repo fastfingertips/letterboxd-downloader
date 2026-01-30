@@ -1,5 +1,8 @@
 ### ![commits](https://img.shields.io/github/last-commit/FastFingertips/letterboxd-list) ![visitors](https://visitor-badge.laobi.icu/badge?page_id=FastFingertips.letterboxd-list)
-
+> [!IMPORTANT]
+> **Project Status:** This repository is currently outdated. I am systematically refactoring my public repositories from oldest to newest.
+> 
+> **Recommendation:** If you are looking for a more up-to-date tool with similar functionality, please check out [**Lizard**](https://github.com/fastfingertips/lizard).
 
 
 ## Simple Usage
